@@ -1,42 +1,4 @@
-// Check if all images are loaded
-        function areImagesLoaded() {
-            if (!images.player.complete) return false;
-            
-            for (let i = 0; i < images.enemies.length; i++) {
-                if (!images.enemies[i].complete) return false;
-            }
-            
-            return true;
-        }
-        
-        // Add error handling for images
-        images.player.onerror = function() {
-            console.error("Error loading player image. Check file path: " + images.player.src);
-        };
-        
-        images.enemies.forEach((img, index) => {
-            img.onerror = function() {
-                console.error("Error loading enemy image " + index + ". Check file path: " + img.src);
-            };
-        });        // Load game images
-        const images = {
-            player: new Image(),
-            enemies: [
-                new Image(), // Intuit
-                new Image(), // Oldman
-                new Image(), // Tiktok
-                new Image(), // Gwagon
-                new Image()  // Paper
-            ]
-        };
-        
-        // Set image sources to your GitHub image folder
-        images.player.src = 'images/me.png'; // Player character
-        images.enemies[0].src = 'images/intuit.png'; // Intuit
-        images.enemies[1].src = 'images/oldman.png'; // Oldman
-        images.enemies[2].src = 'images/tiktok.png'; // Tiktok
-        images.enemies[3].src = 'images/gwagon.png'; // Gwagon
-        images.enemies[4].src = 'images/paper.png';  // Paper<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -122,6 +84,38 @@
         const GRAVITY = 0.5;
         const FRICTION = 0.8;
         const GROUND_HEIGHT = canvas.height - 50;
+        
+        // Load game images
+        const images = {
+            player: new Image(),
+            enemies: [
+                new Image(), // Intuit
+                new Image(), // Oldman
+                new Image(), // Tiktok
+                new Image(), // Gwagon
+                new Image()  // Paper
+            ]
+        };
+        
+        // Set image sources to your GitHub image folder
+        // Remove .png extension if your files don't have them
+        images.player.src = 'images/me';
+        images.enemies[0].src = 'images/intuit';
+        images.enemies[1].src = 'images/oldman';
+        images.enemies[2].src = 'images/tiktok';
+        images.enemies[3].src = 'images/gwagon';
+        images.enemies[4].src = 'images/paper';
+        
+        // Add error handling for images
+        images.player.onerror = function() {
+            console.error("Error loading player image. Check file path: " + images.player.src);
+        };
+        
+        images.enemies.forEach((img, index) => {
+            img.onerror = function() {
+                console.error("Error loading enemy image " + index + ". Check file path: " + img.src);
+            };
+        });
         
         // Simple collision detection
         function checkCollision(rect1, rect2) {
@@ -215,7 +209,6 @@
         
         function createEnemies() {
             enemies = [];
-            const enemyPositions = [300, 500, 700, 900, 1200, 1400, 1600, 1900, 2200, 2400];
             
             // Create a mix of enemy types at different positions
             const placements = [
@@ -482,7 +475,7 @@
                 levelComplete();
             }
             
-            // Draw player as image instead of stick figure
+            // Draw player image
             if (images.player.complete) {
                 ctx.drawImage(images.player, player.x - cameraOffset, player.y, player.width, player.height);
             } else {
