@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Platformer Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #87CEEB;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #87CEEB;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 800px;
+            margin: 20px auto;
+        }
+        
+        #controls {
+            margin: 10px auto;
+            text-align: center;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        #win-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <div id="win-message">
+            <h2>Level Complete!</h2>
+            <p>You made it to the end!</p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+    <div id="controls">
+        <p><strong>Controls:</strong> Use Arrow Keys to move (← →) and jump (↑)</p>
+        <p>Defeat enemies by jumping on their heads!</p>
+        <button onclick="restartGame()">Restart Game</button>
+    </div>
+
+    <script>
+        // Game variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const GRAVITY = 0.5;
+        const FRICTION = 0.8;
+        const GROUND_HEIGHT = canvas.height - 50;
+        
+        // Simple collision detection
+        function checkCollision(rect1, rect2) {
+            return (
+                rect1.x < rect2.x + rect2.width &&
+                rect1.x + rect1.width > rect2.x &&
+                rect1.y < rect2.y + rect2.height &&
+                rect1.y + rect1.height > rect2.y
+            );
+        }
+        
+        // Particle system
+        let particles = [];
+        
+        // Function to create explosion effect when enemy is defeated
+        function createExplosion(x, y, color) {
+            const particleCount = 30;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    size: Math.random() * 5 + 2,
+                    speedX: (Math.random() - 0.5) * 8,
+                    speedY: (Math.random() - 0.5) * 8,
+                    color: color,
+                    life: 30 + Math.random() * 20
+                });
+            }
+        }
+        
+        // Function to update and draw particles
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                
+                // Update position
+                p.x += p.speedX;
+                p.y += p.speedY;
+                
+                // Apply gravity
+                p.speedY += 0.1;
+                
+                // Reduce life
+                p.life--;
+                
+                // Draw particle
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x - cameraOffset, p.y, p.size, p.size);
+                
+                // Remove dead particles
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        // Enemy types
+        const ENEMY_TYPES = [
+            { name: 'Intuit AI', color: '#4CAF50', width: 30, height: 40, symbol: 'I' },
+            { name: 'Grumpy Elder', color: '#8B4513', width: 35, height: 45 },
+            { name: 'TikTok Teen', color: '#00BFFF', width: 30, height: 40 },
+            { name: 'Gwagon', color: '#800080', width: 50, height: 30 },
+            { name: 'Pet', color: '#FF6347', width: 25, height: 20 }
+        ];
+        
+        // Find the tallest enemy for jump height calculation
+        const tallestEnemyHeight = Math.max(...ENEMY_TYPES.map(enemy => enemy.height));
+        const JUMP_POWER = (tallestEnemyHeight * 1.7 * 1.1 * 1.5) / (9 * 1.2 * 1.25); // 50% higher, 25% slower from previous
+        
+        // Player character
+        let player = {
+            x: 50,
+            y: GROUND_HEIGHT - 50,
+            width: 30,
+            height: 50,
+            speed: 1.25,  // Reduced by 75% from 5
+            velX: 0,
+            velY: 0,
+            jumping: false,
+            grounded: false,
+            color: '#FF5733',
+            alive: true,
+            score: 0
+        };
+        
+        // Camera offset for side-scrolling
+        let cameraOffset = 0;
+        
+        // Create enemies with different types spread throughout the level
+        let enemies = [];
+        
+        function createEnemies() {
+            enemies = [];
+            const enemyPositions = [300, 500, 700, 900, 1200, 1400, 1600, 1900, 2200, 2400];
+            
+            enemyPositions.forEach((pos, index) => {
+                const typeIndex = index % ENEMY_TYPES.length;
+                const type = ENEMY_TYPES[typeIndex];
+                
+                enemies.push({
+                    x: pos,
+                    y: GROUND_HEIGHT - type.height,
+                    width: type.width,
+                    height: type.height,
+                    velX: Math.random() * 2 - 1, // Some enemies move, some don't
+                    color: type.color,
+                    type: typeIndex,
+                    symbol: type.symbol || '',
+                    alive: true,
+                    initialX: pos,
+                    movementRange: 100
+                });
+            });
+        }
+        
+        // Platforms
+        let platforms = [];
+        
+        function createPlatforms() {
+            platforms = [
+                { x: 0, y: GROUND_HEIGHT, width: 3000, height: 50, color: '#8B4513' }, // Ground
+                { x: 200, y: GROUND_HEIGHT - 60, width: 100, height: 20, color: '#8B4513' },
+                { x: 350, y: GROUND_HEIGHT - 100, width: 100, height: 20, color: '#8B4513' },
+                { x: 500, y: GROUND_HEIGHT - 60, width: 100, height: 20, color: '#8B4513' },
+                { x: 650, y: GROUND_HEIGHT - 100, width: 100, height: 20, color: '#8B4513' },
+                { x: 800, y: GROUND_HEIGHT - 70, width: 100, height: 20, color: '#8B4513' },
+                { x: 950, y: GROUND_HEIGHT - 90, width: 100, height: 20, color: '#8B4513' },
+                { x: 1100, y: GROUND_HEIGHT - 60, width: 100, height: 20, color: '#8B4513' },
+                { x: 1250, y: GROUND_HEIGHT - 100, width: 100, height: 20, color: '#8B4513' },
+                { x: 1400, y: GROUND_HEIGHT - 70, width: 100, height: 20, color: '#8B4513' },
+                { x: 1550, y: GROUND_HEIGHT - 90, width: 100, height: 20, color: '#8B4513' },
+                { x: 1700, y: GROUND_HEIGHT - 60, width: 100, height: 20, color: '#8B4513' },
+                { x: 1850, y: GROUND_HEIGHT - 100, width: 100, height: 20, color: '#8B4513' },
+                { x: 2000, y: GROUND_HEIGHT - 70, width: 100, height: 20, color: '#8B4513' },
+                { x: 2150, y: GROUND_HEIGHT - 90, width: 100, height: 20, color: '#8B4513' },
+                { x: 2300, y: GROUND_HEIGHT - 60, width: 100, height: 20, color: '#8B4513' },
+                { x: 2450, y: GROUND_HEIGHT - 100, width: 100, height: 20, color: '#8B4513' },
+                { x: 2600, y: GROUND_HEIGHT - 70, width: 150, height: 20, color: '#8B4513' }
+            ];
+        }
+        
+        // Goal/Finish flag
+        const goal = {
+            x: 2700,
+            y: GROUND_HEIGHT - 100,
+            width: 50,
+            height: 100,
+            color: '#FF0000'
+        };
+        
+        // Controls
+        let keys = {};
+        
+        // Event listeners for keyboard controls
+        window.addEventListener('keydown', function(e) {
+            keys[e.keyCode] = true;
+        });
+        
+        window.addEventListener('keyup', function(e) {
+            keys[e.keyCode] = false;
+        });
+        
+        // Game loop
+        function gameLoop() {
+            if (!player.alive) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Move the camera to follow the player
+            cameraOffset = player.x - canvas.width / 3;
+            if (cameraOffset < 0) cameraOffset = 0;
+            if (cameraOffset > goal.x - canvas.width + 100) cameraOffset = goal.x - canvas.width + 100;
+            
+            // Handle player movement
+            if (keys[37] || keys[65]) { // Left arrow or A
+                if (player.velX > -player.speed) {
+                    player.velX -= 1;
+                }
+            }
+            
+            if (keys[39] || keys[68]) { // Right arrow or D
+                if (player.velX < player.speed) {
+                    player.velX += 1;
+                }
+            }
+            
+            if ((keys[38] || keys[87]) && !player.jumping && player.grounded) { // Up arrow, W or Space
+                player.jumping = true;
+                player.grounded = false;
+                player.velY = -JUMP_POWER;
+            }
+            
+            // Apply physics
+            player.velX *= FRICTION;
+            player.velY += GRAVITY;
+            
+            // Reset grounded state
+            player.grounded = false;
+            
+            // Draw all platforms
+            platforms.forEach(function(platform) {
+                const adjustedPlatformX = platform.x - cameraOffset;
+                ctx.fillStyle = platform.color;
+                ctx.fillRect(adjustedPlatformX, platform.y, platform.width, platform.height);
+            });
+            
+            // Move player on X axis
+            player.x += player.velX;
+            
+            // Check for horizontal collisions after moving
+            platforms.forEach(function(platform) {
+                if (
+                    player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x &&
+                    player.y < platform.y + platform.height &&
+                    player.y + player.height > platform.y
+                ) {
+                    // If player's bottom is below platform top and 
+                    // player's top is above platform bottom, it's a side collision
+                    if (player.y + player.height > platform.y + 10 &&
+                        player.y < platform.y + platform.height - 10) {
+                        
+                        // If coming from left
+                        if (player.x + player.width - player.velX <= platform.x) {
+                            player.x = platform.x - player.width;
+                        }
+                        // If coming from right
+                        else if (player.x - player.velX >= platform.x + platform.width) {
+                            player.x = platform.x + platform.width;
+                        }
+                    }
+                }
+            });
+            
+            // Move player on Y axis
+            player.y += player.velY;
+            
+            // Check for vertical collisions after moving
+            platforms.forEach(function(platform) {
+                if (
+                    player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x &&
+                    player.y < platform.y + platform.height &&
+                    player.y + player.height > platform.y
+                ) {
+                    // If moving downward and player's bottom was above platform top
+                    if (player.velY > 0 && player.y + player.height - player.velY <= platform.y) {
+                        player.y = platform.y - player.height;
+                        player.velY = 0;
+                        player.grounded = true;
+                        player.jumping = false;
+                    }
+                    // If moving upward and player's top was below platform bottom
+                    else if (player.velY < 0 && player.y - player.velY >= platform.y + platform.height) {
+                        player.y = platform.y + platform.height;
+                        player.velY = 0;
+                    }
+                }
+            });
+            
+            // Enemy logic and drawing
+            enemies.forEach(function(enemy, index) {
+                if (enemy.alive) {
+                    // Enemy movement logic - some enemies move back and forth
+                    if (Math.abs(enemy.velX) > 0) {
+                        enemy.x += enemy.velX;
+                        
+                        // Keep within range of initial position
+                        if (Math.abs(enemy.x - enemy.initialX) > enemy.movementRange) {
+                            enemy.velX *= -1;
+                        }
+                    }
+                    
+                    // Draw enemy
+                    ctx.fillStyle = enemy.color;
+                    ctx.fillRect(enemy.x - cameraOffset, enemy.y, enemy.width, enemy.height);
+                    
+                    // For Intuit AI, draw the 'I'
+                    if (enemy.type === 0) {
+                        ctx.fillStyle = 'white';
+                        ctx.font = '20px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('I', enemy.x - cameraOffset + enemy.width/2, enemy.y + enemy.height/2 + 7);
+                    }
+                    
+                    // Draw enemy-specific features
+                    switch(enemy.type) {
+                        case 1: // Grumpy Elder - add frown
+                            ctx.beginPath();
+                            ctx.strokeStyle = 'white';
+                            ctx.lineWidth = 2;
+                            ctx.moveTo(enemy.x - cameraOffset + 10, enemy.y + 25);
+                            ctx.lineTo(enemy.x - cameraOffset + enemy.width - 10, enemy.y + 30);
+                            ctx.stroke();
+                            
+                            // Add glasses
+                            ctx.strokeRect(enemy.x - cameraOffset + 8, enemy.y + 15, 8, 5);
+                            ctx.strokeRect(enemy.x - cameraOffset + enemy.width - 16, enemy.y + 15, 8, 5);
+                            break;
+                            
+                        case 2: // TikTok Teen - add phone
+                            ctx.fillStyle = 'black';
+                            ctx.fillRect(enemy.x - cameraOffset + enemy.width/2 - 5, enemy.y + 15, 10, 15);
+                            break;
+                            
+                        case 3: // Gwagon - add windows
+                            ctx.fillStyle = 'lightblue';
+                            ctx.fillRect(enemy.x - cameraOffset + 10, enemy.y + 5, 10, 8);
+                            ctx.fillRect(enemy.x - cameraOffset + 30, enemy.y + 5, 10, 8);
+                            break;
+                            
+                        case 4: // Pet - add ears
+                            ctx.beginPath();
+                            ctx.moveTo(enemy.x - cameraOffset + 5, enemy.y + 5);
+                            ctx.lineTo(enemy.x - cameraOffset + 10, enemy.y - 5);
+                            ctx.lineTo(enemy.x - cameraOffset + 15, enemy.y + 5);
+                            ctx.fill();
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(enemy.x - cameraOffset + enemy.width - 5, enemy.y + 5);
+                            ctx.lineTo(enemy.x - cameraOffset + enemy.width - 10, enemy.y - 5);
+                            ctx.lineTo(enemy.x - cameraOffset + enemy.width - 15, enemy.y + 5);
+                            ctx.fill();
+                            break;
+                    }
+                    
+                    // Simple enemy collision detection
+                    if (player.x < enemy.x + enemy.width &&
+                        player.x + player.width > enemy.x &&
+                        player.y < enemy.y + enemy.height &&
+                        player.y + player.height > enemy.y) {
+                        
+                        // Check if player is landing on top of enemy (feet near top of enemy)
+                        const playerBottom = player.y + player.height;
+                        if (player.velY > 0 && playerBottom - player.velY <= enemy.y + enemy.height/4) {
+                            // Create explosion effect
+                            createExplosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2, enemy.color);
+                            
+                            // Mark enemy as defeated
+                            enemy.alive = false;
+                            player.score += 100;
+                            
+                            // Bounce the player
+                            player.velY = -JUMP_POWER / 1.5;
+                        } else {
+                            // Player hit enemy from side or bottom - game over
+                            gameOver();
+                        }
+                    }
+                }
+            });
+            
+            // Draw the goal/finish flag
+            ctx.fillStyle = goal.color;
+            ctx.fillRect(goal.x - cameraOffset, goal.y, goal.width, goal.height);
+            
+            // Draw flag pole
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(goal.x - cameraOffset + goal.width/2 - 2, goal.y - 50, 4, 150);
+            
+            // Draw flag
+            ctx.beginPath();
+            ctx.moveTo(goal.x - cameraOffset + goal.width/2, goal.y - 50);
+            ctx.lineTo(goal.x - cameraOffset + goal.width/2 + 30, goal.y - 35);
+            ctx.lineTo(goal.x - cameraOffset + goal.width/2, goal.y - 20);
+            ctx.closePath();
+            ctx.fillStyle = '#FFFF00';
+            ctx.fill();
+            
+            // Check if player reached the goal
+            if (player.x < goal.x + goal.width &&
+                player.x + player.width > goal.x &&
+                player.y < goal.y + goal.height &&
+                player.y + player.height > goal.y) {
+                levelComplete();
+            }
+            
+            // Draw player as stick figure
+            // Head
+            ctx.fillStyle = '#FF5733';
+            ctx.beginPath();
+            ctx.arc(player.x - cameraOffset + player.width/2, player.y + 10, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Body
+            ctx.strokeStyle = '#FF5733';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 20);
+            ctx.lineTo(player.x - cameraOffset + player.width/2, player.y + 35);
+            ctx.stroke();
+            
+            // Arms
+            ctx.beginPath();
+            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 25);
+            ctx.lineTo(player.x - cameraOffset + player.width/2 - 10, player.y + 30);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 25);
+            ctx.lineTo(player.x - cameraOffset + player.width/2 + 10, player.y + 30);
+            ctx.stroke();
+            
+            // Legs
+            ctx.beginPath();
+            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 35);
+            ctx.lineTo(player.x - cameraOffset + player.width/2 - 8, player.y + 50);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 35);
+            ctx.lineTo(player.x - cameraOffset + player.width/2 + 8, player.y + 50);
+            ctx.stroke();
+            
+            // Face
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(player.x - cameraOffset + player.width/2 - 4, player.y + 8, 2, 0, Math.PI * 2);
+            ctx.arc(player.x - cameraOffset + player.width/2 + 4, player.y + 8, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Smile
+            ctx.beginPath();
+            ctx.arc(player.x - cameraOffset + player.width/2, player.y + 12, 4, 0, Math.PI);
+            ctx.stroke();
+            
+            // Update and draw particles
+            updateParticles();
+            
+            // Draw game info
+            ctx.fillStyle = 'black';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Score: ' + player.score, 10, 30);
+            
+            // Continue the game loop
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Game over function
+        function gameOver() {
+            player.alive = false;
+            
+            // Show game over message
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = '48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Game Over', canvas.width/2, canvas.height/2 - 40);
+            
+            ctx.font = '24px Arial';
+            ctx.fillText('Score: ' + player.score, canvas.width/2, canvas.height/2 + 10);
+            
+            ctx.font = '18px Arial';
+            ctx.fillText('Press any key to restart', canvas.width/2, canvas.height/2 + 50);
+            
+            // Listen for key press to restart
+            window.addEventListener('keydown', restartOnKey);
+        }
+        
+        // Level complete function
+        function levelComplete() {
+            player.alive = false;
+            
+            // Show win message
+            document.getElementById('win-message').style.display = 'block';
+        }
+        
+        // Restart game function
+        function restartGame() {
+            player.x = 50;
+            player.y = GROUND_HEIGHT - 50;
+            player.velX = 0;
+            player.velY = 0;
+            player.jumping = false;
+            player.grounded = false;
+            player.alive = true;
+            player.score = 0;
+            
+            cameraOffset = 0;
+            
+            // Clear particles
+            particles = [];
+            
+            // Hide win message
+            document.getElementById('win-message').style.display = 'none';
+            
+            // Remove key listener
+            window.removeEventListener('keydown', restartOnKey);
+            
+            // Create new platforms and enemies
+            createPlatforms();
+            createEnemies();
+            
+            // Restart the game loop
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Function to restart game on key press
+        function restartOnKey(e) {
+            restartGame();
+            window.removeEventListener('keydown', restartOnKey);
+        }
+        
+        // Initialize and start the game
+        function init() {
+            createPlatforms();
+            createEnemies();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Start the game
+        window.onload = init;
+    </script>
+</body>
+</html>
