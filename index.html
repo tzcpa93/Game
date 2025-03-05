@@ -1,4 +1,42 @@
-<!DOCTYPE html>
+// Check if all images are loaded
+        function areImagesLoaded() {
+            if (!images.player.complete) return false;
+            
+            for (let i = 0; i < images.enemies.length; i++) {
+                if (!images.enemies[i].complete) return false;
+            }
+            
+            return true;
+        }
+        
+        // Add error handling for images
+        images.player.onerror = function() {
+            console.error("Error loading player image. Check file path: " + images.player.src);
+        };
+        
+        images.enemies.forEach((img, index) => {
+            img.onerror = function() {
+                console.error("Error loading enemy image " + index + ". Check file path: " + img.src);
+            };
+        });        // Load game images
+        const images = {
+            player: new Image(),
+            enemies: [
+                new Image(), // Intuit
+                new Image(), // Oldman
+                new Image(), // Tiktok
+                new Image(), // Gwagon
+                new Image()  // Paper
+            ]
+        };
+        
+        // Set image sources to your GitHub image folder
+        images.player.src = 'images/me.png'; // Player character
+        images.enemies[0].src = 'images/intuit.png'; // Intuit
+        images.enemies[1].src = 'images/oldman.png'; // Oldman
+        images.enemies[2].src = 'images/tiktok.png'; // Tiktok
+        images.enemies[3].src = 'images/gwagon.png'; // Gwagon
+        images.enemies[4].src = 'images/paper.png';  // Paper<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -142,11 +180,11 @@
         
         // Enemy types
         const ENEMY_TYPES = [
-            { name: 'Intuit AI', color: '#4CAF50', width: 30, height: 40, symbol: 'I' },
-            { name: 'Grumpy Elder', color: '#8B4513', width: 35, height: 45 },
-            { name: 'TikTok Teen', color: '#00BFFF', width: 30, height: 40 },
-            { name: 'Gwagon', color: '#800080', width: 50, height: 30 },
-            { name: 'Pet', color: '#FF6347', width: 25, height: 20 }
+            { name: 'Intuit', color: '#4CAF50', width: 40, height: 50, symbol: 'I' },
+            { name: 'Old Man', color: '#8B4513', width: 40, height: 50 },
+            { name: 'TikTok Teen', color: '#00BFFF', width: 40, height: 50 },
+            { name: 'Gwagon', color: '#800080', width: 50, height: 40 },
+            { name: 'Paper', color: '#FF6347', width: 40, height: 50 }
         ];
         
         // Find the tallest enemy for jump height calculation
@@ -179,21 +217,33 @@
             enemies = [];
             const enemyPositions = [300, 500, 700, 900, 1200, 1400, 1600, 1900, 2200, 2400];
             
-            enemyPositions.forEach((pos, index) => {
-                const typeIndex = index % ENEMY_TYPES.length;
-                const type = ENEMY_TYPES[typeIndex];
-                
+            // Create a mix of enemy types at different positions
+            const placements = [
+                {position: 300, type: 0},  // Intuit
+                {position: 500, type: 1},  // Oldman
+                {position: 700, type: 2},  // Tiktok
+                {position: 900, type: 3},  // Gwagon
+                {position: 1200, type: 4}, // Paper
+                {position: 1400, type: 0}, // Intuit
+                {position: 1600, type: 3}, // Gwagon
+                {position: 1900, type: 2}, // Tiktok
+                {position: 2200, type: 1}, // Oldman
+                {position: 2400, type: 4}  // Paper
+            ];
+            
+            placements.forEach(placement => {
+                const type = ENEMY_TYPES[placement.type];
                 enemies.push({
-                    x: pos,
+                    x: placement.position,
                     y: GROUND_HEIGHT - type.height,
                     width: type.width,
                     height: type.height,
                     velX: Math.random() * 2 - 1, // Some enemies move, some don't
                     color: type.color,
-                    type: typeIndex,
+                    type: placement.type,
                     symbol: type.symbol || '',
                     alive: true,
-                    initialX: pos,
+                    initialX: placement.position,
                     movementRange: 100
                 });
             });
@@ -357,57 +407,28 @@
                         }
                     }
                     
-                    // Draw enemy
-                    ctx.fillStyle = enemy.color;
-                    ctx.fillRect(enemy.x - cameraOffset, enemy.y, enemy.width, enemy.height);
-                    
-                    // For Intuit AI, draw the 'I'
-                    if (enemy.type === 0) {
+                    // Draw enemy from your custom image
+                    if (images.enemies[enemy.type] && images.enemies[enemy.type].complete) {
+                        // Draw the image
+                        ctx.drawImage(
+                            images.enemies[enemy.type], 
+                            enemy.x - cameraOffset, 
+                            enemy.y, 
+                            enemy.width, 
+                            enemy.height
+                        );
+                    } else {
+                        // Fallback to colored rectangle if image isn't loaded
+                        ctx.fillStyle = enemy.color;
+                        ctx.fillRect(enemy.x - cameraOffset, enemy.y, enemy.width, enemy.height);
+                        
+                        // Add text label for each enemy type if image fails
                         ctx.fillStyle = 'white';
-                        ctx.font = '20px Arial';
+                        ctx.font = '12px Arial';
                         ctx.textAlign = 'center';
-                        ctx.fillText('I', enemy.x - cameraOffset + enemy.width/2, enemy.y + enemy.height/2 + 7);
-                    }
-                    
-                    // Draw enemy-specific features
-                    switch(enemy.type) {
-                        case 1: // Grumpy Elder - add frown
-                            ctx.beginPath();
-                            ctx.strokeStyle = 'white';
-                            ctx.lineWidth = 2;
-                            ctx.moveTo(enemy.x - cameraOffset + 10, enemy.y + 25);
-                            ctx.lineTo(enemy.x - cameraOffset + enemy.width - 10, enemy.y + 30);
-                            ctx.stroke();
-                            
-                            // Add glasses
-                            ctx.strokeRect(enemy.x - cameraOffset + 8, enemy.y + 15, 8, 5);
-                            ctx.strokeRect(enemy.x - cameraOffset + enemy.width - 16, enemy.y + 15, 8, 5);
-                            break;
-                            
-                        case 2: // TikTok Teen - add phone
-                            ctx.fillStyle = 'black';
-                            ctx.fillRect(enemy.x - cameraOffset + enemy.width/2 - 5, enemy.y + 15, 10, 15);
-                            break;
-                            
-                        case 3: // Gwagon - add windows
-                            ctx.fillStyle = 'lightblue';
-                            ctx.fillRect(enemy.x - cameraOffset + 10, enemy.y + 5, 10, 8);
-                            ctx.fillRect(enemy.x - cameraOffset + 30, enemy.y + 5, 10, 8);
-                            break;
-                            
-                        case 4: // Pet - add ears
-                            ctx.beginPath();
-                            ctx.moveTo(enemy.x - cameraOffset + 5, enemy.y + 5);
-                            ctx.lineTo(enemy.x - cameraOffset + 10, enemy.y - 5);
-                            ctx.lineTo(enemy.x - cameraOffset + 15, enemy.y + 5);
-                            ctx.fill();
-                            
-                            ctx.beginPath();
-                            ctx.moveTo(enemy.x - cameraOffset + enemy.width - 5, enemy.y + 5);
-                            ctx.lineTo(enemy.x - cameraOffset + enemy.width - 10, enemy.y - 5);
-                            ctx.lineTo(enemy.x - cameraOffset + enemy.width - 15, enemy.y + 5);
-                            ctx.fill();
-                            break;
+                        ctx.fillText(ENEMY_TYPES[enemy.type].name, 
+                                     enemy.x - cameraOffset + enemy.width/2, 
+                                     enemy.y + enemy.height/2);
                     }
                     
                     // Simple enemy collision detection
@@ -461,54 +482,59 @@
                 levelComplete();
             }
             
-            // Draw player as stick figure
-            // Head
-            ctx.fillStyle = '#FF5733';
-            ctx.beginPath();
-            ctx.arc(player.x - cameraOffset + player.width/2, player.y + 10, 10, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Body
-            ctx.strokeStyle = '#FF5733';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 20);
-            ctx.lineTo(player.x - cameraOffset + player.width/2, player.y + 35);
-            ctx.stroke();
-            
-            // Arms
-            ctx.beginPath();
-            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 25);
-            ctx.lineTo(player.x - cameraOffset + player.width/2 - 10, player.y + 30);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 25);
-            ctx.lineTo(player.x - cameraOffset + player.width/2 + 10, player.y + 30);
-            ctx.stroke();
-            
-            // Legs
-            ctx.beginPath();
-            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 35);
-            ctx.lineTo(player.x - cameraOffset + player.width/2 - 8, player.y + 50);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 35);
-            ctx.lineTo(player.x - cameraOffset + player.width/2 + 8, player.y + 50);
-            ctx.stroke();
-            
-            // Face
-            ctx.fillStyle = 'black';
-            ctx.beginPath();
-            ctx.arc(player.x - cameraOffset + player.width/2 - 4, player.y + 8, 2, 0, Math.PI * 2);
-            ctx.arc(player.x - cameraOffset + player.width/2 + 4, player.y + 8, 2, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Smile
-            ctx.beginPath();
-            ctx.arc(player.x - cameraOffset + player.width/2, player.y + 12, 4, 0, Math.PI);
-            ctx.stroke();
+            // Draw player as image instead of stick figure
+            if (images.player.complete) {
+                ctx.drawImage(images.player, player.x - cameraOffset, player.y, player.width, player.height);
+            } else {
+                // Fallback to stick figure if image isn't loaded
+                // Head
+                ctx.fillStyle = '#FF5733';
+                ctx.beginPath();
+                ctx.arc(player.x - cameraOffset + player.width/2, player.y + 10, 10, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Body
+                ctx.strokeStyle = '#FF5733';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 20);
+                ctx.lineTo(player.x - cameraOffset + player.width/2, player.y + 35);
+                ctx.stroke();
+                
+                // Arms
+                ctx.beginPath();
+                ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 25);
+                ctx.lineTo(player.x - cameraOffset + player.width/2 - 10, player.y + 30);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 25);
+                ctx.lineTo(player.x - cameraOffset + player.width/2 + 10, player.y + 30);
+                ctx.stroke();
+                
+                // Legs
+                ctx.beginPath();
+                ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 35);
+                ctx.lineTo(player.x - cameraOffset + player.width/2 - 8, player.y + 50);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(player.x - cameraOffset + player.width/2, player.y + 35);
+                ctx.lineTo(player.x - cameraOffset + player.width/2 + 8, player.y + 50);
+                ctx.stroke();
+                
+                // Face
+                ctx.fillStyle = 'black';
+                ctx.beginPath();
+                ctx.arc(player.x - cameraOffset + player.width/2 - 4, player.y + 8, 2, 0, Math.PI * 2);
+                ctx.arc(player.x - cameraOffset + player.width/2 + 4, player.y + 8, 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Smile
+                ctx.beginPath();
+                ctx.arc(player.x - cameraOffset + player.width/2, player.y + 12, 4, 0, Math.PI);
+                ctx.stroke();
+            }
             
             // Update and draw particles
             updateParticles();
