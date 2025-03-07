@@ -1,755 +1,455 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html>
+  <head>
+    <title>Office Adventure Game</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Office Runner - AOL Man Platformer</title>
+    <!-- Load Kaboom.js via CDN -->
+    <script src="https://unpkg.com/kaboom/dist/kaboom.js"></script>
     <style>
-        /* Your original CSS remains unchanged */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background-color: #333;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        
-        #game-container {
-            position: relative;
-            width: 800px;
-            height: 500px;
-            background-color: #87CEEB;
-            border: 4px solid #333;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-        }
-        
-        #game-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        
-        .ui-panel {
-            position: absolute;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 10;
-        }
-        
-        #score-display {
-            top: 10px;
-            left: 10px;
-            font-size: 16px;
-        }
-        
-        #timer-display {
-            top: 10px;
-            right: 10px;
-            font-size: 16px;
-        }
-        
-        #checkpoint-message {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 24px;
-            background-color: rgba(30, 144, 255, 0.8);
-            padding: 15px 30px;
-            border-radius: 10px;
-            text-align: center;
-            display: none;
-        }
-        
-        #game-over {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 20;
-            color: white;
-            text-align: center;
-            padding-top: 100px;
-        }
-        
-        #game-over h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-        }
-        
-        #game-over p {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        
-        #game-start {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 30;
-            color: white;
-            text-align: center;
-            padding-top: 80px;
-        }
-        
-        #game-start h1 {
-            font-size: 40px;
-            margin-bottom: 20px;
-            color: #ffcc00;
-        }
-        
-        #game-start p {
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-        
-        .button {
-            background-color: #ffcc00;
-            color: #333;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            margin: 10px;
-            transition: background-color 0.3s, transform 0.1s;
-            display: inline-block;
-            pointer-events: auto;
-        }
-        
-        .button:hover {
-            background-color: #ffd700;
-            transform: scale(1.05);
-        }
-        
-        .button:active {
-            transform: scale(0.98);
-        }
-        
-        #leaderboard {
-            display: none;
-            width: 80%;
-            max-height: 200px;
-            margin: 20px auto;
-            overflow-y: auto;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            padding: 10px;
-        }
-        
-        #leaderboard table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        #leaderboard th, #leaderboard td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        #leaderboard th {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        
-        #player-name-input {
-            padding: 8px;
-            margin: 10px;
-            width: 250px;
-            font-size: 16px;
-        }
-        
-        @keyframes dust {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(2); }
-        }
+      /* Basic CSS reset and canvas styling */
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #d0d0f0; /* A light background to complement our office theme */
+      }
     </style>
-</head>
-<body>
-    <div id="game-container">
-        <canvas id="game-canvas"></canvas>
-        <div id="ui-layer">
-            <div id="score-display" class="ui-panel">Score: 0</div>
-            <div id="timer-display" class="ui-panel">Time: 0:00</div>
-            <div id="checkpoint-message" class="ui-panel"></div>
-            
-            <div id="game-start">
-                <h1>Office Runner</h1>
-                <p>Help the AOL Man navigate through the office obstacles!</p>
-                <div>
-                    <p><strong>Controls:</strong></p>
-                    <p>Left/Right Arrow: Move</p>
-                    <p>Up Arrow: Jump</p>
-                    <p>Spacebar: Shoot Fireball</p>
-                </div>
-                <button id="start-button" class="button">Start Game</button>
-            </div>
-            
-            <div id="game-over">
-                <h2>Game Over!</h2>
-                <p id="final-score">Your Score: 0</p>
-                <p id="final-time">Completion Time: 0:00</p>
-                <div>
-                    <input type="text" id="player-name-input" placeholder="Enter your name" maxlength="15">
-                    <button id="save-score-button" class="button">Save Score</button>
-                </div>
-                <div id="leaderboard">
-                    <h3>Top Scores</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Name</th>
-                                <th>Score</th>
-                                <th>Time</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body"></tbody>
-                    </table>
-                </div>
-                <button id="share-button" class="button">Share Score</button>
-                <button id="restart-button" class="button">Play Again</button>
-            </div>
-        </div>
-    </div>
-    
+  </head>
+  <body>
+    <!-- The game canvas is automatically created by Kaboom -->
     <script>
-        // Player Class (added basic implementation)
-        class Player {
-            constructor(game) {
-                this.game = game;
-                this.width = 40;
-                this.height = 60;
-                this.x = 50;
-                this.y = 390;
-                this.velocityX = 0;
-                this.velocityY = 0;
-                this.speed = 5;
-                this.jumpStrength = -15;
-                this.gravity = 0.5;
-                this.friction = 0.8;
-            }
+      /************************************************************
+       * Kaboom Initialization & Global Settings
+       ************************************************************/
+      kaboom({
+        global: true,
+        width: 800,
+        height: 400,
+        background: [220, 220, 250],
+        debug: true,
+      });
 
+      /************************************************************
+       * Load Sprites (All images are embedded as inline SVG/Base64)
+       ************************************************************/
+
+      // Player sprite: Inspired by the classic AIM yellow running-man icon
+      loadSprite("player", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjZmYwIi8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxMCIgcj0iNCIgZmlsbD0iIzAwMCIvPjxyZWN0IHg9IjEyIiB5PSIxNCIgd2lkdGg9IjgiIGhlaWdodD0iMTAiIGZpbGw9IiMwMDAiLz48L3N2Zz4=");
+
+      // DOGE monster sprite (a playful Shiba Inu face)
+      loadSprite("doge", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNmMGM0MTkiLz48PGNpcmNsZSBjeD0iMTIiIGN5PSIxNCIgcj0iMiIgZmlsbD0iIzAwMCIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMTQiIHI9IjIiIGZpbGw9IiMwMDAiLz48cGF0aCBkPSJNMTAsMjAgUTE2LDI2IDIyLDIwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==");
+
+      // Angry Client monster sprite (an angry, grumpy face)
+      loadSprite("angry", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNlNzRjM2MiLz48PGxpbmUgeDE9IjEwIiB5MT0iMTIiIHgyPSIxNCIgeTI9IjE2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSIyMiIgeTE9IjEyIiB4Mj0iMTgiIHkyPSIxNiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMTIsMjAgUTE2LDI0IDIwLDIwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==");
+
+      // Paper monster sprite (animated fluttering paper document)
+      loadSprite("paper", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3QgeD0iNiIgeT0iNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjI0IiBmaWxsPSIjZmZmIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSI4IiB5MT0iMTAiIHgyPSIyNCIgeTI9IjEwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTQiIHgyPSIyNCIgeTI9IjE0IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTgiIHgyPSIyNCIgeTI9IjE4IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==");
+
+      // Mercedes monster sprite (spinning logo style)
+      loadSprite("mercedes", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNjY2MiLz48cGF0aCBkPSJNMTYsNCBMMjAsMTYgTDE2LDI4IEwxMiwxNiBaIiBmaWxsPSIjMDAwIi8+PC9zdmc+");
+
+      // BOI monster sprite (a block labeled "BOI")
+      loadSprite("boi", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjODg4Ii8+PHRleHQgeD0iMTYiIHk9IjIxIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIj5CT0k8L3RleHQ+PC9zdmc+");
+
+      // Flagpole sprite (marks the finish line)
+      loadSprite("flagpole", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSI2NCI+PHJlY3QgeD0iNiIgeT0iMTAiIHdpZHRoPSI0IiBoZWlnaHQ9IjU0IiBmaWxsPSIjNTU1Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxMCAxNiwxOCAxMCwyNiIgZmlsbD0iI2YwMCIvPjwvc3ZnPg==");
+
+      // Office-themed platform sprites
+
+      // Desk platform: looks like an office desk
+      loadSprite("desk", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIxNiI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjE2IiBmaWxsPSIjYTA1MjJkIi8+PC9zdmc+");
+
+      // Cabinet platform: resembles a filing cabinet
+      loadSprite("cabinet", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjOGI0NTEzIi8+PGxpbmUgeDE9IjAiIHkxPSIxNiIgeDI9IjMyIiB5Mj0iMTYiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+");
+
+      // Cubicle platform: represents an office cubicle
+      loadSprite("cubicle", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCI+PHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjZDNkM2QzIi8+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==");
+
+      /************************************************************
+       * Global Game Variables
+       ************************************************************/
+      let monstersDefeated = 0; // Count of defeated monsters
+      let startTime = 0;        // Timestamp for level start
+      let lastFireTime = 0;     // To limit fireball frequency
+      let boiActive = true;     // Tracks if the BOI monster is active
+
+      /************************************************************
+       * Helper Function: Spawn Monster
+       * type: sprite id ("doge", "angry", "paper", "mercedes", "boi")
+       * pos: starting position (vec2)
+       * dir: initial horizontal direction (1 for right, -1 for left)
+       ************************************************************/
+      function spawnMonster(type, pos, dir = 1) {
+        return add([
+          sprite(type),
+          pos(pos),
+          area(),
+          "monster",
+          { dir: dir },
+          // Set horizontal speed
+          { speed: 30 },
+          {
             update() {
-                // Apply gravity
-                this.velocityY += this.gravity;
-                this.x += this.velocityX;
-                this.y += this.velocityY;
-                
-                // Apply friction
-                this.velocityX *= this.friction;
-                
-                // Platform collision
-                this.game.platforms.forEach(platform => {
-                    if (this.game.collides(this, platform)) {
-                        if (this.velocityY > 0) {
-                            this.y = platform.y - this.height;
-                            this.velocityY = 0;
-                        }
-                    }
-                });
-                
-                // Keep player above ground
-                if (this.y > 390) {
-                    this.y = 390;
-                    this.velocityY = 0;
-                }
+              // Move horizontally at constant speed
+              this.move(this.dir * this.speed, 0);
+              // Reverse direction if out of level bounds
+              if (this.pos.x < 0 || this.pos.x > 2000) {
+                this.dir = -this.dir;
+              }
             }
+          }
+        ]);
+      }
 
-            render() {
-                const ctx = this.game.ctx;
-                ctx.fillStyle = '#FFD700';
-                ctx.fillRect(this.x - this.game.camera.x, this.y, this.width, this.height);
-            }
+      /************************************************************
+       * Main Game Scene
+       ************************************************************/
+      scene("game", () => {
+        // Reset global variables for a new game attempt
+        monstersDefeated = 0;
+        startTime = time();
+        lastFireTime = 0;
+        boiActive = true;
+
+        // Add a large background (office-like plain backdrop)
+        add([
+          rect(2000, 400),
+          pos(0, 0),
+          color(220, 220, 250),
+          layer("bg"),
+        ]);
+
+        // Add the ground (an invisible collider for the player to stand on)
+        add([
+          rect(2000, 20),
+          pos(0, 380),
+          area(),
+          solid(),
+          color(100, 100, 100),
+        ]);
+
+        // Add the flagpole at the end of the level (finish line)
+        const flagpole = add([
+          sprite("flagpole"),
+          pos(1950, 380 - 64),
+          area(),
+          scale(1),
+          "flag",
+        ]);
+
+        // Add the player character
+        const player = add([
+          sprite("player"),
+          pos(50, 300),
+          area(),
+          body(),
+          origin("center"),
+        ]);
+        // Track player facing direction: 1 = right, -1 = left
+        player.direction = 1;
+
+        /************************************************************
+         * Player Controls & Fireball Mechanics
+         ************************************************************/
+        keyDown("left", () => {
+          player.move(-120, 0);
+          player.direction = -1;
+        });
+        keyDown("right", () => {
+          player.move(120, 0);
+          player.direction = 1;
+        });
+        keyPress("up", () => {
+          if (player.grounded()) {
+            player.jump(300);
+          }
+        });
+        // Spacebar fires a fireball (limited to one per second)
+        keyPress("space", () => {
+          if (time() - lastFireTime > 1) {
+            lastFireTime = time();
+            // Create a fireball as a small red circle
+            const fireball = add([
+              circle(5),
+              pos(player.pos),
+              area(),
+              color(255, 100, 0),
+              "fireball",
+              { dir: player.direction },
+              {
+                update() {
+                  this.move(this.dir * 200, 0);
+                  // Remove fireball if it travels too far (~half screen width)
+                  if (Math.abs(this.pos.x - player.pos.x) > 400) {
+                    destroy(this);
+                  }
+                }
+              }
+            ]);
+          }
+        });
+
+        /************************************************************
+         * Create Office-themed Platforms
+         ************************************************************/
+        // Desk platforms
+        for (let i = 0; i < 5; i++) {
+          add([
+            sprite("desk"),
+            pos(200 * i + 100, 350 - 20 * (i % 2)),
+            area(),
+            solid(),
+          ]);
+        }
+        // Cabinet platforms
+        for (let i = 0; i < 3; i++) {
+          add([
+            sprite("cabinet"),
+            pos(400 * i + 250, 300 - 30 * (i % 2)),
+            area(),
+            solid(),
+          ]);
+        }
+        // Cubicle platforms
+        for (let i = 0; i < 2; i++) {
+          add([
+            sprite("cubicle"),
+            pos(600 * i + 600, 250),
+            area(),
+            solid(),
+          ]);
         }
 
-        // Monster Class (added basic implementation)
-        class Monster {
-            constructor(game, x, y, type) {
-                this.game = game;
-                this.x = x;
-                this.y = y;
-                this.type = type;
-                this.width = 30;
-                this.height = 30;
-                this.speed = 2;
-                this.direction = 1;
-            }
+        /************************************************************
+         * Spawn Monsters Throughout the Level
+         ************************************************************/
+        spawnMonster("doge", vec2(300, 280), 1);
+        spawnMonster("angry", vec2(500, 280), -1);
+        spawnMonster("paper", vec2(800, 280), 1);
+        spawnMonster("mercedes", vec2(1100, 280), -1);
+        // Spawn BOI monster (special: respawns 30s after defeat)
+        let boi = spawnMonster("boi", vec2(1400, 280), 1);
 
-            update() {
-                this.x += this.speed * this.direction;
-                // Simple patrol behavior
-                if (Math.random() < 0.01) this.direction *= -1;
-            }
+        /************************************************************
+         * Monster Interactions & Collisions
+         ************************************************************/
+        // When a fireball collides with a monster
+        collides("fireball", "monster", (fire, monster) => {
+          destroy(fire);
+          // Simulate a dust/disappearance effect with a brief particle text
+          add([
+            text("💥", 16),
+            pos(monster.pos),
+            lifespan(0.5, { fade: 2 }),
+          ]);
+          // Special rule for BOI: schedule a respawn 30 seconds later
+          if (monster.sprite === "boi") {
+            boiActive = false;
+            wait(30, () => {
+              boiActive = true;
+              boi = spawnMonster("boi", vec2(1400, 280), 1);
+            });
+          }
+          destroy(monster);
+          monstersDefeated += 1;
+        });
 
-            render() {
-                const ctx = this.game.ctx;
-                ctx.fillStyle = this.type === 'BOI' ? '#FF0000' : '#666';
-                ctx.fillRect(this.x - this.game.camera.x, this.y, this.width, this.height);
+        // When the player collides with a monster
+        player.collides("monster", (monster) => {
+          // Check if player is coming from above (stomping the monster)
+          if (player.pos.y < monster.pos.y) {
+            player.jump(150); // bounce effect
+            add([
+              text("💥", 16),
+              pos(monster.pos),
+              lifespan(0.5, { fade: 2 }),
+            ]);
+            if (monster.sprite === "boi") {
+              boiActive = false;
+              wait(30, () => {
+                boiActive = true;
+                boi = spawnMonster("boi", vec2(1400, 280), 1);
+              });
             }
+            destroy(monster);
+            monstersDefeated += 1;
+          } else {
+            // Collision from the side causes a game over (one life per attempt)
+            go("gameover", { score: 0 });
+          }
+        });
+
+        /************************************************************
+         * Checkpoint Triggers (Motivational Messages)
+         * Three checkpoints: Easy, Moderate, Hard.
+         ************************************************************/
+        let checkpoint1 = false;
+        let checkpoint2 = false;
+        let checkpoint3 = false;
+        player.action(() => {
+          if (!checkpoint1 && player.pos.x > 400) {
+            checkpoint1 = true;
+            add([
+              text("Great Start!", 16),
+              pos(player.pos.x, player.pos.y - 50),
+              lifespan(2, { fade: 1 }),
+            ]);
+          }
+          if (!checkpoint2 && player.pos.x > 1000) {
+            checkpoint2 = true;
+            add([
+              text("Keep it up!", 16),
+              pos(player.pos.x, player.pos.y - 50),
+              lifespan(2, { fade: 1 }),
+            ]);
+          }
+          if (!checkpoint3 && player.pos.x > 1600) {
+            checkpoint3 = true;
+            add([
+              text("Almost there!", 16),
+              pos(player.pos.x, player.pos.y - 50),
+              lifespan(2, { fade: 1 }),
+            ]);
+          }
+        });
+
+        /************************************************************
+         * Level Completion: Reaching the Flagpole
+         ************************************************************/
+        player.collides("flag", () => {
+          const timeTaken = time() - startTime;
+          // Calculate score: faster time and more monsters defeated yield higher points
+          const score = Math.max(0, Math.floor((1000 - timeTaken * 10) + (monstersDefeated * 100)));
+          go("finish", { score: score, time: timeTaken, monsters: monstersDefeated });
+        });
+      });
+
+      /************************************************************
+       * Finish Scene: Display Final Score & Social Sharing
+       ************************************************************/
+      scene("finish", ({ score, time, monsters }) => {
+        add([
+          text("Level Complete!", 24),
+          pos(300, 50),
+        ]);
+        add([
+          text("Score: " + score, 20),
+          pos(300, 100),
+        ]);
+        add([
+          text("Time: " + time.toFixed(2) + "s", 16),
+          pos(300, 140),
+        ]);
+        add([
+          text("Monsters Defeated: " + monsters, 16),
+          pos(300, 170),
+        ]);
+
+        // "Share Score" button (click to copy a shareable message)
+        const shareBtn = add([
+          rect(150, 40),
+          pos(300, 220),
+          area(),
+          color(100, 200, 100),
+        ]);
+        add([
+          text("Share Score", 16),
+          pos(320, 230),
+        ]);
+        shareBtn.action(() => {
+          if (mouseIsPressed()) {
+            const shareText = "I scored " + score + " points in Office Adventure Game! Can you beat me?";
+            navigator.clipboard.writeText(shareText);
+            alert("Score copied to clipboard!");
+          }
+        ]);
+
+        // Save the score to a local leaderboard
+        const playerName = prompt("Enter your name for the leaderboard:", "Player");
+        let leaderboard = JSON.parse(localStorage.getItem("officeLeaderboard") || "[]");
+        leaderboard.push({ name: playerName, score: score, timestamp: new Date().toLocaleString() });
+        leaderboard.sort((a, b) => b.score - a.score);
+        leaderboard = leaderboard.slice(0, 10);
+        localStorage.setItem("officeLeaderboard", JSON.stringify(leaderboard));
+
+        // Button to view the leaderboard
+        const lbBtn = add([
+          rect(150, 40),
+          pos(300, 280),
+          area(),
+          color(200, 200, 100),
+        ]);
+        add([
+          text("Leaderboard", 16),
+          pos(320, 290),
+        ]);
+        lbBtn.action(() => {
+          if (mouseIsPressed()) {
+            go("leaderboard");
+          }
+        ]);
+
+        // Allow restarting the game with the Enter key
+        keyPress("enter", () => {
+          go("game");
+        });
+      });
+
+      /************************************************************
+       * Leaderboard Scene: Display Top 10 Scores from localStorage
+       ************************************************************/
+      scene("leaderboard", () => {
+        add([
+          text("Leaderboard", 24),
+          pos(300, 20),
+        ]);
+        const leaderboard = JSON.parse(localStorage.getItem("officeLeaderboard") || "[]");
+        for (let i = 0; i < leaderboard.length; i++) {
+          add([
+            text(
+              (i + 1) +
+                ". " +
+                leaderboard[i].name +
+                " - " +
+                leaderboard[i].score +
+                " (" +
+                leaderboard[i].timestamp +
+                ")",
+              16
+            ),
+            pos(100, 60 + i * 30),
+          ]);
         }
+        add([
+          text("Press Enter to play again", 16),
+          pos(250, 350),
+        ]);
+        keyPress("enter", () => {
+          go("game");
+        });
+      });
 
-        // Main Game Class
-        class Game {
-            constructor() {
-                // Canvas and context setup
-                this.canvas = document.getElementById('game-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.canvas.width = 800;
-                this.canvas.height = 500;
-                
-                // Game state
-                this.isRunning = false;
-                this.gameOver = false;
-                this.victory = false;
-                this.score = 0;
-                this.startTime = 0;
-                this.currentTime = 0;
-                this.timeElapsed = 0;
-                
-                // Camera
-                this.camera = {
-                    x: 0,
-                    y: 0,
-                    width: this.canvas.width,
-                    height: this.canvas.height
-                };
-                
-                // Level
-                this.levelWidth = 4000;
-                this.checkpoints = [
-                    { x: 1000, passed: false, message: "Checkpoint 1! Great start!" },
-                    { x: 2500, passed: false, message: "Checkpoint 2! Keep going!" },
-                    { x: 3500, passed: false, message: "Final stretch! You can do it!" }
-                ];
-                this.flagpole = { x: 3800, y: 300, width: 20, height: 200 };
-                
-                // Create player
-                this.player = new Player(this);
-                
-                // Create platforms
-                this.platforms = [];
-                this.createPlatforms();
-                
-                // Create monsters
-                this.monsters = [];
-                this.createMonsters();
-                
-                // Fireball array
-                this.fireballs = [];
-                
-                // Input handling
-                this.keys = {};
-                this.lastFireballTime = 0;
-                
-                // UI elements
-                this.scoreDisplay = document.getElementById('score-display');
-                this.timerDisplay = document.getElementById('timer-display');
-                this.checkpointMessage = document.getElementById('checkpoint-message');
-                this.gameOverScreen = document.getElementById('game-over');
-                this.gameStartScreen = document.getElementById('game-start');
-                this.finalScoreDisplay = document.getElementById('final-score');
-                this.finalTimeDisplay = document.getElementById('final-time');
-                this.leaderboard = document.getElementById('leaderboard');
-                
-                // Setup input listeners
-                this.setupEventListeners();
-                
-                // Animation frame ID
-                this.animationFrameId = null;
-                
-                // BOI monster respawn
-                this.boiRespawnTimer = 0;
-                this.shouldRespawnBoi = false;
-            }
-            
-            init() {
-                document.getElementById('start-button').addEventListener('click', () => {
-                    this.startGame();
-                });
-                
-                document.getElementById('restart-button').addEventListener('click', () => {
-                    this.resetGame();
-                    this.startGame();
-                });
-                
-                document.getElementById('save-score-button').addEventListener('click', () => {
-                    this.saveScore();
-                });
-                
-                document.getElementById('share-button').addEventListener('click', () => {
-                    this.shareScore();
-                });
-                
-                this.loadLeaderboard();
-            }
-            
-            startGame() {
-                this.gameStartScreen.style.display = 'none';
-                this.isRunning = true;
-                this.startTime = Date.now();
-                this.gameLoop();
-            }
-            
-            resetGame() {
-                this.score = 0;
-                this.gameOver = false;
-                this.victory = false;
-                this.timeElapsed = 0;
-                this.player = new Player(this);
-                this.camera.x = 0;
-                this.checkpoints.forEach(checkpoint => checkpoint.passed = false);
-                this.monsters = [];
-                this.createMonsters();
-                this.fireballs = [];
-                this.boiRespawnTimer = 0;
-                this.shouldRespawnBoi = false;
-                this.gameOverScreen.style.display = 'none';
-                this.scoreDisplay.textContent = `Score: ${this.score}`;
-                this.timerDisplay.textContent = `Time: 0:00`;
-            }
-            
-            gameLoop() {
-                if (!this.isRunning) return;
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.currentTime = Date.now();
-                this.timeElapsed = (this.currentTime - this.startTime) / 1000;
-                this.update();
-                this.render();
-                this.updateUI();
-                this.animationFrameId = requestAnimationFrame(() => this.gameLoop());
-            }
-            
-            update() {
-                this.player.update();
-                this.updateCamera();
-                this.updateMonsters();
-                this.updateFireballs();
-                this.checkBoiRespawn();
-                this.checkCheckpoints();
-                this.checkFlagpole();
-            }
-            
-            render() {
-                this.drawBackground();
-                this.renderPlatforms();
-                this.renderCheckpoints();
-                this.renderFlagpole();
-                this.renderMonsters();
-                this.player.render();
-                this.renderFireballs();
-            }
-            
-            updateCamera() {
-                const targetX = this.player.x - this.canvas.width / 3;
-                this.camera.x += (targetX - this.camera.x) * 0.1;
-                this.camera.x = Math.max(0, Math.min(this.camera.x, this.levelWidth - this.canvas.width));
-            }
-            
-            createPlatforms() {
-                this.platforms.push({ x: 0, y: 450, width: this.levelWidth, height: 50, type: 'ground' });
-                this.platforms.push(
-                    { x: 200, y: 380, width: 100, height: 20, type: 'desk' },
-                    { x: 350, y: 320, width: 150, height: 20, type: 'desk' },
-                    { x: 550, y: 370, width: 120, height: 20, type: 'desk' },
-                    { x: 750, y: 300, width: 100, height: 20, type: 'desk' },
-                    { x: 900, y: 250, width: 150, height: 20, type: 'desk' },
-                    { x: 1200, y: 380, width: 80, height: 20, type: 'desk' },
-                    { x: 1350, y: 320, width: 120, height: 20, type: 'desk' },
-                    { x: 1550, y: 380, width: 80, height: 20, type: 'desk' },
-                    { x: 1700, y: 280, width: 100, height: 20, type: 'desk' },
-                    { x: 1880, y: 350, width: 140, height: 20, type: 'cabinet' },
-                    { x: 2100, y: 300, width: 70, height: 20, type: 'cabinet' },
-                    { x: 2250, y: 250, width: 120, height: 20, type: 'cabinet' },
-                    { x: 2600, y: 380, width: 60, height: 20, type: 'cabinet' },
-                    { x: 2700, y: 320, width: 80, height: 20, type: 'cabinet' },
-                    { x: 2850, y: 380, width: 60, height: 20, type: 'cabinet' },
-                    { x: 2950, y: 300, width: 70, height: 20, type: 'cabinet' },
-                    { x: 3100, y: 250, width: 60, height: 20, type: 'cabinet' },
-                    { x: 3250, y: 320, width: 70, height: 20, type: 'cabinet' },
-                    { x: 3400, y: 260, width: 60, height: 20, type: 'cabinet' },
-                    { x: 3600, y: 380, width: 300, height: 20, type: 'desk' }
-                );
-            }
-            
-            createMonsters() {
-                this.monsters.push(
-                    new Monster(this, 400, 290, 'DOGE'),
-                    new Monster(this, 650, 340, 'Paper'),
-                    new Monster(this, 950, 220, 'Client'),
-                    new Monster(this, 1400, 290, 'DOGE'),
-                    new Monster(this, 1600, 350, 'Paper'),
-                    new Monster(this, 1750, 250, 'Client'),
-                    new Monster(this, 1950, 320, 'Mercedes'),
-                    new Monster(this, 2200, 270, 'Paper'),
-                    new Monster(this, 2650, 350, 'Mercedes'),
-                    new Monster(this, 2750, 290, 'DOGE'),
-                    new Monster(this, 2900, 350, 'Client'),
-                    new Monster(this, 3000, 270, 'Paper'),
-                    new Monster(this, 3150, 220, 'Mercedes'),
-                    new Monster(this, 3300, 290, 'BOI'),
-                    new Monster(this, 3450, 230, 'DOGE')
-                );
-            }
-            
-            updateMonsters() {
-                for (let i = this.monsters.length - 1; i >= 0; i--) {
-                    const monster = this.monsters[i];
-                    monster.update();
-                    if (this.collides(this.player, monster)) {
-                        if (this.player.velocityY > 0 && this.player.y + this.player.height < monster.y + monster.height / 2) {
-                            this.score += 100;
-                            this.createDustEffect(monster.x, monster.y);
-                            if (monster.type === 'BOI') {
-                                this.shouldRespawnBoi = true;
-                                this.boiRespawnTimer = 30;
-                            }
-                            this.monsters.splice(i, 1);
-                            this.player.velocityY = -10;
-                        } else {
-                            this.endGame(false);
-                        }
-                    }
-                }
-            }
-            
-            updateFireballs() {
-                // Basic implementation - to be completed
-            }
-            
-            checkBoiRespawn() {
-                if (this.shouldRespawnBoi) {
-                    this.boiRespawnTimer -= 1/60;
-                    if (this.boiRespawnTimer <= 0) {
-                        this.monsters.push(new Monster(this, 3300, 290, 'BOI'));
-                        this.shouldRespawnBoi = false;
-                    }
-                }
-            }
-            
-            checkCheckpoints() {
-                this.checkpoints.forEach(checkpoint => {
-                    if (!checkpoint.passed && this.player.x > checkpoint.x) {
-                        checkpoint.passed = true;
-                        this.score += 200;
-                        this.showCheckpointMessage(checkpoint.message);
-                    }
-                });
-            }
-            
-            checkFlagpole() {
-                if (this.player.x > this.flagpole.x) {
-                    this.endGame(true);
-                }
-            }
-            
-            showCheckpointMessage(message) {
-                this.checkpointMessage.textContent = message;
-                this.checkpointMessage.style.display = 'block';
-                setTimeout(() => this.checkpointMessage.style.display = 'none', 3000);
-            }
-            
-            createDustEffect(x, y) {
-                const dust = document.createElement('div');
-                dust.style.position = 'absolute';
-                dust.style.left = `${x - this.camera.x}px`;
-                dust.style.top = `${y}px`;
-                dust.style.width = '40px';
-                dust.style.height = '40px';
-                dust.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-                dust.style.borderRadius = '50%';
-                dust.style.animation = 'dust 0.5s forwards';
-                dust.style.zIndex = '5';
-                document.getElementById('ui-layer').appendChild(dust);
-                setTimeout(() => dust.remove(), 500);
-            }
-            
-            drawBackground() {
-                this.ctx.fillStyle = '#87CEEB';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                for (let i = 0; i < 8; i++) {
-                    const windowX = (i * 200) - (this.camera.x * 0.2) % 1600;
-                    this.ctx.fillStyle = '#E0E0E0';
-                    this.ctx.fillRect(windowX, 50, 150, 150);
-                    this.ctx.strokeStyle = '#888';
-                    this.ctx.lineWidth = 3;
-                    this.ctx.strokeRect(windowX, 50, 150, 150);
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(windowX, 125);
-                    this.ctx.lineTo(windowX + 150, 125);
-                    this.ctx.moveTo(windowX + 75, 50);
-                    this.ctx.lineTo(windowX + 75, 200);
-                    this.ctx.stroke();
-                }
-                this.ctx.fillStyle = '#F5F5F5';
-                this.ctx.fillRect(0, 200, this.canvas.width, 250);
-                for (let i = 0; i < 10; i++) {
-                    const elementX = (i * 250) - (this.camera.x * 0.5) % 2500;
-                    this.ctx.fillStyle = '#DDD';
-                    this.ctx.fillRect(elementX, 220, 120, 80);
-                    this.ctx.strokeStyle = '#999';
-                    this.ctx.strokeRect(elementX + 10, 230, 100, 60);
-                }
-            }
-            
-            renderPlatforms() {
-                this.platforms.filter(p => p.x + p.width > this.camera.x && p.x < this.camera.x + this.canvas.width)
-                    .forEach(platform => {
-                        const adjustedX = platform.x - this.camera.x;
-                        if (platform.type === 'ground') {
-                            this.ctx.fillStyle = '#8B4513';
-                            this.ctx.fillRect(adjustedX, platform.y, platform.width, platform.height);
-                            this.ctx.fillStyle = '#A0522D';
-                            for (let x = 0; x < platform.width; x += 40) {
-                                for (let y = 0; y < platform.height; y += 20) {
-                                    if ((x + y) % 40 === 0) {
-                                        this.ctx.fillRect(adjustedX + x, platform.y + y, 20, 10);
-                                    }
-                                }
-                            }
-                        } else if (platform.type === 'desk') {
-                            this.ctx.fillStyle = '#8B4513';
-                            this.ctx.fillRect(adjustedX, platform.y, platform.width, platform.height);
-                            this.ctx.fillStyle = '#D2B48C';
-                            this.ctx.fillRect(adjustedX, platform.y, platform.width, 5);
-                            this.ctx.fillStyle = '#5D4037';
-                            this.ctx.fillRect(adjustedX + 10, platform.y + 5, 8, platform.height - 5);
-                            this.ctx.fillRect(adjustedX + platform.width - 18, platform.y + 5, 8, platform.height - 5);
-                        } else if (platform.type === 'cabinet') {
-                            this.ctx.fillStyle = '#607D8B';
-                            this.ctx.fillRect(adjustedX, platform.y, platform.width, platform.height);
-                            this.ctx.fillStyle = '#455A64';
-                            this.ctx.fillRect(adjustedX + 5, platform.y + 5, platform.width - 10, 3);
-                            this.ctx.fillRect(adjustedX + 5, platform.y + 12, platform.width - 10, 3);
-                            this.ctx.fillStyle = '#CFD8DC';
-                            this.ctx.fillRect(adjustedX + platform.width - 15, platform.y + 7, 5, 6);
-                        }
-                    });
-            }
-            
-            renderCheckpoints() {
-                this.checkpoints.forEach((checkpoint, index) => {
-                    if (checkpoint.x > this.camera.x - 50 && checkpoint.x < this.camera.x + this.canvas.width + 50) {
-                        const adjustedX = checkpoint.x - this.camera.x;
-                        this.ctx.fillStyle = '#444';
-                        this.ctx.fillRect(adjustedX - 5, 350, 10, 100);
-                        this.ctx.fillStyle = checkpoint.passed ? '#4CAF50' : '#FFC107';
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(adjustedX + 5, 350);
-                        this.ctx.lineTo(adjustedX + 5, 380);
-                        this.ctx.lineTo(adjustedX + 30, 365);
-                        this.ctx.closePath();
-                        this.ctx.fill();
-                        this.ctx.fillStyle = '#FFF';
-                        this.ctx.font = '14px Arial';
-                        this.ctx.textAlign = 'center';
-                        this.ctx.fillText(`${index + 1}`, adjustedX, 340);
-                    }
-                });
-            }
-            
-            renderFlagpole() {
-                if (this.flagpole.x > this.camera.x - 50 && this.flagpole.x < this.camera.x + this.canvas.width + 50) {
-                    const adjustedX = this.flagpole.x - this.camera.x;
-                    this.ctx.fillStyle = '#333';
-                    this.ctx.fillRect(adjustedX, this.flagpole.y, 10, this.flagpole.height);
-                    this.ctx.fillStyle = '#555';
-                    this.ctx.fillRect(adjustedX - 10, this.flagpole.y + this.flagpole.height - 10, 30, 10);
-                    this.ctx.fillStyle = '#FF4081';
-                    // Add flag drawing code here if desired
-                }
-            }
-            
-            renderMonsters() {
-                this.monsters.forEach(monster => monster.render());
-            }
-            
-            renderFireballs() {
-                // Basic implementation - to be completed
-            }
-            
-            setupEventListeners() {
-                window.addEventListener('keydown', (e) => {
-                    this.keys[e.key] = true;
-                    if (e.key === 'ArrowUp' && this.player.y === 390) {
-                        this.player.velocityY = this.player.jumpStrength;
-                    }
-                    if (e.key === ' ') {
-                        // Add fireball shooting logic here
-                    }
-                });
-                window.addEventListener('keyup', (e) => this.keys[e.key] = false);
-            }
-            
-            updateUI() {
-                this.scoreDisplay.textContent = `Score: ${this.score}`;
-                const minutes = Math.floor(this.timeElapsed / 60);
-                const seconds = Math.floor(this.timeElapsed % 60);
-                this.timerDisplay.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }
-            
-            endGame(victory) {
-                this.isRunning = false;
-                this.victory = victory;
-                this.gameOverScreen.style.display = 'block';
-                this.finalScoreDisplay.textContent = `Your Score: ${this.score}`;
-                const minutes = Math.floor(this.timeElapsed / 60);
-                const seconds = Math.floor(this.timeElapsed % 60);
-                this.finalTimeDisplay.textContent = `Completion Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                this.leaderboard.style.display = 'block';
-            }
-            
-            saveScore() {
-                // Basic implementation - to be completed with actual storage
-                console.log('Score saved');
-            }
-            
-            shareScore() {
-                // Basic implementation - to be completed
-                console.log('Score shared');
-            }
-            
-            loadLeaderboard() {
-                // Basic implementation - to be completed
-            }
-            
-            collides(a, b) {
-                return a.x < b.x + b.width &&
-                       a.x + a.width > b.x &&
-                       a.y < b.y + b.height &&
-                       a.y + a.height > b.y;
-            }
-        }
+      /************************************************************
+       * Game Over Scene: Restart After a Failed Attempt
+       ************************************************************/
+      scene("gameover", ({ score }) => {
+        add([
+          text("Game Over", 32),
+          pos(300, 150),
+        ]);
+        add([
+          text("Press Enter to restart", 16),
+          pos(280, 200),
+        ]);
+        keyPress("enter", () => {
+          go("game");
+        });
+      });
 
-        // Initialize the game
-        const game = new Game();
-        game.init();  // This fixes the Start Game button not working
+      /************************************************************
+       * Start the Game (Initial Scene)
+       ************************************************************/
+      go("game");
     </script>
-</body>
+  </body>
 </html>
