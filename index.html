@@ -6,82 +6,57 @@
     <!-- Load Kaboom.js via CDN -->
     <script src="https://unpkg.com/kaboom/dist/kaboom.js"></script>
     <style>
-      /* Basic CSS reset and canvas styling */
       body {
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background: #d0d0f0; /* Light background to suit our office theme */
+        background: #d0d0f0;
       }
     </style>
   </head>
   <body>
-    <!-- The game canvas is automatically created by Kaboom -->
     <script>
-      /************************************************************
-       * Kaboom Initialization & Global Settings
-       ************************************************************/
       kaboom({
         global: true,
         width: 800,
         height: 400,
-        background: [220, 220, 250],
         debug: true,
       });
 
-      // If you want to use named layers like "bg", "obj", "ui", define them first:
       layers([
-        "bg",   // background layer
-        "obj",  // default objects layer
-        "ui",   // user-interface layer
+        "bg",
+        "obj",
+        "ui",
       ], "obj");
 
-      /************************************************************
-       * Load Sprites (All images are embedded as inline SVG/Base64)
-       ************************************************************/
-      // Player sprite: Inspired by the classic AIM yellow running-man icon
+      // Corrected sprite loading
       loadSprite("player", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjRkZGWTAwIi8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxMCIgcj0iNCIgZmlsbD0iIzAwMCIvPjxyZWN0IHg9IjEyIiB5PSIxNCIgd2lkdGg9IjgiIGhlaWdodD0iMTAiIGZpbGw9IiMwMDAiLz48L3N2Zz4=");
-      // DOGE monster sprite
-      loadSprite("doge", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNmMGM0MTkiLz48PGNpcmNsZSBjeD0iMTIiIGN5PSIxNCIgcj0iMiIgZmlsbD0iIzAwMCIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMTQiIHI9IjIiIGZpbGw9IiMwMDAiLz48cGF0aCBkPSJNMTAsMjAgUTE2LDI2IDIyLDIwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==");
-      // Angry Client monster sprite (grumpy face)
-      loadSprite("angry", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNlNzRjM2MiLz48PGxpbmUgeDE9IjEwIiB5MT0iMTIiIHgyPSIxNCIgeTI9IjE2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSIyMiIgeTE9IjEyIiB4Mj0iMTgiIHkyPSIxNiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMTIsMjAgUTE2LDI0IDIwLDIwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==");
-      // Paper monster sprite (fluttering document)
+      loadSprite("doge", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNmMGM0MTkiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjE0IiByPSIyIiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iMjAiIGN5PSIxNCIgcj0iMiIgZmlsbD0iIzAwMCIvPjxwYXRoIGQ9Ik0xMCwyMCBRMTYsMjYgMjIsMjAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PC9zdmc+");
+      loadSprite("angry", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNlNzRjM2MiLz48bGluZSB4MT0iMTAiIHkxPSIxMiIgeDI9IjE0IiB5Mj0iMTYiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PGxpbmUgeDE9IjIyIiB5MT0iMTIiIHgyPSIxOCIgeTI9IjE2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0xMiwyMCBRMTYsMjQgMjAsMjAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PC9zdmc+");
       loadSprite("paper", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3QgeD0iNiIgeT0iNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjI0IiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSI4IiB5MT0iMTAiIHgyPSIyNCIgeTI9IjEwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTQiIHgyPSIyNCIgeTI9IjE0IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTgiIHgyPSIyNCIgeTI9IjE4IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==");
-      // Mercedes monster sprite (spinning logo style)
       loadSprite("mercedes", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNDQ0NDQ0MiLz48cGF0aCBkPSJNMTYsNCAyMCwxNiBMMTYsMjggTDEyLDE2IFoiIGZpbGw9IiMwMDAiLz48L3N2Zz4=");
-      // BOI monster sprite (block labeled "BOI")
       loadSprite("boi", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjODg4ODg4Ii8+PHRleHQgeD0iMTYiIHk9IjIxIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZGRkZGIj5CT0k8L3RleHQ+PC9zdmc+");
-      // Flagpole sprite (finish line marker)
       loadSprite("flagpole", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSI2NCI+PHJlY3QgeD0iNiIgeT0iMTAiIHdpZHRoPSI0IiBoZWlnaHQ9IjU0IiBmaWxsPSIjNTU1NTU1Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxMCAxNiwxOCAxMCwyNiIgZmlsbD0iI0YwMDAwMCIvPjwvc3ZnPg==");
-      // Desk platform
       loadSprite("desk", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIxNiI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjE2IiBmaWxsPSIjYTA1MjJkIi8+PC9zdmc+");
-      // Cabinet platform
       loadSprite("cabinet", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjOGI0NTEzIi8+PGxpbmUgeDE9IjAiIHkxPSIxNiIgeDI9IjMyIiB5Mj0iMTYiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+");
-      // Cubicle platform
       loadSprite("cubicle", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCI+PHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjZDNkM2QzIi8+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==");
 
-      /************************************************************
-       * Global Game Variables
-       ************************************************************/
       let monstersDefeated = 0;
       let startTime = 0;
       let lastFireTime = 0;
       let boiActive = true;
 
-      /************************************************************
-       * Helper Function: Spawn Monster
-       ************************************************************/
       function spawnMonster(type, pos, dir = 1) {
         return add([
           sprite(type),
           pos(pos),
           area(),
+          layer("obj"),
           "monster",
           { monsterType: type, dir: dir, speed: 30 },
           {
             update() {
               this.move(this.dir * this.speed, 0);
-              // Reverse direction when out of bounds
               if (this.pos.x < 0 || this.pos.x > 2000) {
                 this.dir = -this.dir;
               }
@@ -90,17 +65,19 @@
         ]);
       }
 
-      /************************************************************
-       * Main Game Scene
-       ************************************************************/
       scene("game", () => {
-        // Reset globals
+        add([
+          text("Game Scene Loaded", 16),
+          pos(10, 10),
+          layer("ui"),
+          lifespan(2),
+        ]);
+
         monstersDefeated = 0;
         startTime = time();
         lastFireTime = 0;
         boiActive = true;
 
-        // Office-style background (put it on layer "bg")
         add([
           rect(2000, 400),
           pos(0, 0),
@@ -108,7 +85,6 @@
           layer("bg"),
         ]);
 
-        // Ground collider
         add([
           rect(2000, 20),
           pos(0, 380),
@@ -117,25 +93,24 @@
           color(100, 100, 100),
         ]);
 
-        // Flagpole at the end
         add([
           sprite("flagpole"),
           pos(1950, 316),
           area(),
+          layer("obj"),
           "flag",
         ]);
 
-        // Player
         const player = add([
           sprite("player"),
           pos(50, 300),
           area(),
           body(),
           origin("center"),
+          layer("obj"),
         ]);
         player.direction = 1;
 
-        // Movement
         keyDown("left", () => {
           player.move(-120, 0);
           player.direction = -1;
@@ -149,7 +124,6 @@
             player.jump(300);
           }
         });
-        // Fireball
         keyPress("space", () => {
           if (time() - lastFireTime > 1) {
             lastFireTime = time();
@@ -158,6 +132,7 @@
               pos(player.pos),
               area(),
               color(255, 100, 0),
+              layer("obj"),
               "fireball",
               { dir: player.direction },
               {
@@ -172,13 +147,13 @@
           }
         });
 
-        // Platforms
         for (let i = 0; i < 5; i++) {
           add([
             sprite("desk"),
             pos(200 * i + 100, 350 - 20 * (i % 2)),
             area(),
             solid(),
+            layer("obj"),
           ]);
         }
         for (let i = 0; i < 3; i++) {
@@ -187,6 +162,7 @@
             pos(400 * i + 250, 300 - 30 * (i % 2)),
             area(),
             solid(),
+            layer("obj"),
           ]);
         }
         for (let i = 0; i < 2; i++) {
@@ -195,22 +171,22 @@
             pos(600 * i + 600, 250),
             area(),
             solid(),
+            layer("obj"),
           ]);
         }
 
-        // Spawn monsters
         spawnMonster("doge", vec2(300, 280), 1);
         spawnMonster("angry", vec2(500, 280), -1);
         spawnMonster("paper", vec2(800, 280), 1);
         spawnMonster("mercedes", vec2(1100, 280), -1);
         let boi = spawnMonster("boi", vec2(1400, 280), 1);
 
-        // Fireball vs. Monster
         collides("fireball", "monster", (fire, monster) => {
           destroy(fire);
           add([
             text("💥", 16),
             pos(monster.pos),
+            layer("ui"),
             lifespan(0.5, { fade: 2 }),
           ]);
           if (monster.monsterType === "boi") {
@@ -224,14 +200,13 @@
           monstersDefeated += 1;
         });
 
-        // Player vs. Monster
         player.collides("monster", (monster) => {
-          // Stomp from above
           if (player.pos.y < monster.pos.y) {
             player.jump(150);
             add([
               text("💥", 16),
               pos(monster.pos),
+              layer("ui"),
               lifespan(0.5, { fade: 2 }),
             ]);
             if (monster.monsterType === "boi") {
@@ -244,12 +219,10 @@
             destroy(monster);
             monstersDefeated += 1;
           } else {
-            // Game over if hit from the side
             go("gameover", { score: 0 });
           }
         });
 
-        // Checkpoints
         let checkpoint1 = false;
         let checkpoint2 = false;
         let checkpoint3 = false;
@@ -259,6 +232,7 @@
             add([
               text("Great Start!", 16),
               pos(player.pos.x, player.pos.y - 50),
+              layer("ui"),
               lifespan(2, { fade: 1 }),
             ]);
           }
@@ -267,6 +241,7 @@
             add([
               text("Keep it up!", 16),
               pos(player.pos.x, player.pos.y - 50),
+              layer("ui"),
               lifespan(2, { fade: 1 }),
             ]);
           }
@@ -275,12 +250,12 @@
             add([
               text("Almost there!", 16),
               pos(player.pos.x, player.pos.y - 50),
+              layer("ui"),
               lifespan(2, { fade: 1 }),
             ]);
           }
         });
 
-        // Reaching the flagpole
         player.collides("flag", () => {
           const timeTaken = time() - startTime;
           const score = Math.max(
@@ -291,54 +266,56 @@
         });
       });
 
-      /************************************************************
-       * Finish Scene
-       ************************************************************/
       scene("finish", ({ score, time, monsters }) => {
         add([
           text("Level Complete!", 24),
           pos(300, 50),
+          layer("ui"),
         ]);
         add([
           text("Score: " + score, 20),
           pos(300, 100),
+          layer("ui"),
         ]);
         add([
           text("Time: " + time.toFixed(2) + "s", 16),
           pos(300, 140),
+          layer("ui"),
         ]);
         add([
           text("Monsters Defeated: " + monsters, 16),
           pos(300, 170),
+          layer("ui"),
         ]);
 
-        // Share button
         const shareBtn = add([
           rect(150, 40),
           pos(300, 220),
           area(),
           color(100, 200, 100),
+          layer("ui"),
           "shareBtn",
         ]);
         add([
           text("Share Score", 16),
           pos(320, 230),
+          layer("ui"),
         ]);
 
-        // Leaderboard button
         const lbBtn = add([
           rect(150, 40),
           pos(300, 280),
           area(),
           color(200, 200, 100),
+          layer("ui"),
           "lbBtn",
         ]);
         add([
           text("Leaderboard", 16),
           pos(320, 290),
+          layer("ui"),
         ]);
 
-        // Handle clicks
         mouseClick(() => {
           if (shareBtn.isHovering()) {
             const shareText = `I scored ${score} points in Office Adventure Game! Can you beat me?`;
@@ -350,76 +327,4 @@
           }
         });
 
-        // Save score locally
-        const playerName = prompt("Enter your name for the leaderboard:", "Player");
-        let leaderboard = JSON.parse(localStorage.getItem("officeLeaderboard") || "[]");
-        leaderboard.push({ 
-          name: playerName, 
-          score: score, 
-          timestamp: new Date().toLocaleString() 
-        });
-        // Sort & keep top 10
-        leaderboard.sort((a, b) => b.score - a.score);
-        leaderboard = leaderboard.slice(0, 10);
-        localStorage.setItem("officeLeaderboard", JSON.stringify(leaderboard));
-
-        add([
-          text("Press Enter to restart", 16),
-          pos(300, 340),
-        ]);
-        keyPress("enter", () => {
-          go("game");
-        });
-      });
-
-      /************************************************************
-       * Leaderboard Scene
-       ************************************************************/
-      scene("leaderboard", () => {
-        add([
-          text("Leaderboard", 24),
-          pos(300, 20),
-        ]);
-        const leaderboard = JSON.parse(localStorage.getItem("officeLeaderboard") || "[]");
-        for (let i = 0; i < leaderboard.length; i++) {
-          add([
-            text(
-              `${i + 1}. ${leaderboard[i].name} - ${leaderboard[i].score} (${leaderboard[i].timestamp})`,
-              16
-            ),
-            pos(100, 60 + i * 30),
-          ]);
-        }
-        add([
-          text("Press Enter to play again", 16),
-          pos(250, 350),
-        ]);
-        keyPress("enter", () => {
-          go("game");
-        });
-      });
-
-      /************************************************************
-       * Game Over Scene
-       ************************************************************/
-      scene("gameover", ({ score }) => {
-        add([
-          text("Game Over", 32),
-          pos(300, 150),
-        ]);
-        add([
-          text("Press Enter to restart", 16),
-          pos(280, 200),
-        ]);
-        keyPress("enter", () => {
-          go("game");
-        });
-      });
-
-      /************************************************************
-       * Start the Game
-       ************************************************************/
-      go("game");
-    </script>
-  </body>
-</html>
+        const playerName = prompt
