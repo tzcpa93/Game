@@ -1,330 +1,244 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Office Adventure Game</title>
-    <meta charset="UTF-8">
-    <!-- Load Kaboom.js via CDN -->
-    <script src="https://unpkg.com/kaboom/dist/kaboom.js"></script>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background: #d0d0f0;
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Report Rampage</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+    }
+    #gameContainer {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 500px;
+      background: #fff;
+      overflow: hidden;
+      border: 2px solid #333;
+      margin: 20px auto;
+    }
+    .expense {
+      position: absolute;
+      padding: 10px;
+      min-width: 80px;
+      text-align: center;
+      border: 1px solid #555;
+      cursor: pointer;
+      border-radius: 4px;
+      user-select: none;
+    }
+    #score, #timer {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 5px;
+      display: inline-block;
+    }
+    #startScreen, #gameOverScreen {
+      margin-top: 100px;
+    }
+    #gameOverScreen {
+      display: none;
+    }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Opening Screen -->
+  <div id="startScreen">
+    <h1>Expense Report Rampage</h1>
+    <p>Click on fraudulent expenses only! Allowable expenses must be left alone.</p>
+    <p>
+      <strong>Correct click:</strong> +10 points<br>
+      <strong>Wrong click:</strong> -15 points
+    </p>
+    <p>The game lasts 60 seconds. Watch the score and timer at the top during play.</p>
+    <button id="startButton">Start Game</button>
+  </div>
+  
+  <!-- Game Area -->
+  <div id="gameContainer" style="display: none;">
+    <div id="score">Score: 0</div>
+    <div id="timer">Time: 60</div>
+  </div>
+  
+  <!-- Game Over Screen -->
+  <div id="gameOverScreen">
+    <h1 id="finalMessage"></h1>
+    <p>Your final score: <span id="finalScore"></span></p>
+    <button id="restartButton">Play Again</button>
+  </div>
+  
+  <script>
+    // Game Variables
+    let score = 0;
+    let timeLeft = 60;
+    let gameInterval;
+    let expenseInterval;
+    let expenseSpeed = 1; // starting vertical speed (pixels per frame)
+    const gameContainer = document.getElementById("gameContainer");
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const startScreen = document.getElementById("startScreen");
+    const gameOverScreen = document.getElementById("gameOverScreen");
+    const finalMessage = document.getElementById("finalMessage");
+    const finalScore = document.getElementById("finalScore");
+    const restartButton = document.getElementById("restartButton");
+    
+    // Expense Categories
+    const allowableExpenses = ["Office Supplies", "Client Lunch", "Software Subscription", "Conference Fees"];
+    const unallowableExpenses = ["Concert Tickets", "Spa Treatments", "Luxury Watch", "Golf Club Membership"];
+    
+    // Start Game Function
+    function startGame() {
+      score = 0;
+      timeLeft = 60;
+      expenseSpeed = 1;
+      scoreDisplay.textContent = "Score: " + score;
+      timerDisplay.textContent = "Time: " + timeLeft;
+      
+      // Clear any existing expenses
+      gameContainer.querySelectorAll(".expense").forEach(exp => exp.remove());
+      
+      startScreen.style.display = "none";
+      gameOverScreen.style.display = "none";
+      gameContainer.style.display = "block";
+      
+      // Timer countdown
+      gameInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = "Time: " + timeLeft;
+        
+        // Gradually increase speed every 10 seconds
+        if (timeLeft % 10 === 0) {
+          expenseSpeed += 0.5;
+        }
+        
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+      
+      // Generate expenses at random intervals (between 1-2 seconds)
+      expenseInterval = setInterval(() => {
+        generateExpense();
+      }, Math.random() * 1000 + 1000);
+      
+      // Begin animation loop
+      requestAnimationFrame(updateExpenses);
+    }
+    
+    // Create and add an expense element
+    function generateExpense() {
+      const expenseDiv = document.createElement("div");
+      expenseDiv.className = "expense";
+      
+      // Randomly decide if this is unallowable (fraudulent) or allowable
+      let isUnallowable = Math.random() < 0.5;
+      let label;
+      if (isUnallowable) {
+        label = unallowableExpenses[Math.floor(Math.random() * unallowableExpenses.length)];
+      } else {
+        label = allowableExpenses[Math.floor(Math.random() * allowableExpenses.length)];
       }
-    </style>
-  </head>
-  <body>
-    <script>
-      kaboom({
-        global: true,
-        width: 800,
-        height: 400,
-        debug: true,
+      expenseDiv.textContent = label;
+      expenseDiv.dataset.unallowable = isUnallowable;
+      
+      // Set random horizontal position
+      const containerWidth = gameContainer.offsetWidth;
+      const x = Math.random() * (containerWidth - 100);
+      expenseDiv.style.left = x + "px";
+      
+      // Position at the bottom of the container
+      expenseDiv.style.top = gameContainer.offsetHeight + "px";
+      
+      // Random background color for variety
+      expenseDiv.style.backgroundColor = getRandomColor();
+      
+      // Click event for expense elimination
+      expenseDiv.addEventListener("click", function() {
+        if (this.dataset.unallowable === "true") {
+          // Correct click on fraudulent expense
+          score += 10;
+          this.remove();
+        } else {
+          // Incorrect click on an allowable expense
+          score -= 15;
+          flashError();
+        }
+        scoreDisplay.textContent = "Score: " + score;
       });
-
-      layers([
-        "bg",
-        "obj",
-        "ui",
-      ], "obj");
-
-      // Corrected sprite loading
-      loadSprite("player", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjRkZGWTAwIi8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxMCIgcj0iNCIgZmlsbD0iIzAwMCIvPjxyZWN0IHg9IjEyIiB5PSIxNCIgd2lkdGg9IjgiIGhlaWdodD0iMTAiIGZpbGw9IiMwMDAiLz48L3N2Zz4=");
-      loadSprite("doge", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNmMGM0MTkiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjE0IiByPSIyIiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iMjAiIGN5PSIxNCIgcj0iMiIgZmlsbD0iIzAwMCIvPjxwYXRoIGQ9Ik0xMCwyMCBRMTYsMjYgMjIsMjAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PC9zdmc+");
-      loadSprite("angry", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNlNzRjM2MiLz48bGluZSB4MT0iMTAiIHkxPSIxMiIgeDI9IjE0IiB5Mj0iMTYiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PGxpbmUgeDE9IjIyIiB5MT0iMTIiIHgyPSIxOCIgeTI9IjE2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0xMiwyMCBRMTYsMjQgMjAsMjAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PC9zdmc+");
-      loadSprite("paper", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3QgeD0iNiIgeT0iNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjI0IiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSI4IiB5MT0iMTAiIHgyPSIyNCIgeTI9IjEwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTQiIHgyPSIyNCIgeTI9IjE0IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTgiIHgyPSIyNCIgeTI9IjE4IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==");
-      loadSprite("mercedes", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNDQ0NDQ0MiLz48cGF0aCBkPSJNMTYsNCAyMCwxNiBMMTYsMjggTDEyLDE2IFoiIGZpbGw9IiMwMDAiLz48L3N2Zz4=");
-      loadSprite("boi", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjODg4ODg4Ii8+PHRleHQgeD0iMTYiIHk9IjIxIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZGRkZGIj5CT0k8L3RleHQ+PC9zdmc+");
-      loadSprite("flagpole", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSI2NCI+PHJlY3QgeD0iNiIgeT0iMTAiIHdpZHRoPSI0IiBoZWlnaHQ9IjU0IiBmaWxsPSIjNTU1NTU1Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxMCAxNiwxOCAxMCwyNiIgZmlsbD0iI0YwMDAwMCIvPjwvc3ZnPg==");
-      loadSprite("desk", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIxNiI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjE2IiBmaWxsPSIjYTA1MjJkIi8+PC9zdmc+");
-      loadSprite("cabinet", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjOGI0NTEzIi8+PGxpbmUgeDE9IjAiIHkxPSIxNiIgeDI9IjMyIiB5Mj0iMTYiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+");
-      loadSprite("cubicle", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCI+PHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjZDNkM2QzIi8+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==");
-
-      let monstersDefeated = 0;
-      let startTime = 0;
-      let lastFireTime = 0;
-      let boiActive = true;
-
-      function spawnMonster(type, pos, dir = 1) {
-        return add([
-          sprite(type),
-          pos(pos),
-          area(),
-          layer("obj"),
-          "monster",
-          { monsterType: type, dir: dir, speed: 30 },
-          {
-            update() {
-              this.move(this.dir * this.speed, 0);
-              if (this.pos.x < 0 || this.pos.x > 2000) {
-                this.dir = -this.dir;
-              }
-            },
-          },
-        ]);
+      
+      gameContainer.appendChild(expenseDiv);
+    }
+    
+    // Update positions of expense elements (simple upward movement)
+    function updateExpenses() {
+      const expenses = gameContainer.querySelectorAll(".expense");
+      expenses.forEach(exp => {
+        let currentTop = parseFloat(exp.style.top);
+        exp.style.top = (currentTop - expenseSpeed) + "px";
+        
+        // Remove expense if it moves off the top of the screen
+        if (currentTop < -50) {
+          exp.remove();
+        }
+      });
+      if (timeLeft > 0) {
+        requestAnimationFrame(updateExpenses);
       }
-
-      scene("game", () => {
-        add([
-          text("Game Scene Loaded", 16),
-          pos(10, 10),
-          layer("ui"),
-          lifespan(2),
-        ]);
-
-        monstersDefeated = 0;
-        startTime = time();
-        lastFireTime = 0;
-        boiActive = true;
-
-        add([
-          rect(2000, 400),
-          pos(0, 0),
-          color(220, 220, 250),
-          layer("bg"),
-        ]);
-
-        add([
-          rect(2000, 20),
-          pos(0, 380),
-          area(),
-          solid(),
-          color(100, 100, 100),
-        ]);
-
-        add([
-          sprite("flagpole"),
-          pos(1950, 316),
-          area(),
-          layer("obj"),
-          "flag",
-        ]);
-
-        const player = add([
-          sprite("player"),
-          pos(50, 300),
-          area(),
-          body(),
-          origin("center"),
-          layer("obj"),
-        ]);
-        player.direction = 1;
-
-        keyDown("left", () => {
-          player.move(-120, 0);
-          player.direction = -1;
-        });
-        keyDown("right", () => {
-          player.move(120, 0);
-          player.direction = 1;
-        });
-        keyPress("up", () => {
-          if (player.grounded()) {
-            player.jump(300);
-          }
-        });
-        keyPress("space", () => {
-          if (time() - lastFireTime > 1) {
-            lastFireTime = time();
-            add([
-              circle(5),
-              pos(player.pos),
-              area(),
-              color(255, 100, 0),
-              layer("obj"),
-              "fireball",
-              { dir: player.direction },
-              {
-                update() {
-                  this.move(this.dir * 200, 0);
-                  if (Math.abs(this.pos.x - player.pos.x) > 400) {
-                    destroy(this);
-                  }
-                },
-              },
-            ]);
-          }
-        });
-
-        for (let i = 0; i < 5; i++) {
-          add([
-            sprite("desk"),
-            pos(200 * i + 100, 350 - 20 * (i % 2)),
-            area(),
-            solid(),
-            layer("obj"),
-          ]);
-        }
-        for (let i = 0; i < 3; i++) {
-          add([
-            sprite("cabinet"),
-            pos(400 * i + 250, 300 - 30 * (i % 2)),
-            area(),
-            solid(),
-            layer("obj"),
-          ]);
-        }
-        for (let i = 0; i < 2; i++) {
-          add([
-            sprite("cubicle"),
-            pos(600 * i + 600, 250),
-            area(),
-            solid(),
-            layer("obj"),
-          ]);
-        }
-
-        spawnMonster("doge", vec2(300, 280), 1);
-        spawnMonster("angry", vec2(500, 280), -1);
-        spawnMonster("paper", vec2(800, 280), 1);
-        spawnMonster("mercedes", vec2(1100, 280), -1);
-        let boi = spawnMonster("boi", vec2(1400, 280), 1);
-
-        collides("fireball", "monster", (fire, monster) => {
-          destroy(fire);
-          add([
-            text("💥", 16),
-            pos(monster.pos),
-            layer("ui"),
-            lifespan(0.5, { fade: 2 }),
-          ]);
-          if (monster.monsterType === "boi") {
-            boiActive = false;
-            wait(30, () => {
-              boiActive = true;
-              boi = spawnMonster("boi", vec2(1400, 280), 1);
-            });
-          }
-          destroy(monster);
-          monstersDefeated += 1;
-        });
-
-        player.collides("monster", (monster) => {
-          if (player.pos.y < monster.pos.y) {
-            player.jump(150);
-            add([
-              text("💥", 16),
-              pos(monster.pos),
-              layer("ui"),
-              lifespan(0.5, { fade: 2 }),
-            ]);
-            if (monster.monsterType === "boi") {
-              boiActive = false;
-              wait(30, () => {
-                boiActive = true;
-                boi = spawnMonster("boi", vec2(1400, 280), 1);
-              });
-            }
-            destroy(monster);
-            monstersDefeated += 1;
-          } else {
-            go("gameover", { score: 0 });
-          }
-        });
-
-        let checkpoint1 = false;
-        let checkpoint2 = false;
-        let checkpoint3 = false;
-        player.action(() => {
-          if (!checkpoint1 && player.pos.x > 400) {
-            checkpoint1 = true;
-            add([
-              text("Great Start!", 16),
-              pos(player.pos.x, player.pos.y - 50),
-              layer("ui"),
-              lifespan(2, { fade: 1 }),
-            ]);
-          }
-          if (!checkpoint2 && player.pos.x > 1000) {
-            checkpoint2 = true;
-            add([
-              text("Keep it up!", 16),
-              pos(player.pos.x, player.pos.y - 50),
-              layer("ui"),
-              lifespan(2, { fade: 1 }),
-            ]);
-          }
-          if (!checkpoint3 && player.pos.x > 1600) {
-            checkpoint3 = true;
-            add([
-              text("Almost there!", 16),
-              pos(player.pos.x, player.pos.y - 50),
-              layer("ui"),
-              lifespan(2, { fade: 1 }),
-            ]);
-          }
-        });
-
-        player.collides("flag", () => {
-          const timeTaken = time() - startTime;
-          const score = Math.max(
-            0,
-            Math.floor((1000 - timeTaken * 10) + (monstersDefeated * 100))
-          );
-          go("finish", { score: score, time: timeTaken, monsters: monstersDefeated });
-        });
-      });
-
-      scene("finish", ({ score, time, monsters }) => {
-        add([
-          text("Level Complete!", 24),
-          pos(300, 50),
-          layer("ui"),
-        ]);
-        add([
-          text("Score: " + score, 20),
-          pos(300, 100),
-          layer("ui"),
-        ]);
-        add([
-          text("Time: " + time.toFixed(2) + "s", 16),
-          pos(300, 140),
-          layer("ui"),
-        ]);
-        add([
-          text("Monsters Defeated: " + monsters, 16),
-          pos(300, 170),
-          layer("ui"),
-        ]);
-
-        const shareBtn = add([
-          rect(150, 40),
-          pos(300, 220),
-          area(),
-          color(100, 200, 100),
-          layer("ui"),
-          "shareBtn",
-        ]);
-        add([
-          text("Share Score", 16),
-          pos(320, 230),
-          layer("ui"),
-        ]);
-
-        const lbBtn = add([
-          rect(150, 40),
-          pos(300, 280),
-          area(),
-          color(200, 200, 100),
-          layer("ui"),
-          "lbBtn",
-        ]);
-        add([
-          text("Leaderboard", 16),
-          pos(320, 290),
-          layer("ui"),
-        ]);
-
-        mouseClick(() => {
-          if (shareBtn.isHovering()) {
-            const shareText = `I scored ${score} points in Office Adventure Game! Can you beat me?`;
-            navigator.clipboard.writeText(shareText);
-            alert("Score copied to clipboard!");
-          }
-          if (lbBtn.isHovering()) {
-            go("leaderboard");
-          }
-        });
-
-        const playerName = prompt
+    }
+    
+    // Brief flash to indicate error on wrong click
+    function flashError() {
+      const originalColor = document.body.style.backgroundColor;
+      document.body.style.backgroundColor = "red";
+      setTimeout(() => {
+        document.body.style.backgroundColor = originalColor;
+      }, 100);
+    }
+    
+    // End game and display results
+    function endGame() {
+      clearInterval(gameInterval);
+      clearInterval(expenseInterval);
+      
+      // Remove any remaining expenses
+      gameContainer.querySelectorAll(".expense").forEach(exp => exp.remove());
+      gameContainer.style.display = "none";
+      
+      finalScore.textContent = score;
+      // Display a fun message based on final score
+      if (score >= 100) {
+        finalMessage.textContent = "Audit Superstar!";
+      } else if (score >= 0) {
+        finalMessage.textContent = "Balanced Books, But There's Room for Improvement!";
+      } else {
+        finalMessage.textContent = "Time for a Tax Review!";
+      }
+      
+      gameOverScreen.style.display = "block";
+    }
+    
+    // Helper function to generate a random color
+    function getRandomColor() {
+      const letters = '89ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * letters.length)];
+      }
+      return color;
+    }
+    
+    // Event Listeners for starting and restarting the game
+    document.getElementById("startButton").addEventListener("click", startGame);
+    restartButton.addEventListener("click", startGame);
+  </script>
+</body>
+</html>
