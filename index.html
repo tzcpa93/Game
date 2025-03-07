@@ -2,243 +2,380 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Expense Report Rampage</title>
+  <title>Daily Accounting Challenge</title>
+  <!-- Import Inter font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
   <style>
+    /* Global styles */
     body {
+      font-family: 'Inter', sans-serif;
+      letter-spacing: -0.61px;
       margin: 0;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f0f0f0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
     }
-    #gameContainer {
-      position: relative;
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem 2rem;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    h1, h2 {
+      color: #1D92FB;
+    }
+    input[type="text"], input[type="email"] {
       width: 100%;
-      max-width: 600px;
-      height: 500px;
-      background: #fff;
-      overflow: hidden;
-      border: 2px solid #333;
-      margin: 20px auto;
-    }
-    .expense {
-      position: absolute;
       padding: 10px;
-      min-width: 80px;
-      text-align: center;
-      border: 1px solid #555;
-      cursor: pointer;
+      margin: 0.5rem 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
       border-radius: 4px;
-      user-select: none;
-    }
-    #score, #timer {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 5px;
-      display: inline-block;
-    }
-    #startScreen, #gameOverScreen {
-      margin-top: 100px;
-    }
-    #gameOverScreen {
-      display: none;
     }
     button {
-      font-size: 16px;
+      background-color: #1D92FB;
+      color: #fff;
+      border: none;
       padding: 10px 20px;
+      margin: 0.5rem 0;
       cursor: pointer;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .stats {
+      margin-bottom: 1rem;
+    }
+    .admin-panel {
+      margin-top: 2rem;
+      padding: 1rem;
+      border: 1px dashed #1D92FB;
+      background-color: #e7f3ff;
+    }
+    .feedback {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    .disabled {
+      opacity: 0.6;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <!-- Opening Screen -->
-  <div id="startScreen">
-    <h1>Expense Report Rampage</h1>
-    <p>Click on fraudulent expenses only! Allowable expenses must be left alone.</p>
-    <p>
-      <strong>Correct click:</strong> +10 points<br>
-      <strong>Wrong click:</strong> -15 points
-    </p>
-    <p>The game lasts 60 seconds. Watch the score and timer at the top during play.</p>
-    <button id="startButton">Start Game</button>
+  <div class="container">
+    <!-- Login Section -->
+    <div id="loginSection">
+      <h1>Welcome to Daily Accounting Challenge</h1>
+      <p>Enter your email to get started. (Note: Full account verification is required only when redeeming rewards.)</p>
+      <input type="email" id="emailInput" placeholder="Enter your email" />
+      <button id="loginButton">Login / Enroll</button>
+    </div>
+
+    <!-- Main Game Section -->
+    <div id="gameSection" style="display:none;">
+      <h1>Daily Accounting Challenge</h1>
+      <!-- User Stats -->
+      <div class="stats">
+        <p>Email: <span id="userEmail"></span></p>
+        <p>Daily Streak: <span id="streakCount">0</span></p>
+        <p>Total Points: <span id="pointsCount">0</span></p>
+      </div>
+      <!-- Daily Challenge Display -->
+      <div id="challengeContainer">
+        <h2 id="challengeQuestion">Challenge Question</h2>
+        <div id="challengeHint" style="display:none; color:#555; font-style:italic;"></div>
+        <input type="text" id="answerInput" placeholder="Type your answer here" />
+        <button id="submitAnswerButton">Submit Answer</button>
+      </div>
+      <!-- Feedback -->
+      <div id="feedback" class="feedback"></div>
+      <!-- Message when today's challenge already attempted -->
+      <div id="alreadyAttempted" style="display:none; color: #1D92FB; font-weight:bold; margin-top:1rem;">
+        You have already attempted today's challenge. Please come back tomorrow.
+      </div>
+    </div>
+
+    <!-- Admin Panel (only visible in admin mode) -->
+    <div id="adminPanel" class="admin-panel" style="display:none;">
+      <h2>Admin / Testing Mode</h2>
+      <p>This mode is enabled via the query string (e.g., ?admin=1). It allows you to cycle through challenges instantly, reset progress, and view the current challenge level.</p>
+      <button id="nextChallengeButton">Next Challenge (Bypass 24-hour wait)</button>
+      <button id="resetProgressButton">Reset Progress</button>
+      <button id="viewLevelButton">View Current Level</button>
+    </div>
   </div>
-  
-  <!-- Game Area -->
-  <div id="gameContainer" style="display: none;">
-    <div id="score">Score: 0</div>
-    <div id="timer">Time: 60</div>
-  </div>
-  
-  <!-- Game Over Screen -->
-  <div id="gameOverScreen">
-    <h1 id="finalMessage"></h1>
-    <p>Your final score: <span id="finalScore"></span></p>
-    <button id="restartButton">Play Again</button>
-  </div>
-  
+
   <script>
-    // Game Variables
-    let score = 0;
-    let timeLeft = 60;
-    let gameInterval;
-    let expenseInterval;
-    let expenseSpeed = 1; // starting vertical speed (pixels per frame)
-    const gameContainer = document.getElementById("gameContainer");
-    const scoreDisplay = document.getElementById("score");
-    const timerDisplay = document.getElementById("timer");
-    const startScreen = document.getElementById("startScreen");
-    const gameOverScreen = document.getElementById("gameOverScreen");
-    const finalMessage = document.getElementById("finalMessage");
-    const finalScore = document.getElementById("finalScore");
-    const restartButton = document.getElementById("restartButton");
-    
-    // Expense Categories
-    const allowableExpenses = ["Office Supplies", "Client Lunch", "Software Subscription", "Conference Fees"];
-    const unallowableExpenses = ["Concert Tickets", "Spa Treatments", "Luxury Watch", "Golf Club Membership"];
-    
-    // Start Game Function
-    function startGame() {
-      score = 0;
-      timeLeft = 60;
-      expenseSpeed = 1;
-      scoreDisplay.textContent = "Score: " + score;
-      timerDisplay.textContent = "Time: " + timeLeft;
-      
-      // Clear any existing expenses
-      gameContainer.querySelectorAll(".expense").forEach(exp => exp.remove());
-      
-      startScreen.style.display = "none";
-      gameOverScreen.style.display = "none";
-      gameContainer.style.display = "block";
-      
-      // Timer countdown
-      gameInterval = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = "Time: " + timeLeft;
-        
-        // Gradually increase speed every 10 seconds
-        if (timeLeft % 10 === 0) {
-          expenseSpeed += 0.5;
-        }
-        
-        if (timeLeft <= 0) {
-          endGame();
-        }
-      }, 1000);
-      
-      // Generate expenses at random intervals (between 1-2 seconds)
-      expenseInterval = setInterval(() => {
-        generateExpense();
-      }, Math.random() * 1000 + 1000);
-      
-      // Begin animation loop
-      requestAnimationFrame(updateExpenses);
+    /***********************
+     * Data & Game Logic
+     ***********************/
+    // Sample challenges – progressively more difficult
+    // Each challenge object contains:
+    // - question: The text to display.
+    // - validate: A function to validate the user's answer.
+    // - points: Points awarded for a correct answer.
+    const challenges = [
+      {
+        question: "What is the formula for Net Income?",
+        // Validate if answer includes both 'revenue' and 'expense'
+        validate: function(answer) {
+          const normalized = answer.trim().toLowerCase();
+          return normalized.includes("revenue") && normalized.includes("expense");
+        },
+        points: 10
+      },
+      {
+        question: "Define Depreciation.",
+        // Check for keywords; a simple check for 'allocation' or 'expensing' over 'useful life'
+        validate: function(answer) {
+          const normalized = answer.trim().toLowerCase();
+          return normalized.includes("allocation") || normalized.includes("spread");
+        },
+        points: 15
+      },
+      {
+        question: "Calculate depreciation expense for an asset costing $1,000 with a 5-year life (straight-line method).",
+        validate: function(answer) {
+          // Expecting an answer of 200 (or $200)
+          const num = parseFloat(answer.replace(/[^0-9.]/g, ""));
+          return Math.abs(num - 200) < 0.001;
+        },
+        points: 20
+      },
+      {
+        question: "Solve: Assets = Liabilities + ?",
+        validate: function(answer) {
+          return answer.trim().toLowerCase() === "equity";
+        },
+        points: 25
+      },
+      {
+        question: "Record a journal entry for receiving $500 cash revenue. (Format: 'Debit Cash $500; Credit Revenue $500')",
+        validate: function(answer) {
+          const normalized = answer.trim().toLowerCase();
+          return normalized.includes("debit") && normalized.includes("cash") &&
+                 normalized.includes("credit") && normalized.includes("revenue");
+        },
+        points: 30
+      }
+    ];
+
+    // Local Storage Keys
+    const LS_EMAIL = "accountingGameEmail";
+    const LS_STREAK = "accountingGameStreak";
+    const LS_LEVEL = "accountingGameLevel";
+    const LS_POINTS = "accountingGamePoints";
+    const LS_LAST_DATE = "accountingGameLastChallengeDate";
+
+    // Helper: Get today's date string in YYYY-MM-DD format.
+    function getTodayDateString() {
+      const today = new Date();
+      return today.toISOString().split("T")[0];
     }
-    
-    // Create and add an expense element
-    function generateExpense() {
-      const expenseDiv = document.createElement("div");
-      expenseDiv.className = "expense";
-      
-      // Randomly decide if this is unallowable (fraudulent) or allowable
-      let isUnallowable = Math.random() < 0.5;
-      let label;
-      if (isUnallowable) {
-        label = unallowableExpenses[Math.floor(Math.random() * unallowableExpenses.length)];
+
+    // Helper: Get a value from local storage or a default.
+    function getLS(key, defaultValue) {
+      const value = localStorage.getItem(key);
+      return value !== null ? JSON.parse(value) : defaultValue;
+    }
+
+    // Helper: Set a value in local storage.
+    function setLS(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    // Check if Admin mode is active (by query string parameter "admin").
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdmin = urlParams.get("admin") === "1" || urlParams.get("admin") === "true";
+
+    /***********************
+     * DOM Elements
+     ***********************/
+    const loginSection = document.getElementById("loginSection");
+    const gameSection = document.getElementById("gameSection");
+    const adminPanel = document.getElementById("adminPanel");
+    const emailInput = document.getElementById("emailInput");
+    const loginButton = document.getElementById("loginButton");
+    const userEmailDisplay = document.getElementById("userEmail");
+    const streakCountDisplay = document.getElementById("streakCount");
+    const pointsCountDisplay = document.getElementById("pointsCount");
+    const challengeQuestionDisplay = document.getElementById("challengeQuestion");
+    const challengeHintDisplay = document.getElementById("challengeHint");
+    const answerInput = document.getElementById("answerInput");
+    const submitAnswerButton = document.getElementById("submitAnswerButton");
+    const feedbackDisplay = document.getElementById("feedback");
+    const alreadyAttemptedDisplay = document.getElementById("alreadyAttempted");
+
+    // Admin buttons
+    const nextChallengeButton = document.getElementById("nextChallengeButton");
+    const resetProgressButton = document.getElementById("resetProgressButton");
+    const viewLevelButton = document.getElementById("viewLevelButton");
+
+    /***********************
+     * Initialization
+     ***********************/
+    document.addEventListener("DOMContentLoaded", function() {
+      // If admin mode is active, show the admin panel.
+      if (isAdmin) {
+        adminPanel.style.display = "block";
+      }
+      // Check if user is already logged in (via localStorage)
+      const savedEmail = localStorage.getItem(LS_EMAIL);
+      if (savedEmail) {
+        showGameInterface();
+      }
+    });
+
+    /***********************
+     * Event Listeners
+     ***********************/
+    // Login button: Save email and initialize game data if needed.
+    loginButton.addEventListener("click", function() {
+      const email = emailInput.value.trim();
+      if (email === "") {
+        alert("Please enter your email.");
+        return;
+      }
+      // Save email to localStorage.
+      setLS(LS_EMAIL, email);
+      // Initialize game data if not already present.
+      if (localStorage.getItem(LS_STREAK) === null) setLS(LS_STREAK, 0);
+      if (localStorage.getItem(LS_LEVEL) === null) setLS(LS_LEVEL, 0);
+      if (localStorage.getItem(LS_POINTS) === null) setLS(LS_POINTS, 0);
+      showGameInterface();
+    });
+
+    // Submit answer button: Check answer and update progress.
+    submitAnswerButton.addEventListener("click", function() {
+      // Prevent multiple submissions if already attempted today (unless admin mode)
+      if (!isChallengeAvailable() && !isAdmin) return;
+      const userAnswer = answerInput.value;
+      if (userAnswer.trim() === "") {
+        alert("Please provide an answer.");
+        return;
+      }
+      const currentChallenge = getCurrentChallenge();
+      const correct = currentChallenge.validate(userAnswer);
+      // Update streak regardless of correctness
+      let currentStreak = getLS(LS_STREAK, 0);
+      currentStreak++;
+      setLS(LS_STREAK, currentStreak);
+      // Update last challenge date to today so user cannot replay until next day (unless admin)
+      setLS(LS_LAST_DATE, getTodayDateString());
+      // Disable further input for today.
+      answerInput.disabled = true;
+      submitAnswerButton.disabled = true;
+
+      if (correct) {
+        // Award points and progress level
+        let points = getLS(LS_POINTS, 0);
+        points += currentChallenge.points;
+        setLS(LS_POINTS, points);
+        // Increment difficulty level
+        let currentLevel = getLS(LS_LEVEL, 0);
+        currentLevel++;
+        setLS(LS_LEVEL, currentLevel);
+        feedbackDisplay.textContent = "Correct! +" + currentChallenge.points + " points.";
       } else {
-        label = allowableExpenses[Math.floor(Math.random() * allowableExpenses.length)];
+        // For incorrect answers, streak increases but level remains same.
+        feedbackDisplay.textContent = "Incorrect. Try again tomorrow. (Correct answer criteria not met.)";
       }
-      expenseDiv.textContent = label;
-      expenseDiv.dataset.unallowable = isUnallowable;
-      
-      // Set random horizontal position
-      const containerWidth = gameContainer.offsetWidth;
-      const x = Math.random() * (containerWidth - 100);
-      expenseDiv.style.left = x + "px";
-      
-      // Position at the bottom of the container
-      expenseDiv.style.top = gameContainer.offsetHeight + "px";
-      
-      // Random background color for variety
-      expenseDiv.style.backgroundColor = getRandomColor();
-      
-      // Click event for expense elimination
-      expenseDiv.addEventListener("click", function() {
-        if (this.dataset.unallowable === "true") {
-          // Correct click on fraudulent expense
-          score += 10;
-          this.remove();
-        } else {
-          // Incorrect click on an allowable expense
-          score -= 15;
-          flashError();
-        }
-        scoreDisplay.textContent = "Score: " + score;
-      });
-      
-      gameContainer.appendChild(expenseDiv);
-    }
-    
-    // Update positions of expense elements (simple upward movement)
-    function updateExpenses() {
-      const expenses = gameContainer.querySelectorAll(".expense");
-      expenses.forEach(exp => {
-        let currentTop = parseFloat(exp.style.top);
-        exp.style.top = (currentTop - expenseSpeed) + "px";
-        
-        // Remove expense if it moves off the top of the screen
-        if (currentTop < -50) {
-          exp.remove();
-        }
-      });
-      if (timeLeft > 0) {
-        requestAnimationFrame(updateExpenses);
+      updateStats();
+    });
+
+    // Admin: Next Challenge button – bypass daily waiting.
+    nextChallengeButton.addEventListener("click", function() {
+      // Reset last challenge date so that the challenge becomes available.
+      setLS(LS_LAST_DATE, "");
+      // Re-enable input fields
+      answerInput.disabled = false;
+      submitAnswerButton.disabled = false;
+      feedbackDisplay.textContent = "";
+      answerInput.value = "";
+      // Reload the current challenge (if the level was advanced, the new challenge will show)
+      loadChallenge();
+    });
+
+    // Admin: Reset Progress button – clears streak, level, and points.
+    resetProgressButton.addEventListener("click", function() {
+      if (confirm("Are you sure you want to reset progress?")) {
+        setLS(LS_STREAK, 0);
+        setLS(LS_LEVEL, 0);
+        setLS(LS_POINTS, 0);
+        setLS(LS_LAST_DATE, "");
+        updateStats();
+        loadChallenge();
+        answerInput.disabled = false;
+        submitAnswerButton.disabled = false;
+        feedbackDisplay.textContent = "";
+        answerInput.value = "";
       }
+    });
+
+    // Admin: View Current Level button – shows an alert with the current challenge number.
+    viewLevelButton.addEventListener("click", function() {
+      const currentLevel = getLS(LS_LEVEL, 0);
+      alert("Current Challenge Level: " + (Math.min(currentLevel, challenges.length - 1) + 1));
+    });
+
+    /***********************
+     * Functions
+     ***********************/
+    // Show the main game interface after login.
+    function showGameInterface() {
+      loginSection.style.display = "none";
+      gameSection.style.display = "block";
+      userEmailDisplay.textContent = localStorage.getItem(LS_EMAIL);
+      updateStats();
+      loadChallenge();
     }
-    
-    // Brief flash to indicate error on wrong click
-    function flashError() {
-      const originalColor = document.body.style.backgroundColor;
-      document.body.style.backgroundColor = "red";
-      setTimeout(() => {
-        document.body.style.backgroundColor = originalColor;
-      }, 100);
+
+    // Update the displayed streak and points.
+    function updateStats() {
+      streakCountDisplay.textContent = getLS(LS_STREAK, 0);
+      pointsCountDisplay.textContent = getLS(LS_POINTS, 0);
     }
-    
-    // End game and display results
-    function endGame() {
-      clearInterval(gameInterval);
-      clearInterval(expenseInterval);
-      
-      // Remove any remaining expenses
-      gameContainer.querySelectorAll(".expense").forEach(exp => exp.remove());
-      gameContainer.style.display = "none";
-      
-      finalScore.textContent = score;
-      // Display a fun message based on final score
-      if (score >= 100) {
-        finalMessage.textContent = "Audit Superstar!";
-      } else if (score >= 0) {
-        finalMessage.textContent = "Balanced Books, But There's Room for Improvement!";
+
+    // Get the current challenge object based on the user's level.
+    function getCurrentChallenge() {
+      let currentLevel = getLS(LS_LEVEL, 0);
+      // Use the final challenge if user level exceeds available challenges.
+      let index = Math.min(currentLevel, challenges.length - 1);
+      return challenges[index];
+    }
+
+    // Load the current challenge.
+    function loadChallenge() {
+      const currentChallenge = getCurrentChallenge();
+      challengeQuestionDisplay.textContent = currentChallenge.question;
+      // Clear any hint (if you want to add hints later, you can set challengeHintDisplay.textContent)
+      challengeHintDisplay.style.display = "none";
+      // Reset answer input and button state if challenge is available.
+      if (isChallengeAvailable() || isAdmin) {
+        answerInput.disabled = false;
+        submitAnswerButton.disabled = false;
+        alreadyAttemptedDisplay.style.display = "none";
       } else {
-        finalMessage.textContent = "Time for a Tax Review!";
+        // If today's challenge already attempted, disable input and show message.
+        answerInput.disabled = true;
+        submitAnswerButton.disabled = true;
+        alreadyAttemptedDisplay.style.display = "block";
       }
-      
-      gameOverScreen.style.display = "block";
+      // Clear previous answer and feedback.
+      answerInput.value = "";
+      feedbackDisplay.textContent = "";
     }
-    
-    // Helper function to generate a random color
-    function getRandomColor() {
-      const letters = '89ABCDEF';
-      let color = '#';
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * letters.length)];
-      }
-      return color;
+
+    // Check if the challenge is available for today (based on last challenge date).
+    function isChallengeAvailable() {
+      const lastDate = getLS(LS_LAST_DATE, "");
+      return lastDate !== getTodayDateString();
     }
-    
-    // Event Listeners for starting and restarting the game
-    document.getElementById("startButton").addEventListener("click", startGame);
-    restartButton.addEventListener("click", startGame);
   </script>
 </body>
 </html>
