@@ -29,6 +29,13 @@
         debug: true,
       });
 
+      // If you want to use named layers like "bg", "obj", "ui", define them first:
+      layers([
+        "bg",   // background layer
+        "obj",  // default objects layer
+        "ui",   // user-interface layer
+      ], "obj");
+
       /************************************************************
        * Load Sprites (All images are embedded as inline SVG/Base64)
        ************************************************************/
@@ -46,7 +53,6 @@
       loadSprite("boi", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjODg4ODg4Ii8+PHRleHQgeD0iMTYiIHk9IjIxIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZGRkZGIj5CT0k8L3RleHQ+PC9zdmc+");
       // Flagpole sprite (finish line marker)
       loadSprite("flagpole", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSI2NCI+PHJlY3QgeD0iNiIgeT0iMTAiIHdpZHRoPSI0IiBoZWlnaHQ9IjU0IiBmaWxsPSIjNTU1NTU1Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxMCAxNiwxOCAxMCwyNiIgZmlsbD0iI0YwMDAwMCIvPjwvc3ZnPg==");
-      // Office-themed platform sprites:
       // Desk platform
       loadSprite("desk", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIxNiI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjE2IiBmaWxsPSIjYTA1MjJkIi8+PC9zdmc+");
       // Cabinet platform
@@ -64,7 +70,6 @@
 
       /************************************************************
        * Helper Function: Spawn Monster
-       * Spawns a monster with a given type, position, and direction.
        ************************************************************/
       function spawnMonster(type, pos, dir = 1) {
         return add([
@@ -76,12 +81,12 @@
           {
             update() {
               this.move(this.dir * this.speed, 0);
-              // Reverse direction when reaching level bounds
+              // Reverse direction when out of bounds
               if (this.pos.x < 0 || this.pos.x > 2000) {
                 this.dir = -this.dir;
               }
-            }
-          }
+            },
+          },
         ]);
       }
 
@@ -89,13 +94,13 @@
        * Main Game Scene
        ************************************************************/
       scene("game", () => {
-        // Reset globals for a new game attempt
+        // Reset globals
         monstersDefeated = 0;
         startTime = time();
         lastFireTime = 0;
         boiActive = true;
 
-        // Office-style background
+        // Office-style background (put it on layer "bg")
         add([
           rect(2000, 400),
           pos(0, 0),
@@ -112,7 +117,7 @@
           color(100, 100, 100),
         ]);
 
-        // Flagpole at the finish line
+        // Flagpole at the end
         add([
           sprite("flagpole"),
           pos(1950, 316),
@@ -120,7 +125,7 @@
           "flag",
         ]);
 
-        // Add the player character
+        // Player
         const player = add([
           sprite("player"),
           pos(50, 300),
@@ -130,9 +135,7 @@
         ]);
         player.direction = 1;
 
-        /************************************************************
-         * Player Movement & Fireball Mechanics
-         ************************************************************/
+        // Movement
         keyDown("left", () => {
           player.move(-120, 0);
           player.direction = -1;
@@ -146,10 +149,10 @@
             player.jump(300);
           }
         });
+        // Fireball
         keyPress("space", () => {
           if (time() - lastFireTime > 1) {
             lastFireTime = time();
-            // Create a fireball as a small red circle moving in player's facing direction
             add([
               circle(5),
               pos(player.pos),
@@ -160,20 +163,16 @@
               {
                 update() {
                   this.move(this.dir * 200, 0);
-                  // Remove fireball if it travels too far (~half screen width)
                   if (Math.abs(this.pos.x - player.pos.x) > 400) {
                     destroy(this);
                   }
-                }
-              }
+                },
+              },
             ]);
           }
         });
 
-        /************************************************************
-         * Create Office-themed Platforms
-         ************************************************************/
-        // Desk platforms
+        // Platforms
         for (let i = 0; i < 5; i++) {
           add([
             sprite("desk"),
@@ -182,7 +181,6 @@
             solid(),
           ]);
         }
-        // Cabinet platforms
         for (let i = 0; i < 3; i++) {
           add([
             sprite("cabinet"),
@@ -191,7 +189,6 @@
             solid(),
           ]);
         }
-        // Cubicle platforms
         for (let i = 0; i < 2; i++) {
           add([
             sprite("cubicle"),
@@ -201,19 +198,14 @@
           ]);
         }
 
-        /************************************************************
-         * Spawn Monsters
-         ************************************************************/
+        // Spawn monsters
         spawnMonster("doge", vec2(300, 280), 1);
         spawnMonster("angry", vec2(500, 280), -1);
         spawnMonster("paper", vec2(800, 280), 1);
         spawnMonster("mercedes", vec2(1100, 280), -1);
         let boi = spawnMonster("boi", vec2(1400, 280), 1);
 
-        /************************************************************
-         * Monster & Collision Interactions
-         ************************************************************/
-        // Fireball hits monster
+        // Fireball vs. Monster
         collides("fireball", "monster", (fire, monster) => {
           destroy(fire);
           add([
@@ -232,9 +224,9 @@
           monstersDefeated += 1;
         });
 
-        // Player collides with monster
+        // Player vs. Monster
         player.collides("monster", (monster) => {
-          // If player is coming from above, defeat the monster
+          // Stomp from above
           if (player.pos.y < monster.pos.y) {
             player.jump(150);
             add([
@@ -252,14 +244,12 @@
             destroy(monster);
             monstersDefeated += 1;
           } else {
-            // Collision from the side causes game over (one life per attempt)
+            // Game over if hit from the side
             go("gameover", { score: 0 });
           }
         });
 
-        /************************************************************
-         * Checkpoint Triggers (Motivational Messages)
-         ************************************************************/
+        // Checkpoints
         let checkpoint1 = false;
         let checkpoint2 = false;
         let checkpoint3 = false;
@@ -290,19 +280,19 @@
           }
         });
 
-        /************************************************************
-         * Level Completion: Flagpole Collision
-         ************************************************************/
+        // Reaching the flagpole
         player.collides("flag", () => {
           const timeTaken = time() - startTime;
-          // Calculate score: faster time and more monsters defeated yield higher points
-          const score = Math.max(0, Math.floor((1000 - timeTaken * 10) + (monstersDefeated * 100)));
+          const score = Math.max(
+            0,
+            Math.floor((1000 - timeTaken * 10) + (monstersDefeated * 100))
+          );
           go("finish", { score: score, time: timeTaken, monsters: monstersDefeated });
         });
       });
 
       /************************************************************
-       * Finish Scene: Display Final Score & Social Sharing
+       * Finish Scene
        ************************************************************/
       scene("finish", ({ score, time, monsters }) => {
         add([
@@ -322,36 +312,36 @@
           pos(300, 170),
         ]);
 
-        // Create Share Score button
+        // Share button
         const shareBtn = add([
           rect(150, 40),
           pos(300, 220),
           area(),
           color(100, 200, 100),
-          "shareBtn"
+          "shareBtn",
         ]);
         add([
           text("Share Score", 16),
           pos(320, 230),
         ]);
 
-        // Create Leaderboard button
+        // Leaderboard button
         const lbBtn = add([
           rect(150, 40),
           pos(300, 280),
           area(),
           color(200, 200, 100),
-          "lbBtn"
+          "lbBtn",
         ]);
         add([
           text("Leaderboard", 16),
           pos(320, 290),
         ]);
 
-        // Global mouse click event for buttons in this scene
+        // Handle clicks
         mouseClick(() => {
           if (shareBtn.isHovering()) {
-            const shareText = "I scored " + score + " points in Office Adventure Game! Can you beat me?";
+            const shareText = `I scored ${score} points in Office Adventure Game! Can you beat me?`;
             navigator.clipboard.writeText(shareText);
             alert("Score copied to clipboard!");
           }
@@ -360,10 +350,15 @@
           }
         });
 
-        // Save the score to the local leaderboard
+        // Save score locally
         const playerName = prompt("Enter your name for the leaderboard:", "Player");
         let leaderboard = JSON.parse(localStorage.getItem("officeLeaderboard") || "[]");
-        leaderboard.push({ name: playerName, score: score, timestamp: new Date().toLocaleString() });
+        leaderboard.push({ 
+          name: playerName, 
+          score: score, 
+          timestamp: new Date().toLocaleString() 
+        });
+        // Sort & keep top 10
         leaderboard.sort((a, b) => b.score - a.score);
         leaderboard = leaderboard.slice(0, 10);
         localStorage.setItem("officeLeaderboard", JSON.stringify(leaderboard));
@@ -372,14 +367,13 @@
           text("Press Enter to restart", 16),
           pos(300, 340),
         ]);
-
         keyPress("enter", () => {
           go("game");
         });
       });
 
       /************************************************************
-       * Leaderboard Scene: Display Top 10 Scores from localStorage
+       * Leaderboard Scene
        ************************************************************/
       scene("leaderboard", () => {
         add([
@@ -390,14 +384,7 @@
         for (let i = 0; i < leaderboard.length; i++) {
           add([
             text(
-              (i + 1) +
-              ". " +
-              leaderboard[i].name +
-              " - " +
-              leaderboard[i].score +
-              " (" +
-              leaderboard[i].timestamp +
-              ")",
+              `${i + 1}. ${leaderboard[i].name} - ${leaderboard[i].score} (${leaderboard[i].timestamp})`,
               16
             ),
             pos(100, 60 + i * 30),
@@ -413,7 +400,7 @@
       });
 
       /************************************************************
-       * Game Over Scene: Restart After a Failed Attempt
+       * Game Over Scene
        ************************************************************/
       scene("gameover", ({ score }) => {
         add([
@@ -430,7 +417,7 @@
       });
 
       /************************************************************
-       * Start the Game (Initial Scene)
+       * Start the Game
        ************************************************************/
       go("game");
     </script>
