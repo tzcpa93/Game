@@ -11,7 +11,7 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background: #d0d0f0; /* A light background to complement our office theme */
+        background: #d0d0f0; /* Light background to suit our office theme */
       }
     </style>
   </head>
@@ -32,52 +32,39 @@
       /************************************************************
        * Load Sprites (All images are embedded as inline SVG/Base64)
        ************************************************************/
-
       // Player sprite: Inspired by the classic AIM yellow running-man icon
-      loadSprite("player", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjZmYwIi8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxMCIgcj0iNCIgZmlsbD0iIzAwMCIvPjxyZWN0IHg9IjEyIiB5PSIxNCIgd2lkdGg9IjgiIGhlaWdodD0iMTAiIGZpbGw9IiMwMDAiLz48L3N2Zz4=");
-
-      // DOGE monster sprite (a playful Shiba Inu face)
+      loadSprite("player", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjRkZGWTAwIi8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxMCIgcj0iNCIgZmlsbD0iIzAwMCIvPjxyZWN0IHg9IjEyIiB5PSIxNCIgd2lkdGg9IjgiIGhlaWdodD0iMTAiIGZpbGw9IiMwMDAiLz48L3N2Zz4=");
+      // DOGE monster sprite
       loadSprite("doge", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNmMGM0MTkiLz48PGNpcmNsZSBjeD0iMTIiIGN5PSIxNCIgcj0iMiIgZmlsbD0iIzAwMCIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMTQiIHI9IjIiIGZpbGw9IiMwMDAiLz48cGF0aCBkPSJNMTAsMjAgUTE2LDI2IDIyLDIwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==");
-
-      // Angry Client monster sprite (an angry, grumpy face)
+      // Angry Client monster sprite (grumpy face)
       loadSprite("angry", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNlNzRjM2MiLz48PGxpbmUgeDE9IjEwIiB5MT0iMTIiIHgyPSIxNCIgeTI9IjE2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSIyMiIgeTE9IjEyIiB4Mj0iMTgiIHkyPSIxNiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMTIsMjAgUTE2LDI0IDIwLDIwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==");
-
-      // Paper monster sprite (animated fluttering paper document)
-      loadSprite("paper", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3QgeD0iNiIgeT0iNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjI0IiBmaWxsPSIjZmZmIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSI4IiB5MT0iMTAiIHgyPSIyNCIgeTI9IjEwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTQiIHgyPSIyNCIgeTI9IjE0IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTgiIHgyPSIyNCIgeTI9IjE4IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==");
-
+      // Paper monster sprite (fluttering document)
+      loadSprite("paper", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3QgeD0iNiIgeT0iNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjI0IiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSI4IiB5MT0iMTAiIHgyPSIyNCIgeTI9IjEwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTQiIHgyPSIyNCIgeTI9IjE0IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjxsaW5lIHgxPSI4IiB5MT0iMTgiIHgyPSIyNCIgeTI9IjE4IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==");
       // Mercedes monster sprite (spinning logo style)
-      loadSprite("mercedes", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNjY2MiLz48cGF0aCBkPSJNMTYsNCBMMjAsMTYgTDE2LDI4IEwxMiwxNiBaIiBmaWxsPSIjMDAwIi8+PC9zdmc+");
-
-      // BOI monster sprite (a block labeled "BOI")
-      loadSprite("boi", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjODg4Ii8+PHRleHQgeD0iMTYiIHk9IjIxIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIj5CT0k8L3RleHQ+PC9zdmc+");
-
-      // Flagpole sprite (marks the finish line)
-      loadSprite("flagpole", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSI2NCI+PHJlY3QgeD0iNiIgeT0iMTAiIHdpZHRoPSI0IiBoZWlnaHQ9IjU0IiBmaWxsPSIjNTU1Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxMCAxNiwxOCAxMCwyNiIgZmlsbD0iI2YwMCIvPjwvc3ZnPg==");
-
-      // Office-themed platform sprites
-
-      // Desk platform: looks like an office desk
+      loadSprite("mercedes", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiNDQ0NDQ0MiLz48cGF0aCBkPSJNMTYsNCAyMCwxNiBMMTYsMjggTDEyLDE2IFoiIGZpbGw9IiMwMDAiLz48L3N2Zz4=");
+      // BOI monster sprite (block labeled "BOI")
+      loadSprite("boi", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjODg4ODg4Ii8+PHRleHQgeD0iMTYiIHk9IjIxIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZGRkZGIj5CT0k8L3RleHQ+PC9zdmc+");
+      // Flagpole sprite (finish line marker)
+      loadSprite("flagpole", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSI2NCI+PHJlY3QgeD0iNiIgeT0iMTAiIHdpZHRoPSI0IiBoZWlnaHQ9IjU0IiBmaWxsPSIjNTU1NTU1Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxMCAxNiwxOCAxMCwyNiIgZmlsbD0iI0YwMDAwMCIvPjwvc3ZnPg==");
+      // Office-themed platform sprites:
+      // Desk platform
       loadSprite("desk", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIxNiI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjE2IiBmaWxsPSIjYTA1MjJkIi8+PC9zdmc+");
-
-      // Cabinet platform: resembles a filing cabinet
+      // Cabinet platform
       loadSprite("cabinet", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjOGI0NTEzIi8+PGxpbmUgeDE9IjAiIHkxPSIxNiIgeDI9IjMyIiB5Mj0iMTYiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+");
-
-      // Cubicle platform: represents an office cubicle
+      // Cubicle platform
       loadSprite("cubicle", "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCI+PHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjZDNkM2QzIi8+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==");
 
       /************************************************************
        * Global Game Variables
        ************************************************************/
-      let monstersDefeated = 0; // Count of defeated monsters
-      let startTime = 0;        // Timestamp for level start
-      let lastFireTime = 0;     // To limit fireball frequency
-      let boiActive = true;     // Tracks if the BOI monster is active
+      let monstersDefeated = 0;
+      let startTime = 0;
+      let lastFireTime = 0;
+      let boiActive = true;
 
       /************************************************************
        * Helper Function: Spawn Monster
-       * type: sprite id ("doge", "angry", "paper", "mercedes", "boi")
-       * pos: starting position (vec2)
-       * dir: initial horizontal direction (1 for right, -1 for left)
+       * Spawns a monster with a given type, position, and direction.
        ************************************************************/
       function spawnMonster(type, pos, dir = 1) {
         return add([
@@ -85,14 +72,11 @@
           pos(pos),
           area(),
           "monster",
-          { dir: dir },
-          // Set horizontal speed
-          { speed: 30 },
+          { monsterType: type, dir: dir, speed: 30 },
           {
             update() {
-              // Move horizontally at constant speed
               this.move(this.dir * this.speed, 0);
-              // Reverse direction if out of level bounds
+              // Reverse direction when reaching level bounds
               if (this.pos.x < 0 || this.pos.x > 2000) {
                 this.dir = -this.dir;
               }
@@ -105,13 +89,13 @@
        * Main Game Scene
        ************************************************************/
       scene("game", () => {
-        // Reset global variables for a new game attempt
+        // Reset globals for a new game attempt
         monstersDefeated = 0;
         startTime = time();
         lastFireTime = 0;
         boiActive = true;
 
-        // Add a large background (office-like plain backdrop)
+        // Office-style background
         add([
           rect(2000, 400),
           pos(0, 0),
@@ -119,7 +103,7 @@
           layer("bg"),
         ]);
 
-        // Add the ground (an invisible collider for the player to stand on)
+        // Ground collider
         add([
           rect(2000, 20),
           pos(0, 380),
@@ -128,12 +112,11 @@
           color(100, 100, 100),
         ]);
 
-        // Add the flagpole at the end of the level (finish line)
-        const flagpole = add([
+        // Flagpole at the finish line
+        add([
           sprite("flagpole"),
-          pos(1950, 380 - 64),
+          pos(1950, 316),
           area(),
-          scale(1),
           "flag",
         ]);
 
@@ -145,11 +128,10 @@
           body(),
           origin("center"),
         ]);
-        // Track player facing direction: 1 = right, -1 = left
         player.direction = 1;
 
         /************************************************************
-         * Player Controls & Fireball Mechanics
+         * Player Movement & Fireball Mechanics
          ************************************************************/
         keyDown("left", () => {
           player.move(-120, 0);
@@ -164,12 +146,11 @@
             player.jump(300);
           }
         });
-        // Spacebar fires a fireball (limited to one per second)
         keyPress("space", () => {
           if (time() - lastFireTime > 1) {
             lastFireTime = time();
-            // Create a fireball as a small red circle
-            const fireball = add([
+            // Create a fireball as a small red circle moving in player's facing direction
+            add([
               circle(5),
               pos(player.pos),
               area(),
@@ -221,29 +202,26 @@
         }
 
         /************************************************************
-         * Spawn Monsters Throughout the Level
+         * Spawn Monsters
          ************************************************************/
         spawnMonster("doge", vec2(300, 280), 1);
         spawnMonster("angry", vec2(500, 280), -1);
         spawnMonster("paper", vec2(800, 280), 1);
         spawnMonster("mercedes", vec2(1100, 280), -1);
-        // Spawn BOI monster (special: respawns 30s after defeat)
         let boi = spawnMonster("boi", vec2(1400, 280), 1);
 
         /************************************************************
-         * Monster Interactions & Collisions
+         * Monster & Collision Interactions
          ************************************************************/
-        // When a fireball collides with a monster
+        // Fireball hits monster
         collides("fireball", "monster", (fire, monster) => {
           destroy(fire);
-          // Simulate a dust/disappearance effect with a brief particle text
           add([
             text("💥", 16),
             pos(monster.pos),
             lifespan(0.5, { fade: 2 }),
           ]);
-          // Special rule for BOI: schedule a respawn 30 seconds later
-          if (monster.sprite === "boi") {
+          if (monster.monsterType === "boi") {
             boiActive = false;
             wait(30, () => {
               boiActive = true;
@@ -254,17 +232,17 @@
           monstersDefeated += 1;
         });
 
-        // When the player collides with a monster
+        // Player collides with monster
         player.collides("monster", (monster) => {
-          // Check if player is coming from above (stomping the monster)
+          // If player is coming from above, defeat the monster
           if (player.pos.y < monster.pos.y) {
-            player.jump(150); // bounce effect
+            player.jump(150);
             add([
               text("💥", 16),
               pos(monster.pos),
               lifespan(0.5, { fade: 2 }),
             ]);
-            if (monster.sprite === "boi") {
+            if (monster.monsterType === "boi") {
               boiActive = false;
               wait(30, () => {
                 boiActive = true;
@@ -274,14 +252,13 @@
             destroy(monster);
             monstersDefeated += 1;
           } else {
-            // Collision from the side causes a game over (one life per attempt)
+            // Collision from the side causes game over (one life per attempt)
             go("gameover", { score: 0 });
           }
         });
 
         /************************************************************
          * Checkpoint Triggers (Motivational Messages)
-         * Three checkpoints: Easy, Moderate, Hard.
          ************************************************************/
         let checkpoint1 = false;
         let checkpoint2 = false;
@@ -314,7 +291,7 @@
         });
 
         /************************************************************
-         * Level Completion: Reaching the Flagpole
+         * Level Completion: Flagpole Collision
          ************************************************************/
         player.collides("flag", () => {
           const timeTaken = time() - startTime;
@@ -345,26 +322,45 @@
           pos(300, 170),
         ]);
 
-        // "Share Score" button (click to copy a shareable message)
+        // Create Share Score button
         const shareBtn = add([
           rect(150, 40),
           pos(300, 220),
           area(),
           color(100, 200, 100),
+          "shareBtn"
         ]);
         add([
           text("Share Score", 16),
           pos(320, 230),
         ]);
-        shareBtn.action(() => {
-          if (mouseIsPressed()) {
+
+        // Create Leaderboard button
+        const lbBtn = add([
+          rect(150, 40),
+          pos(300, 280),
+          area(),
+          color(200, 200, 100),
+          "lbBtn"
+        ]);
+        add([
+          text("Leaderboard", 16),
+          pos(320, 290),
+        ]);
+
+        // Global mouse click event for buttons in this scene
+        mouseClick(() => {
+          if (shareBtn.isHovering()) {
             const shareText = "I scored " + score + " points in Office Adventure Game! Can you beat me?";
             navigator.clipboard.writeText(shareText);
             alert("Score copied to clipboard!");
           }
-        ]);
+          if (lbBtn.isHovering()) {
+            go("leaderboard");
+          }
+        });
 
-        // Save the score to a local leaderboard
+        // Save the score to the local leaderboard
         const playerName = prompt("Enter your name for the leaderboard:", "Player");
         let leaderboard = JSON.parse(localStorage.getItem("officeLeaderboard") || "[]");
         leaderboard.push({ name: playerName, score: score, timestamp: new Date().toLocaleString() });
@@ -372,24 +368,11 @@
         leaderboard = leaderboard.slice(0, 10);
         localStorage.setItem("officeLeaderboard", JSON.stringify(leaderboard));
 
-        // Button to view the leaderboard
-        const lbBtn = add([
-          rect(150, 40),
-          pos(300, 280),
-          area(),
-          color(200, 200, 100),
-        ]);
         add([
-          text("Leaderboard", 16),
-          pos(320, 290),
-        ]);
-        lbBtn.action(() => {
-          if (mouseIsPressed()) {
-            go("leaderboard");
-          }
+          text("Press Enter to restart", 16),
+          pos(300, 340),
         ]);
 
-        // Allow restarting the game with the Enter key
         keyPress("enter", () => {
           go("game");
         });
@@ -408,13 +391,13 @@
           add([
             text(
               (i + 1) +
-                ". " +
-                leaderboard[i].name +
-                " - " +
-                leaderboard[i].score +
-                " (" +
-                leaderboard[i].timestamp +
-                ")",
+              ". " +
+              leaderboard[i].name +
+              " - " +
+              leaderboard[i].score +
+              " (" +
+              leaderboard[i].timestamp +
+              ")",
               16
             ),
             pos(100, 60 + i * 30),
