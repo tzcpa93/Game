@@ -1,352 +1,553 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Office Runner</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
-        #gameCanvas {
-            width: 800px;
-            height: 400px;
-            border: 2px solid #333;
-            margin: 20px auto;
-            display: block;
-            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2U2ZTVkMCIvPgogIDxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iMTAwIiB5PSIzMDAiIGZpbGw9IiNiM2IzYjMiLz4KICA8cmVjdCB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHg9IjEwMCIgeT0iMjUwIiBmaWxsPSIjZGRkIi8+CiAgPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiB4PSIzMDAiIHk9IjI1MCIgZmlsbD0iI2RkZCIvPgogIDxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgeD0iNTAwIiB5PSIyNTAiIGZpbGw9IiNkZGQiLz4KPC9zdmc+') no-repeat;
-        }
-        #endScreen {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            display: none;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>Office Platformer</title>
+  <style>
+    /* General page styling */
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #c0c0c0; /* Office gray */
+      font-family: sans-serif;
+    }
+    /* Canvas for game */
+    #gameCanvas {
+      display: block;
+      background: #a0a0a0; /* Office floor/background color */
+    }
+    /* Overlay for game over / complete screens */
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 800px;
+      height: 600px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    #overlay.hidden { display: none; }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .leaderboard {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <div id="endScreen">
-        <h2>Game Over!</h2>
-        <p id="finalScore"></p>
-        <input id="playerName" placeholder="Enter your name" maxlength="10">
-        <button onclick="saveScore()">Save Score</button>
-        <button onclick="shareScore()">Share</button>
-        <h3>Leaderboard</h3>
-        <ul id="leaderboard"></ul>
-        <button onclick="restartGame()">Play Again</button>
-    </div>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <div id="overlay" class="hidden"></div>
+  <script>
+    /* -------- Global Variables & Asset Definitions -------- */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const overlay = document.getElementById('overlay');
+    const CANVAS_WIDTH = canvas.width;
+    const CANVAS_HEIGHT = canvas.height;
+    const LEVEL_WIDTH = 3000;  // total horizontal length of the level
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 800;
-        canvas.height = 400;
+    // Input keys
+    const keys = { left: false, right: false, up: false, space: false };
 
-        // Game state
-        let player, platforms, monsters, fireballs, score, startTime, checkpoint;
-        const gravity = 0.5;
-        const friction = 0.9;
-        let gameOver = false;
+    // Gravity and physics settings
+    const GRAVITY = 0.6;
+    const FRICTION = 0.8;
+    const MOVE_SPEED = 3;
+    const JUMP_POWER = 12;
 
-        // Player object
-        class Player {
-            constructor() {
-                this.x = 50;
-                this.y = 300;
-                this.width = 30;
-                this.height = 40;
-                this.dx = 0;
-                this.dy = 0;
-                this.speed = 4;
-                this.jumpPower = -12;
-                this.facingRight = true;
-                this.lastFireball = 0;
-            }
-            draw() {
-                ctx.fillStyle = '#ffcc00';
-                ctx.beginPath();
-                ctx.arc(this.x + 15, this.y + 10, 10, 0, Math.PI * 2); // Head
-                ctx.fill();
-                ctx.fillRect(this.x + 10, this.y + 20, 10, 20); // Body
-                ctx.fillRect(this.x + 5, this.y + 40, 5, 10); // Left leg
-                ctx.fillRect(this.x + 20, this.y + 40, 5, 10); // Right leg
-                ctx.fillRect(this.x + (this.facingRight ? 20 : 5), this.y + 25, 10, 5); // Arm
-            }
-            update() {
-                this.dy += gravity;
-                this.x += this.dx;
-                this.y += this.dy;
-                this.dx *= friction;
+    // Timing fireball (1 per second)
+    let lastFireballTime = 0;
+    const FIREBALL_COOLDOWN = 1000; // ms
 
-                if (this.y + this.height > canvas.height) {
-                    this.y = canvas.height - this.height;
-                    this.dy = 0;
-                }
-                if (this.x < 0) this.x = 0;
-                if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
+    // Game state variables
+    let gameState = "playing"; // "playing", "gameover", "complete"
+    let startTime = Date.now();
+    let monstersDefeated = 0;
+    let finalScore = 0;
 
-                platforms.forEach(p => {
-                    if (this.dy > 0 && this.y + this.height <= p.y + p.height && this.y + this.height + this.dy >= p.y &&
-                        this.x + this.width > p.x && this.x < p.x + p.width) {
-                        this.y = p.y - this.height;
-                        this.dy = 0;
-                    }
-                });
-            }
-        }
+    // Preload assets (embedded as inline base64 SVG images)
+    const assets = {
+      // Two frames for the AIM-style yellow running man
+      playerFrames: [],
+      // Monsters
+      doge: new Image(),
+      angry: new Image(),
+      paper: new Image(),
+      mercedes: new Image(),
+      boi: new Image(),
+      // Dust effect
+      dust: new Image()
+    };
 
-        // Platform object
-        class Platform {
-            constructor(x, y, width, height, type) {
-                this.x = x;
-                this.y = y;
-                this.width = width;
-                this.height = height;
-                this.type = type;
-            }
-            draw() {
-                ctx.fillStyle = this.type === 'desk' ? '#8b4513' : this.type === 'cubicle' ? '#4682b4' : '#696969';
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-            }
-        }
+    // Player frame 1
+    assets.playerFrames[0] = new Image();
+    assets.playerFrames[0].src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSJ5ZWxsb3ciIC8+PGNpcmNsZSBjeD0iMjAiIGN5PSIxNSIgcj0iOCIgc3R5bGU9ImZpbGw6YmxhY2s7Ii8+PHJlY3QgeD0iMTUiIHk9IjI1IiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIGZpbGw9ImJsYWNrIi8+PC9zdmc+";
+    // Player frame 2 (slightly different leg position)
+    assets.playerFrames[1] = new Image();
+    assets.playerFrames[1].src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSJ5ZWxsb3ciIC8+PGNpcmNsZSBjeD0iMjAiIGN5PSIxNSIgcj0iOCIgc3R5bGU9ImZpbGw6YmxhY2s7Ii8+PHBhdGggZD0iTTE1IDI1IEwyNSAyNSBMMjAgMzUgWiIgZmlsbD0iYmxhY2siLz48L3N2Zz4=";
+    // DOGE monster
+    assets.doge.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMTgiIGZpbGw9IiNmZmNjMDAiIC8+PHRleHQgeD0iMjAiIHk9IjI1IiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJibGFjayI+RE9HRTwvdGV4dD48L3N2Zz4=";
+    // Angry Client monster
+    assets.angry.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMTgiIGZpbGw9IiNmZjk5OTkiIC8+PHRleHQgeD0iMjAiIHk9IjI1IiBmb250LXNpemU9IjEwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJibGFjayI+QW5ncnk8L3RleHQ+PGxpbmUgeDE9IjEyIiB5MT0iMTUiIHgyPSIxOCIgeTI9IjE1IiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIC8+PGxpbmUgeDE9IjIyIiB5MT0iMTUiIHgyPSIyOCIgeTI9IjE1IiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIC8+PHBhdGggZD0iTTE1IDI1IFEyMCAzMCAyNSAyNSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PC9zdmc+";
+    // Paper monster
+    assets.paper.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIC8+PHRleHQgeD0iMTUiIHk9IjI1IiBmb250LXNpemU9IjEwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJibGFjayI+UGFwZXI8L3RleHQ+PC9zdmc+";
+    // Mercedes monster
+    assets.mercedes.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMTgiIGZpbGw9IiNjMGMwYzAiIC8+PHBhdGggZD0iTTIwIDEwIEwyNCAyMCBMMjAgMzAgTDE2IDIwIFoiIGZpbGw9ImJsYWNrIi8+PC9zdmc+";
+    // BOI monster
+    assets.boi.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjY2NjY2NjIiAvPjx0ZXh0IHg9IjIwIiB5PSIyNSIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iYmxhY2siPkJPSTwvdGV4dD48L3N2Zz4=";
+    // Dust (for defeated monsters)
+    assets.dust.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iOCIgZmlsbD0iIzk5OTk5OSI+PC9jaXJjbGU+PC9zdmc+";
 
-        // Monster object
-        class Monster {
-            constructor(x, y, type) {
-                this.x = x;
-                this.y = y;
-                this.width = 30;
-                this.height = 30;
-                this.dx = type === 'BOI' ? 0 : 1;
-                this.type = type;
-                this.dead = false;
-            }
-            draw() {
-                if (this.dead) {
-                    ctx.fillStyle = 'gray';
-                    ctx.fillRect(this.x, this.y, this.width, this.height);
-                    return;
-                }
-                ctx.fillStyle = this.type === 'DOGE' ? '#ff9900' : this.type === 'Angry' ? '#ff4500' : this.type === 'Paper' ? '#fff' : this.type === 'Mercedes' ? '#00cc00' : '#666';
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-                ctx.fillStyle = '#000';
-                ctx.font = '12px Arial';
-                ctx.fillText(this.type, this.x + 5, this.y + 20);
-            }
-            update() {
-                if (this.dead) return;
-                this.x += this.dx;
-                if (this.x <= 0 || this.x + this.width >= canvas.width) this.dx *= -1;
-            }
-        }
+    /* -------- Game Object Definitions -------- */
+    // Player object
+    const player = {
+      x: 50,
+      y: 500,
+      width: 40,
+      height: 40,
+      vx: 0,
+      vy: 0,
+      onGround: false,
+      facing: 1, // 1: right, -1: left
+      animFrame: 0,
+      animTimer: 0
+    };
 
-        // Fireball object
-        class Fireball {
-            constructor(x, y, dx) {
-                this.x = x;
-                this.y = y;
-                this.width = 10;
-                this.height = 10;
-                this.dx = dx;
-                this.range = 400;
-                this.distance = 0;
-            }
-            draw() {
-                ctx.fillStyle = '#ff0000';
-                ctx.beginPath();
-                ctx.arc(this.x + 5, this.y + 5, 5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            update() {
-                this.x += this.dx;
-                this.distance += Math.abs(this.dx);
-            }
-        }
+    // Array for fireballs
+    const fireballs = [];
+    // Array for enemy objects
+    const enemies = [];
+    // Array for dust particle effects (for defeated enemies)
+    const dustParticles = [];
+    // Define enemy types (each with a width/height and image reference)
+    const enemyTypes = {
+      doge: { width: 40, height: 40, img: assets.doge },
+      angry: { width: 40, height: 40, img: assets.angry },
+      paper: { width: 30, height: 40, img: assets.paper },
+      mercedes: { width: 40, height: 40, img: assets.mercedes },
+      boi: { width: 40, height: 40, img: assets.boi }
+    };
 
-        // Initialize game
-        function init() {
-            player = new Player();
-            platforms = [
-                new Platform(100, 300, 100, 20, 'desk'),
-                new Platform(250, 250, 100, 20, 'cubicle'),
-                new Platform(400, 200, 100, 20, 'filing'),
-                new Platform(600, 250, 100, 20, 'desk'),
-                new Platform(750, 200, 100, 20, 'cubicle')
-            ];
-            monsters = [
-                new Monster(150, 270, 'DOGE'),
-                new Monster(300, 220, 'Angry'),
-                new Monster(450, 170, 'Paper'),
-                new Monster(650, 220, 'Mercedes'),
-                new Monster(800, 170, 'BOI')
-            ];
-            fireballs = [];
-            score = 0;
-            startTime = Date.now();
-            checkpoint = 0;
-            gameOver = false;
-            document.getElementById('endScreen').style.display = 'none';
-        }
+    // Platforms (desks, cubicles, filing cabinets, plus ground)
+    const platforms = [
+      { x: 0, y: 550, width: LEVEL_WIDTH, height: 50 }, // ground
+      { x: 200, y: 450, width: 200, height: 20 },  // desk
+      { x: 600, y: 400, width: 150, height: 20 },  // cubicle top
+      { x: 900, y: 500, width: 100, height: 20 },  // filing cabinet top
+      { x: 1200, y: 430, width: 200, height: 20 },
+      { x: 1600, y: 480, width: 150, height: 20 },
+      { x: 2000, y: 420, width: 200, height: 20 },
+      { x: 2400, y: 500, width: 150, height: 20 }
+    ];
 
-        // Game loop
-        function update() {
-            if (gameOver) return;
+    // Checkpoints positions (x coordinates; a checkpoint is passed when player.x passes it)
+    const checkpoints = [
+      { x: 400, passed: false, message: "Great start!" },
+      { x: 1200, passed: false, message: "Keep going!" },
+      { x: 2200, passed: false, message: "Almost there!" }
+    ];
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            player.update();
-            player.draw();
+    // Flagpole at the end
+    const flagpole = { x: 2900, y: 450, width: 20, height: 100 };
 
-            platforms.forEach(p => p.draw());
-            monsters.forEach((m, i) => {
-                m.update();
-                m.draw();
-                if (!m.dead && player.x < m.x + m.width && player.x + player.width > m.x &&
-                    player.y < m.y + m.height && player.y + player.height > m.y) {
-                    if (player.dy > 0 && player.y + player.height - player.dy <= m.y) {
-                        m.dead = true;
-                        score += 100;
-                        player.dy = -10;
-                        if (m.type === 'BOI') setTimeout(() => monsters.push(new Monster(800, 170, 'BOI')), 30000);
-                    } else {
-                        gameOver = true;
-                        endGame();
-                    }
-                }
-            });
+    /* -------- Input Handling -------- */
+    window.addEventListener("keydown", function(e) {
+      if (e.code === "ArrowLeft") keys.left = true;
+      if (e.code === "ArrowRight") keys.right = true;
+      if (e.code === "ArrowUp") keys.up = true;
+      if (e.code === "Space") keys.space = true;
+    });
+    window.addEventListener("keyup", function(e) {
+      if (e.code === "ArrowLeft") keys.left = false;
+      if (e.code === "ArrowRight") keys.right = false;
+      if (e.code === "ArrowUp") keys.up = false;
+      if (e.code === "Space") keys.space = false;
+    });
 
-            fireballs.forEach((f, i) => {
-                f.update();
-                f.draw();
-                if (f.distance > f.range) fireballs.splice(i, 1);
-                monsters.forEach(m => {
-                    if (!m.dead && f.x < m.x + m.width && f.x + f.width > m.x &&
-                        f.y < m.y + m.height && f.y + f.height > m.y) {
-                        m.dead = true;
-                        score += 100;
-                        fireballs.splice(i, 1);
-                    }
-                });
-            });
+    /* -------- Collision Detection -------- */
+    function rectIntersect(a, b) {
+      return !(a.x > b.x + b.width ||
+               a.x + a.width < b.x ||
+               a.y > b.y + b.height ||
+               a.y + a.height < b.y);
+    }
 
-            // Checkpoints
-            if (player.x > 250 && checkpoint < 1) {
-                checkpoint = 1;
-                showMessage('Checkpoint 1: Keep Going!');
-            } else if (player.x > 500 && checkpoint < 2) {
-                checkpoint = 2;
-                showMessage('Checkpoint 2: Nice Work!');
-            } else if (player.x > 750 && checkpoint < 3) {
-                checkpoint = 3;
-                showMessage('Checkpoint 3: Almost There!');
-            }
-
-            // Flagpole
-            ctx.fillStyle = '#00ff00';
-            ctx.fillRect(780, 150, 10, 150);
-            if (player.x + player.width > 780) {
-                gameOver = true;
-                endGame(true);
-            }
-
-            ctx.fillStyle = '#000';
-            ctx.font = '20px Arial';
-            ctx.fillText(`Score: ${score}`, 10, 30);
-
-            requestAnimationFrame(update);
-        }
-
-        // Controls
-        const keys = {};
-        document.addEventListener('keydown', e => {
-            keys[e.key] = true;
-            if (e.key === 'ArrowUp' && player.dy === 0) player.dy = player.jumpPower;
-            if (e.key === ' ' && Date.now() - player.lastFireball > 1000) {
-                fireballs.push(new Fireball(player.x + (player.facingRight ? 30 : -10), player.y + 20, player.facingRight ? 8 : -8));
-                player.lastFireball = Date.now();
-            }
+    /* -------- Game Initialization & Enemy Setup -------- */
+    // Populate enemies at various positions with different types
+    function initEnemies() {
+      enemies.length = 0;
+      const enemyData = [
+        { type: "doge", x: 350, y: 510 },
+        { type: "angry", x: 800, y: 360 },
+        { type: "paper", x: 950, y: 460 },
+        { type: "mercedes", x: 1300, y: 390 },
+        { type: "boi", x: 1700, y: 510 }
+      ];
+      enemyData.forEach(data => {
+        enemies.push({
+          type: data.type,
+          x: data.x,
+          y: data.y - enemyTypes[data.type].height, // align with platform
+          width: enemyTypes[data.type].width,
+          height: enemyTypes[data.type].height,
+          vx: 1.5,  // horizontal movement speed
+          defeated: false,
+          respawnTimer: 0  // for BOI respawn timer
         });
-        document.addEventListener('keyup', e => keys[e.key] = false);
+      });
+    }
 
-        function handleControls() {
-            if (keys['ArrowLeft']) {
-                player.dx = -player.speed;
-                player.facingRight = false;
-            } else if (keys['ArrowRight']) {
-                player.dx = player.speed;
-                player.facingRight = true;
-            }
-        }
-        setInterval(handleControls, 16);
+    // Reset game state to start a new attempt
+    function resetGame() {
+      player.x = 50;
+      player.y = 500;
+      player.vx = 0;
+      player.vy = 0;
+      player.onGround = false;
+      player.facing = 1;
+      player.animFrame = 0;
+      player.animTimer = 0;
+      fireballs.length = 0;
+      dustParticles.length = 0;
+      checkpoints.forEach(cp => cp.passed = false);
+      startTime = Date.now();
+      monstersDefeated = 0;
+      gameState = "playing";
+      initEnemies();
+      overlay.classList.add("hidden");
+    }
+    // Initialize for first run
+    resetGame();
 
-        // Game end
-        function endGame(won = false) {
-            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-            const finalScore = won ? Math.max(1000 - timeTaken * 10, 100) + score : score;
-            document.getElementById('finalScore').textContent = `Final Score: ${finalScore}${won ? ' - You Win!' : ' - Game Over'}`;
-            document.getElementById('endScreen').style.display = 'block';
-            loadLeaderboard();
-        }
-
-        // Messages
-        function showMessage(text) {
-            ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
-            ctx.font = '24px Arial';
-            ctx.fillText(text, canvas.width / 2 - 100, canvas.height / 2);
-            setTimeout(() => {}, 2000);
-        }
-
-        // Leaderboard
-        function loadLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]');
-            const ul = document.getElementById('leaderboard');
-            ul.innerHTML = '';
-            leaderboard.sort((a, b) => b.score - a.score).slice(0, 10).forEach(entry => {
-                const li = document.createElement('li');
-                li.textContent = `${entry.name}: ${entry.score} (${entry.date})`;
-                ul.appendChild(li);
-            });
-        }
-
-        window.saveScore = function() {
-            const name = document.getElementById('playerName').value || 'Anonymous';
-            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-            const finalScore = Math.max(1000 - timeTaken * 10, 100) + score;
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]');
-            leaderboard.push({ name, score: finalScore, date: new Date().toLocaleDateString() });
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-            loadLeaderboard();
-        };
-
-        window.shareScore = function() {
-            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-            const finalScore = Math.max(1000 - timeTaken * 10, 100) + score;
-            const text = `I scored ${finalScore} in Office Runner! Can you beat me? Play here: [Your GitHub Pages URL]`;
-            navigator.clipboard.writeText(text);
-            alert('Score copied to clipboard! Share it on social media!');
-        };
-
-        window.restartGame = function() {
-            init();
-            update();
-        };
-
-        // Start game
-        init();
+    /* -------- Main Game Loop -------- */
+    function gameLoop() {
+      if (gameState === "playing") {
         update();
-    </script>
+      }
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+    requestAnimationFrame(gameLoop);
+
+    /* -------- Update Function (Physics, Input, Collisions) -------- */
+    function update() {
+      // Handle horizontal movement input
+      if (keys.left) {
+        player.vx = -MOVE_SPEED;
+        player.facing = -1;
+      } else if (keys.right) {
+        player.vx = MOVE_SPEED;
+        player.facing = 1;
+      } else {
+        player.vx *= FRICTION;
+      }
+      // Jumping if on the ground
+      if (keys.up && player.onGround) {
+        player.vy = -JUMP_POWER;
+        player.onGround = false;
+      }
+      // Apply gravity
+      player.vy += GRAVITY;
+      // Update player position
+      player.x += player.vx;
+      player.y += player.vy;
+
+      // Prevent player from going off left side
+      if (player.x < 0) {
+        player.x = 0;
+        player.vx = 0;
+      }
+      // If player falls below canvas, restart
+      if (player.y > CANVAS_HEIGHT) {
+        gameOver();
+      }
+
+      // Platform collisions (simple AABB)
+      player.onGround = false;
+      platforms.forEach(plat => {
+        const pRect = { x: player.x, y: player.y, width: player.width, height: player.height };
+        if (rectIntersect(pRect, plat)) {
+          // Check if landing on top of the platform
+          if (player.vy >= 0 && player.y + player.height - player.vy <= plat.y + 5) {
+            player.y = plat.y - player.height;
+            player.vy = 0;
+            player.onGround = true;
+          }
+        }
+      });
+
+      // Fireball creation (one per FIREBALL_COOLDOWN)
+      if (keys.space && Date.now() - lastFireballTime > FIREBALL_COOLDOWN) {
+        fireballs.push({
+          x: player.x + player.width / 2,
+          y: player.y + player.height / 2,
+          vx: player.facing * 6,
+          range: CANVAS_WIDTH / 2,
+          startX: player.x + player.width / 2
+        });
+        lastFireballTime = Date.now();
+      }
+      // Update fireballs
+      for (let i = fireballs.length - 1; i >= 0; i--) {
+        let fb = fireballs[i];
+        fb.x += fb.vx;
+        if (Math.abs(fb.x - fb.startX) > fb.range) {
+          fireballs.splice(i, 1);
+        }
+      }
+
+      // Update enemies
+      enemies.forEach(enemy => {
+        // Skip defeated enemies (dust effect handled separately)
+        if (enemy.defeated) {
+          enemy.respawnTimer -= 16.67;
+          // For BOI, respawn after exactly 30 seconds
+          if (enemy.type === "boi" && enemy.respawnTimer <= 0) {
+            enemy.defeated = false;
+            // Reset BOI’s position (you may adjust as desired)
+            enemy.x = 1700;
+            enemy.y = 510 - enemyTypes.boi.height;
+          }
+          return;
+        }
+        // Simple horizontal movement
+        enemy.x += enemy.vx;
+        // Reverse direction if enemy reaches platform boundaries or level edges
+        if (enemy.x < 0 || enemy.x + enemy.width > LEVEL_WIDTH) {
+          enemy.vx *= -1;
+        }
+      });
+
+      // Check collisions: player vs enemies
+      enemies.forEach(enemy => {
+        if (enemy.defeated) return;
+        const enemyRect = { x: enemy.x, y: enemy.y, width: enemy.width, height: enemy.height };
+        const playerRect = { x: player.x, y: player.y, width: player.width, height: player.height };
+        if (rectIntersect(playerRect, enemyRect)) {
+          // If player is falling (landed on enemy head)
+          if (player.vy > 0 && player.y + player.height - enemy.y < 15) {
+            enemy.defeated = true;
+            monstersDefeated++;
+            // Add dust particle at enemy’s location
+            dustParticles.push({ x: enemy.x, y: enemy.y, timer: 60 });
+            // Bounce the player upward
+            player.vy = -JUMP_POWER / 1.5;
+            // Special rule: for BOI, set respawn timer (30 seconds)
+            if (enemy.type === "boi") {
+              enemy.respawnTimer = 30000;
+            }
+          } else {
+            // Otherwise, player loses one life → restart level
+            gameOver();
+          }
+        }
+      });
+
+      // Check collisions: fireballs vs enemies
+      for (let i = fireballs.length - 1; i >= 0; i--) {
+        const fb = fireballs[i];
+        const fbRect = { x: fb.x - 5, y: fb.y - 5, width: 10, height: 10 };
+        enemies.forEach(enemy => {
+          if (enemy.defeated) return;
+          const enemyRect = { x: enemy.x, y: enemy.y, width: enemy.width, height: enemy.height };
+          if (rectIntersect(fbRect, enemyRect)) {
+            enemy.defeated = true;
+            monstersDefeated++;
+            dustParticles.push({ x: enemy.x, y: enemy.y, timer: 60 });
+            // For BOI, set respawn timer
+            if (enemy.type === "boi") {
+              enemy.respawnTimer = 30000;
+            }
+            fireballs.splice(i, 1);
+          }
+        });
+      }
+
+      // Update dust particles (fade out effect)
+      for (let i = dustParticles.length - 1; i >= 0; i--) {
+        dustParticles[i].timer -= 1;
+        if (dustParticles[i].timer <= 0) {
+          dustParticles.splice(i, 1);
+        }
+      }
+
+      // Checkpoints: if player passes a checkpoint, mark it and show a message
+      checkpoints.forEach(cp => {
+        if (!cp.passed && player.x > cp.x) {
+          cp.passed = true;
+          showCheckpointMessage(cp.message);
+        }
+      });
+
+      // Check for level completion (flagpole)
+      if (player.x + player.width > flagpole.x && player.y + player.height > flagpole.y) {
+        completeGame();
+      }
+
+      // Update player animation timer
+      player.animTimer += 1;
+      if (player.animTimer > 10) {
+        player.animFrame = (player.animFrame + 1) % assets.playerFrames.length;
+        player.animTimer = 0;
+      }
+    }
+
+    /* -------- Drawing Function -------- */
+    function draw() {
+      // Clear canvas
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      // Compute camera offset so player is centered
+      let camX = player.x - CANVAS_WIDTH / 2;
+      if (camX < 0) camX = 0;
+      if (camX > LEVEL_WIDTH - CANVAS_WIDTH) camX = LEVEL_WIDTH - CANVAS_WIDTH;
+
+      // Draw background (a simple office tone with a grid-like pattern)
+      ctx.fillStyle = "#d0d0d0";
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      for (let i = 0; i < LEVEL_WIDTH; i += 100) {
+        ctx.strokeStyle = "#b0b0b0";
+        ctx.beginPath();
+        ctx.moveTo(i - camX, 0);
+        ctx.lineTo(i - camX, CANVAS_HEIGHT);
+        ctx.stroke();
+      }
+
+      // Draw platforms
+      platforms.forEach(plat => {
+        ctx.fillStyle = "#654321";
+        ctx.fillRect(plat.x - camX, plat.y, plat.width, plat.height);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(plat.x - camX, plat.y, plat.width, plat.height);
+      });
+
+      // Draw flagpole (finish)
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(flagpole.x - camX, flagpole.y, flagpole.width, flagpole.height);
+      ctx.strokeStyle = "#000";
+      ctx.strokeRect(flagpole.x - camX, flagpole.y, flagpole.width, flagpole.height);
+
+      // Draw checkpoints (a simple marker)
+      checkpoints.forEach(cp => {
+        if (!cp.passed) {
+          ctx.fillStyle = "#00ff00";
+          ctx.fillRect(cp.x - camX, 500, 10, 50);
+        }
+      });
+
+      // Draw enemies
+      enemies.forEach(enemy => {
+        if (enemy.defeated) return;
+        const type = enemy.type;
+        const img = enemyTypes[type].img;
+        ctx.drawImage(img, enemy.x - camX, enemy.y, enemy.width, enemy.height);
+      });
+
+      // Draw fireballs
+      fireballs.forEach(fb => {
+        ctx.fillStyle = "#ff4500";
+        ctx.beginPath();
+        ctx.arc(fb.x - camX, fb.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Draw dust particles (with fading effect)
+      dustParticles.forEach(dp => {
+        ctx.save();
+        ctx.globalAlpha = dp.timer / 60;
+        ctx.drawImage(assets.dust, dp.x - camX, dp.y, 20, 20);
+        ctx.restore();
+      });
+
+      // Draw player
+      let playerImg = assets.playerFrames[player.animFrame];
+      ctx.save();
+      // Flip image if facing left
+      if (player.facing === -1) {
+        ctx.translate(player.x - camX + player.width / 2, 0);
+        ctx.scale(-1, 1);
+        ctx.translate(-player.x + camX - player.width / 2, 0);
+      }
+      ctx.drawImage(playerImg, player.x - camX, player.y, player.width, player.height);
+      ctx.restore();
+
+      // Optionally, draw score and time at top-left
+      ctx.fillStyle = "#000";
+      ctx.font = "16px sans-serif";
+      let timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+      ctx.fillText("Time: " + timeElapsed + "s", 10, 20);
+      ctx.fillText("Monsters: " + monstersDefeated, 10, 40);
+    }
+
+    /* -------- Utility: Show Checkpoint Message -------- */
+    function showCheckpointMessage(message) {
+      overlay.innerHTML = "<h2>" + message + "</h2>";
+      overlay.classList.remove("hidden");
+      setTimeout(() => { overlay.classList.add("hidden"); }, 1500);
+    }
+
+    /* -------- Game Over & Complete Handlers -------- */
+    function gameOver() {
+      gameState = "gameover";
+      overlay.innerHTML = "<h1>Game Over!</h1><p>Try again.</p><button id='restartBtn'>Restart</button>";
+      overlay.classList.remove("hidden");
+      document.getElementById('restartBtn').onclick = resetGame;
+    }
+
+    function completeGame() {
+      gameState = "complete";
+      let timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+      // Simple scoring: bonus for monsters defeated and speed (you can adjust the formula)
+      finalScore = Math.max(0, Math.round((monstersDefeated * 1000) - (timeElapsed * 10)));
+      overlay.innerHTML = "<h1>Level Complete!</h1><p>Your Score: " + finalScore + "</p><button id='shareBtn'>Share</button><button id='restartBtn'>Restart</button><div class='leaderboard'><h3>Leaderboard</h3><div id='lbList'></div></div>";
+      overlay.classList.remove("hidden");
+      // Update leaderboard and show it
+      updateLeaderboard(finalScore);
+      document.getElementById('shareBtn').onclick = shareScore;
+      document.getElementById('restartBtn').onclick = resetGame;
+    }
+
+    /* -------- Leaderboard using localStorage -------- */
+    function updateLeaderboard(score) {
+      let name = prompt("Enter your name for the leaderboard:", "Player");
+      if (!name) name = "Anonymous";
+      let entry = { name: name, score: score, time: new Date().toLocaleString() };
+      let leaderboard = JSON.parse(localStorage.getItem("officePlatformerLeaderboard") || "[]");
+      leaderboard.push(entry);
+      // Sort descending by score and keep top 10
+      leaderboard.sort((a, b) => b.score - a.score);
+      leaderboard = leaderboard.slice(0, 10);
+      localStorage.setItem("officePlatformerLeaderboard", JSON.stringify(leaderboard));
+      displayLeaderboard(leaderboard);
+    }
+    function displayLeaderboard(lb) {
+      let lbList = document.getElementById("lbList");
+      lbList.innerHTML = "";
+      lb.forEach((entry, idx) => {
+        lbList.innerHTML += (idx+1) + ". " + entry.name + " - " + entry.score + " (" + entry.time + ")<br>";
+      });
+    }
+
+    /* -------- Social Sharing -------- */
+    function shareScore() {
+      const shareText = "I scored " + finalScore + " in Office Platformer! Can you beat my score? #OfficePlatformer";
+      // Copy text to clipboard
+      navigator.clipboard.writeText(shareText).then(() => {
+        alert("Score copied to clipboard! Share it with your friends.");
+      });
+    }
+  </script>
 </body>
 </html>
