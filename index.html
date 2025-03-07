@@ -1001,6 +1001,59 @@
                        obj1.y + obj1.height > obj2.y;
             }
         }
+
+        class Fireball {
+            constructor(game, x, y, goingRight) {
+                this.game = game;
+                this.x = x;
+                this.y = y;
+                this.width = 15;
+                this.height = 15;
+                this.velocityX = goingRight ? 10 : -10;
+                this.goingRight = goingRight;
+                this.distanceTraveled = 0;
+                this.maxDistance = 400; // Max distance fireball can travel
+            }
+            
+            update() {
+                this.x += this.velocityX;
+                this.distanceTraveled += Math.abs(this.velocityX);
+            }
+            
+            render() {
+                const ctx = this.game.ctx;
+                const adjustedX = this.x - this.game.camera.x;
+                
+                // Draw fireball
+                // Gradient for fire effect
+                const gradient = ctx.createRadialGradient(
+                    adjustedX + this.width/2, this.y + this.height/2, 0,
+                    adjustedX + this.width/2, this.y + this.height/2, this.width/2
+                );
+                gradient.addColorStop(0, '#FFFFFF');
+                gradient.addColorStop(0.3, '#FFDD00');
+                gradient.addColorStop(1, '#FF4400');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(adjustedX + this.width/2, this.y + this.height/2, this.width/2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Fire tail
+                ctx.beginPath();
+                ctx.moveTo(adjustedX + (this.goingRight ? 0 : this.width), this.y + this.height/2);
+                for (let i = 0; i < 3; i++) {
+                    const tailX = adjustedX + (this.goingRight ? -i * 5 : this.width + i * 5);
+                    const offsetY = (Math.sin(Date.now() / 50 + i) * 3);
+                    
+                    ctx.lineTo(tailX, this.y + this.height/2 + offsetY);
+                    ctx.lineTo(tailX - (this.goingRight ? 3 : -3), this.y + this.height/2 - offsetY);
+                }
+                ctx.closePath();
+                ctx.fillStyle = '#FF8800';
+                ctx.fill();
+            }
+        }
         
         // Player Class
         class Player {
