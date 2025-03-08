@@ -49,13 +49,13 @@
             text-align: center;
         }
 
-        #score-display-outer {
+        #score-display-outer, #timer-display-outer {
             background-color: #000044;
             border: 2px solid #00ff00;
             padding: 15px;
             font-size: 24px;
             color: #ffff00;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             border-radius: 5px;
         }
 
@@ -239,6 +239,10 @@
                 <div>SCORE</div>
                 <div id="score-display">0</div>
             </div>
+            <div id="timer-display-outer">
+                <div>TIME</div>
+                <div id="timer-display">0:00</div>
+            </div>
         </div>
         
         <div id="game-container">
@@ -260,7 +264,7 @@
 
             <div id="game-over">
                 <h1>GAME OVER</h1>
-                <div id="final-score">Final Score: 0</div>
+                <div id="final-message">You lasted 0:00 before fraud ruined your business</div>
                 <button id="restart-button">PLAY AGAIN</button>
             </div>
         </div>
@@ -277,12 +281,14 @@
         // Game variables
         let gameActive = false;
         let score = 0;
+        let gameTime = 0; // Time in seconds
         let expenses = [];
         let player = document.getElementById('player');
         let gameContainer = document.getElementById('game-container');
         let scoreDisplay = document.getElementById('score-display');
+        let timerDisplay = document.getElementById('timer-display');
         let gameOverScreen = document.getElementById('game-over');
-        let finalScoreDisplay = document.getElementById('final-score');
+        let finalMessageDisplay = document.getElementById('final-message');
         let restartButton = document.getElementById('restart-button');
         let startScreen = document.getElementById('start-screen');
         let startButton = document.getElementById('start-button');
@@ -431,6 +437,13 @@
             }
         }
 
+        // Function to format time as MM:SS
+        function formatTime(timeInSeconds) {
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = Math.floor(timeInSeconds % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
         // Function to start or restart the game
         function startGame() {
             // Make sure we have expense data before starting
@@ -445,6 +458,7 @@
             
             // Reset game state
             score = 0;
+            gameTime = 0;
             expenses = [];
             currentFallSpeed = initialFallSpeed;
             spawnInterval = 750; // Faster initial spawn rate
@@ -457,6 +471,7 @@
             
             // Update the score display
             scoreDisplay.textContent = `${score}`;
+            timerDisplay.textContent = formatTime(gameTime);
             
             // Hide the start screen and game over screen
             startScreen.style.display = 'none';
@@ -478,7 +493,7 @@
         // Function to end the game
         function endGame() {
             gameActive = false;
-            finalScoreDisplay.textContent = `Final Score: ${score}`;
+            finalMessageDisplay.textContent = `You lasted ${formatTime(gameTime)} before fraud ruined your business`;
             gameOverScreen.style.display = 'flex';
         }
 
@@ -724,6 +739,10 @@
             
             // Calculate delta time (in seconds)
             const deltaTime = (timestamp - lastFrameTime) / 1000;
+            
+            // Update game time
+            gameTime += deltaTime;
+            timerDisplay.textContent = formatTime(gameTime);
             
             // Update spawn timer - fixed calculation
             spawnTimer += (timestamp - lastFrameTime);
