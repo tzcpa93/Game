@@ -1,49 +1,500 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Expense Manager Mania</title>
-  <!-- Link to external CSS -->
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Manager Mania</title>
+    <style>
+        /* Early-2000s nostalgic styling */
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #000033;
+            color: #00ff00;
+            text-align: center;
+            margin: 0;
+            overflow: hidden;
+            cursor: none; /* Hide cursor during gameplay */
+        }
+
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            margin: 20px auto;
+            border: 3px solid #00ff00;
+            background-color: #000022;
+            overflow: hidden;
+        }
+
+        #score-display {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: #ffff00;
+            text-shadow: 2px 2px #000000;
+            z-index: 10;
+        }
+
+        #player {
+            position: absolute;
+            bottom: 10px;
+            width: 100px;
+            height: 20px;
+            background-color: #ff0000;
+            border: 2px solid #ffffff;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+
+        .expense {
+            position: absolute;
+            width: 100px;
+            height: 30px;
+            text-align: center;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .good-expense {
+            background-color: #00aa00;
+            border: 2px solid #00ff00;
+            color: white;
+        }
+
+        .bad-expense {
+            background-color: #aa0000;
+            border: 2px solid #ff0000;
+            color: white;
+        }
+
+        #game-over {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #ff0000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        #game-over h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0px #000000;
+        }
+
+        #final-score {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #ffff00;
+        }
+
+        #restart-button {
+            padding: 10px 20px;
+            font-size: 24px;
+            background-color: #0000aa;
+            color: #ffffff;
+            border: 3px solid #0000ff;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        #restart-button:hover {
+            background-color: #0000ff;
+        }
+
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 50, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        #start-screen h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ffff00;
+            text-shadow: 3px 3px 0px #000000;
+        }
+
+        #start-button {
+            padding: 10px 20px;
+            font-size: 24px;
+            background-color: #0000aa;
+            color: #ffffff;
+            border: 3px solid #0000ff;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        #start-button:hover {
+            background-color: #0000ff;
+        }
+
+        #instructions {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+            border: 2px dashed #00ff00;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        #instructions p {
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
+    <div id="game-container">
+        <div id="score-display">Score: 0</div>
+        <div id="player"></div>
 
-  <!-- 
-    Game Container
-    This is our main area where the falling objects and player exist.
-  -->
-  <div id="game-container">
-    <!-- Score Display -->
-    <div id="score-display">Score: 0</div>
+        <div id="start-screen">
+            <h1>Expense Manager Mania!</h1>
+            <div id="instructions">
+                <p>You are the company's Expense Manager!</p>
+                <p>- <span style="color: #00ff00;">GREEN expenses</span> are legitimate business expenses. Let them reach the bottom for +1 point.</p>
+                <p>- <span style="color: #ff0000;">RED expenses</span> are unauthorized! Block them with your red blocker or lose points!</p>
+                <p>- Move your mouse left and right to control the blocker</p>
+                <p>- If your score goes below 0, you're FIRED!</p>
+            </div>
+            <button id="start-button">START GAME</button>
+        </div>
 
-    <!-- 
-      Game Over Screen
-      This overlay appears when score < 0. 
-      It is hidden by default and shown on game over.
-    -->
-    <div id="game-over-screen" class="hidden">
-      <h1>GAME OVER!</h1>
-      <p id="final-score"></p>
-      <button id="restart-button">Play Again</button>
+        <div id="game-over">
+            <h1>GAME OVER</h1>
+            <div id="final-score">Final Score: 0</div>
+            <button id="restart-button">PLAY AGAIN</button>
+        </div>
     </div>
 
-    <!-- 
-      On-Screen Mobile Controls
-      Visible on smaller screens by default (or always if you prefer).
-      Left, Right, and optionally a Speed button (can be removed if desired).
-    -->
-    <div id="mobile-controls" class="hidden">
-      <button id="left-button">&#9664;</button>
-      <button id="right-button">&#9654;</button>
-      <button id="speed-button">&#x23E9;</button>
-    </div>
+    <script>
+        // Game variables
+        let gameActive = false;
+        let score = 0;
+        let expenses = [];
+        let player = document.getElementById('player');
+        let gameContainer = document.getElementById('game-container');
+        let scoreDisplay = document.getElementById('score-display');
+        let gameOverScreen = document.getElementById('game-over');
+        let finalScoreDisplay = document.getElementById('final-score');
+        let restartButton = document.getElementById('restart-button');
+        let startScreen = document.getElementById('start-screen');
+        let startButton = document.getElementById('start-button');
+        let lastFrameTime = 0;
+        let spawnTimer = 0;
+        let spawnInterval = 2000; // milliseconds between spawns (initial)
+        let minSpawnInterval = 500; // Minimum spawn interval (maximum difficulty)
+        let difficultyIncreaseRate = 0.95; // Rate at which spawn interval decreases
+        let difficultyIncreaseInterval = 10000; // How often to increase difficulty (milliseconds)
+        let lastDifficultyIncrease = 0;
+        let initialFallSpeed = 100; // pixels per second (initial)
+        let currentFallSpeed = initialFallSpeed;
+        let maxFallSpeed = 300; // Maximum fall speed (pixels per second)
+        let fallSpeedIncreaseRate = 1.1; // Rate at which fall speed increases
+        let expenseData = null;
+        let gameAreaWidth = 800;
 
-    <!-- Player / Blocker element -->
-    <div id="player"></div>
-  </div>
+        // Function to fetch the expense data from data.json
+        function fetchExpenseData() {
+            fetch('data.json')
+                .then(response => response.json())
+                .then(data => {
+                    expenseData = data;
+                    // Start screen is already shown by default
+                })
+                .catch(error => {
+                    console.error('Error loading expense data:', error);
+                    alert('Failed to load expense data. Please check data.json file.');
+                });
+        }
 
-  <!-- Link to external JavaScript -->
-  <script src="script.js"></script>
+        // Call this function to fetch the data when the page loads
+        fetchExpenseData();
+
+        // Start button click handler
+        startButton.addEventListener('click', startGame);
+
+        // Restart button click handler
+        restartButton.addEventListener('click', startGame);
+
+        // Function to start or restart the game
+        function startGame() {
+            // Reset game state
+            score = 0;
+            expenses = [];
+            currentFallSpeed = initialFallSpeed;
+            spawnInterval = 2000;
+            lastDifficultyIncrease = 0;
+            
+            // Clear any existing expenses
+            document.querySelectorAll('.expense').forEach(expense => expense.remove());
+            
+            // Update the score display
+            scoreDisplay.textContent = `Score: ${score}`;
+            
+            // Hide the start screen and game over screen
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            
+            // Set game as active
+            gameActive = true;
+            
+            // Start the game loop
+            lastFrameTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Function to end the game
+        function endGame() {
+            gameActive = false;
+            finalScoreDisplay.textContent = `Final Score: ${score}`;
+            gameOverScreen.style.display = 'flex';
+        }
+
+        // Function to spawn a new expense
+        function spawnExpense() {
+            if (!expenseData) return; // If data isn't loaded yet, don't spawn
+            
+            // Decide if this will be a good or bad expense
+            const isGood = Math.random() < 0.6; // 60% chance of good expenses
+            
+            let expenseObj;
+            if (isGood) {
+                // Choose a random good expense
+                const randomIndex = Math.floor(Math.random() * expenseData.good.length);
+                expenseObj = {
+                    label: expenseData.good[randomIndex],
+                    score: 1,
+                    type: 'good'
+                };
+            } else {
+                // Choose a random bad expense
+                const randomIndex = Math.floor(Math.random() * expenseData.bad.length);
+                expenseObj = {
+                    label: expenseData.bad[randomIndex].label,
+                    score: expenseData.bad[randomIndex].score,
+                    type: 'bad'
+                };
+            }
+            
+            // Create the expense element
+            const expense = document.createElement('div');
+            expense.classList.add('expense');
+            expense.classList.add(isGood ? 'good-expense' : 'bad-expense');
+            expense.textContent = expenseObj.label;
+            
+            // Set its initial position
+            // Random X position, staying within the bounds of the game area
+            const containerWidth = gameContainer.offsetWidth;
+            const expenseWidth = 100; // Width of expense element from CSS
+            const maxX = containerWidth - expenseWidth;
+            const randomX = Math.random() * maxX;
+            
+            expense.style.left = `${randomX}px`;
+            expense.style.top = '-30px'; // Start above the game area
+            
+            // Add to the DOM
+            gameContainer.appendChild(expense);
+            
+            // Store the expense object and element
+            expenses.push({
+                element: expense,
+                x: randomX,
+                y: -30,
+                width: expenseWidth,
+                height: 30, // Height of expense element from CSS
+                type: expenseObj.type,
+                score: expenseObj.score
+            });
+        }
+
+        // Function to handle mouse movement
+        function handleMouseMove(event) {
+            if (!gameActive) return;
+            
+            // Get the mouse X position relative to the game container
+            const containerRect = gameContainer.getBoundingClientRect();
+            const relativeX = event.clientX - containerRect.left;
+            
+            // Keep the player within the game container bounds
+            const playerWidth = player.offsetWidth;
+            const maxX = containerRect.width - playerWidth / 2;
+            const minX = playerWidth / 2;
+            
+            let playerX = Math.max(minX, Math.min(relativeX, maxX));
+            
+            // Set the player position
+            player.style.left = `${playerX}px`;
+        }
+
+        // Function to check for collisions between player and expenses
+        function checkCollisions() {
+            const playerRect = player.getBoundingClientRect();
+            
+            expenses.forEach(expense => {
+                const expenseRect = expense.element.getBoundingClientRect();
+                
+                // Only check for collisions with bad expenses that haven't been marked as collided
+                if (expense.type === 'bad' && !expense.collided) {
+                    // Check if the expense and player rectangles overlap
+                    if (
+                        expenseRect.left < playerRect.right &&
+                        expenseRect.right > playerRect.left &&
+                        expenseRect.bottom > playerRect.top &&
+                        expenseRect.top < playerRect.bottom
+                    ) {
+                        // Mark this expense as collided so we don't count it multiple times
+                        expense.collided = true;
+                        
+                        // Remove the expense element
+                        expense.element.remove();
+                        
+                        // Mark for removal
+                        expense.toRemove = true;
+                    }
+                }
+            });
+            
+            // Remove expenses marked for removal
+            expenses = expenses.filter(expense => !expense.toRemove);
+        }
+
+        // Function to create screen shake effect
+        function shakeScreen() {
+            // Save the original position
+            const originalPosition = gameContainer.style.position;
+            const originalTransform = gameContainer.style.transform;
+            
+            // Apply the shake
+            gameContainer.style.position = 'relative';
+            
+            // Shake sequence
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
+            setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
+            setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
+            
+            // Reset to original position
+            setTimeout(() => {
+                gameContainer.style.transform = originalTransform;
+                gameContainer.style.position = originalPosition;
+            }, 350);
+        }
+
+        // Function to handle when an expense reaches the bottom
+        function handleExpenseAtBottom(expense) {
+            // Update score based on expense type
+            if (expense.type === 'good') {
+                // Good expense reached the bottom - add points
+                score += expense.score;
+            } else {
+                // Bad expense reached the bottom - subtract points
+                score += expense.score; // This is negative already
+                
+                // Trigger screen shake
+                shakeScreen();
+            }
+            
+            // Update the score display
+            scoreDisplay.textContent = `Score: ${score}`;
+            
+            // Check if the game is over
+            if (score < 0) {
+                endGame();
+            }
+            
+            // Remove the expense
+            expense.element.remove();
+            expense.toRemove = true;
+        }
+
+        // Main game loop
+        function gameLoop(timestamp) {
+            if (!gameActive) return;
+            
+            // Calculate delta time (in seconds)
+            const deltaTime = (timestamp - lastFrameTime) / 1000;
+            lastFrameTime = timestamp;
+            
+            // Update spawn timer
+            spawnTimer += timestamp - lastFrameTime;
+            
+            // Spawn a new expense if it's time
+            if (spawnTimer >= spawnInterval) {
+                spawnExpense();
+                spawnTimer = 0;
+            }
+            
+            // Check if it's time to increase difficulty
+            if (timestamp - lastDifficultyIncrease > difficultyIncreaseInterval) {
+                // Increase fall speed
+                currentFallSpeed = Math.min(maxFallSpeed, currentFallSpeed * fallSpeedIncreaseRate);
+                
+                // Decrease spawn interval
+                spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
+                
+                lastDifficultyIncrease = timestamp;
+            }
+            
+            // Update expense positions and check for those that reached the bottom
+            expenses.forEach(expense => {
+                // Update Y position based on fall speed
+                expense.y += currentFallSpeed * deltaTime;
+                
+                // Update the element position
+                expense.element.style.top = `${expense.y}px`;
+                
+                // Check if it reached the bottom
+                if (expense.y > gameContainer.offsetHeight) {
+                    handleExpenseAtBottom(expense);
+                }
+            });
+            
+            // Clean up expenses marked for removal
+            expenses = expenses.filter(expense => !expense.toRemove);
+            
+            // Check for collisions
+            checkCollisions();
+            
+            // Continue the game loop
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Add event listener for mouse movement
+        gameContainer.addEventListener('mousemove', handleMouseMove);
+
+        // Update the game area width if window is resized
+        window.addEventListener('resize', function() {
+            gameAreaWidth = gameContainer.offsetWidth;
+        });
+
+        // Initial setting
+        gameAreaWidth = gameContainer.offsetWidth;
+        
+        // Position the player initially in the middle
+        player.style.left = `${gameAreaWidth / 2}px`;
+    </script>
 </body>
 </html>
