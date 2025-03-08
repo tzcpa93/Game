@@ -12,18 +12,43 @@
             color: #00ff00;
             text-align: center;
             margin: 0;
-            overflow: hidden;
-            cursor: none; /* Hide cursor during gameplay */
+            padding: 20px;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #ffff00;
+            text-shadow: 2px 2px #000000;
+            margin-bottom: 5px;
+        }
+
+        .tagline {
+            font-size: 18px;
+            color: #00ccff;
+            margin-bottom: 20px;
         }
 
         #game-container {
             position: relative;
             width: 800px;
             height: 600px;
-            margin: 20px auto;
+            margin: 10px auto;
             border: 3px solid #00ff00;
             background-color: #000022;
             overflow: hidden;
+            cursor: none; /* Hide cursor during gameplay */
+        }
+
+        #bottom-instructions {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 15px;
+            border: 2px solid #00ff00;
+            background-color: #000044;
+            font-size: 16px;
+            line-height: 1.5;
         }
 
         #score-display {
@@ -175,6 +200,9 @@
     </style>
 </head>
 <body>
+    <h1>Expense Management Mania</h1>
+    <div class="tagline">Have prepaid expenses? Stop playing games and check out Accruer already.</div>
+    
     <div id="game-container">
         <div id="score-display">Score: 0</div>
         <div id="player"></div>
@@ -198,6 +226,13 @@
             <div id="final-score">Final Score: 0</div>
             <button id="restart-button">PLAY AGAIN</button>
         </div>
+    </div>
+    
+    <div id="bottom-instructions">
+        Move mouse left and right to block bad expenses.<br>
+        Don't block good expenses!<br> 
+        Press space bar to speed up.<br>
+        If your score goes negative, you lose!
     </div>
 
     <script>
