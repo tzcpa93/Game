@@ -661,8 +661,10 @@
                     expense.collided = true;
                     
                     // Get the center position of the expense for the poof effect
-                    const expenseX = expenseRect.left + (expenseRect.width / 2);
-                    const expenseY = expenseRect.top + (expenseRect.height / 2);
+                    const containerRect = gameContainer.getBoundingClientRect();
+const expenseX = expenseRect.left + (expenseRect.width / 2) - containerRect.left;
+const expenseY = expenseRect.top + (expenseRect.height / 2) - containerRect.top;
+
                     
                     if (expense.type === 'bad') {
                         // Successfully blocked a bad expense
