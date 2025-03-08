@@ -1,27 +1,4 @@
-// Function to create screen shake effect
-        function shakeScreen() {
-            // Save the original position
-            const originalPosition = gameContainer.style.position;
-            const originalTransform = gameContainer.style.transform;
-            
-            // Apply the shake
-            gameContainer.style.position = 'relative';
-            
-            // Shake sequence
-            setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
-            setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
-            setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
-            setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
-            
-            // Reset to original position
-            setTimeout(() => {
-                gameContainer.style.transform = originalTransform;
-                gameContainer.style.position = originalPosition;
-            }, 350);
-        }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -238,14 +215,14 @@
         let startButton = document.getElementById('start-button');
         let lastFrameTime = 0;
         let spawnTimer = 0;
-        let spawnInterval = 1500; // milliseconds between spawns (initial) - faster start
-        let minSpawnInterval = 400; // Minimum spawn interval (maximum difficulty)
+        let spawnInterval = 750; // milliseconds between spawns (initial) - 2x faster start
+        let minSpawnInterval = 300; // Minimum spawn interval (maximum difficulty)
         let difficultyIncreaseRate = 0.90; // Rate at which spawn interval decreases - faster progression
         let difficultyIncreaseInterval = 5000; // How often to increase difficulty (milliseconds) - more frequent increases
         let lastDifficultyIncrease = 0;
-        let initialFallSpeed = 150; // pixels per second (initial) - faster start
+        let initialFallSpeed = 350; // pixels per second (initial) - much faster start
         let currentFallSpeed = initialFallSpeed;
-        let maxFallSpeed = 400; // Maximum fall speed (pixels per second) - higher max speed
+        let maxFallSpeed = 700; // Maximum fall speed (pixels per second)
         let fallSpeedIncreaseRate = 1.15; // Rate at which fall speed increases - faster progression
         let expenseData = null;
         let gameAreaWidth = 800;
@@ -304,6 +281,83 @@
         // Restart button click handler
         restartButton.addEventListener('click', startGame);
 
+        // Function to create screen shake effect
+        function shakeScreen() {
+            // Save the original position
+            const originalPosition = gameContainer.style.position;
+            const originalTransform = gameContainer.style.transform;
+            
+            // Apply the shake
+            gameContainer.style.position = 'relative';
+            
+            // Shake sequence
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
+            setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
+            setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
+            
+            // Reset to original position
+            setTimeout(() => {
+                gameContainer.style.transform = originalTransform;
+                gameContainer.style.position = originalPosition;
+            }, 350);
+        }
+
+        // Function to create pixel poof effect
+        function createPoofEffect(x, y, color) {
+            const particleCount = 30; // Number of particles
+            const particleSize = 4;  // Size of particles
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Set particle initial position at the center of the expense
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                // Set particle color based on expense type
+                particle.style.backgroundColor = color;
+                
+                // Set random particle size with slight variation
+                const size = particleSize + Math.random() * 3;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Add to game container
+                gameContainer.appendChild(particle);
+                
+                // Animate particle outward in random direction
+                const angle = Math.random() * Math.PI * 2; // Random angle in radians
+                const speed = 2 + Math.random() * 5; // Random speed
+                const distance = 30 + Math.random() * 60; // Random distance
+                
+                // Calculate end position
+                const endX = x + Math.cos(angle) * distance;
+                const endY = y + Math.sin(angle) * distance;
+                
+                // Set transition duration
+                const duration = 300 + Math.random() * 500; // 300-800ms duration
+                particle.style.transition = `all ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
+                
+                // Animate after a tiny delay to ensure the transition works
+                setTimeout(() => {
+                    particle.style.left = `${endX}px`;
+                    particle.style.top = `${endY}px`;
+                    particle.style.opacity = "0";
+                    particle.style.transform = "scale(0.1)";
+                }, 15);
+                
+                // Remove particle after animation is complete
+                setTimeout(() => {
+                    particle.remove();
+                }, duration + 50);
+            }
+        }
+
         // Function to start or restart the game
         function startGame() {
             // Make sure we have expense data before starting
@@ -320,7 +374,7 @@
             score = 0;
             expenses = [];
             currentFallSpeed = initialFallSpeed;
-            spawnInterval = 1500; // Faster initial spawn rate
+            spawnInterval = 750; // Faster initial spawn rate
             lastDifficultyIncrease = 0;
             spawnTimer = 0;
             isSpeedBoost = false;
@@ -402,6 +456,7 @@
                     };
                 }
                 
+                // DEBUG - Log expense type
                 console.log(`Creating ${expenseObj.type} expense: ${expenseObj.label} (${expenseObj.score})`);
                 
                 // Create the expense element
@@ -457,229 +512,6 @@
             player.style.left = `${playerX}px`;
         }
 
-        // Function to check for collisions between player and expenses
-        function checkCollisions() {
-            const playerRect = player.getBoundingClientRect();
-            
-            expenses.forEach(expense => {
-                const expenseRect = expense.element.getBoundingClientRect();
-                
-                // Check if the expense and player rectangles overlap
-                if (
-                    expenseRect.left < playerRect.right &&
-                    expenseRect.right > playerRect.left &&
-                    expenseRect.bottom > playerRect.top &&
-                    expenseRect.top < playerRect.bottom &&
-                    !expense.collided
-                ) {
-                    // Mark this expense as collided so we don't count it multiple times
-                    expense.collided = true;
-                    
-                    // Get the center position of the expense for the poof effect
-                    const expenseX = expenseRect.left + (expenseRect.width / 2);
-                    const expenseY = expenseRect.top + (expenseRect.height / 2);
-                    
-                    if (expense.type === 'bad') {
-                        // Successfully blocked a bad expense
-                        // Create pixel poof effect with red color
-                        createPoofEffect(expenseX, expenseY, '#FF0000');
-                        
-                        // Remove the expense element
-                        expense.element.remove();
-                        expense.toRemove = true;
-                    } else {
-                        // Penalize for blocking a good expense!
-                        score -= 10;
-                        scoreDisplay.textContent = `Score: ${score}`;
-                        
-                        // Trigger screen shake when blocking a good expense
-                        shakeScreen();
-                        
-                        // Create pixel poof effect with green color
-                        createPoofEffect(expenseX, expenseY, '#00FF00');
-                        
-                        // Add a visual indicator
-                        expense.element.style.backgroundColor = '#AA0000';
-                        expense.element.style.borderColor = '#FF0000';
-                        expense.element.textContent = '-10!';
-                        
-                        // Mark for removal
-                        setTimeout(() => {
-                            if (expense.element) {
-                                expense.element.remove();
-                                expense.toRemove = true;
-                            }
-                        }, 500);
-                        
-                        // Check if game over
-                        if (score < 0) {
-                            endGame();
-                        }
-                    }
-                }
-            });
-            
-            // Remove expenses marked for removal
-            expenses = expenses.filter(expense => !expense.toRemove);
-        }
-
-        // Function to create pixel poof effect
-        function createPoofEffect(x, y, color) {
-            const particleCount = 30; // Number of particles
-            const particleSize = 4;  // Size of particles
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                
-                // Set particle initial position at the center of the expense
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
-                
-                // Set particle color based on expense type
-                particle.style.backgroundColor = color;
-                
-                // Set random particle size with slight variation
-                const size = particleSize + Math.random() * 3;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                
-                // Add to game container
-                gameContainer.appendChild(particle);
-                
-                // Animate particle outward in random direction
-                const angle = Math.random() * Math.PI * 2; // Random angle in radians
-                const speed = 2 + Math.random() * 5; // Random speed
-                const distance = 30 + Math.random() * 60; // Random distance
-                
-                // Calculate end position
-                const endX = x + Math.cos(angle) * distance;
-                const endY = y + Math.sin(angle) * distance;
-                
-                // Set transition duration
-                const duration = 300 + Math.random() * 500; // 300-800ms duration
-                particle.style.transition = `all ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
-                
-                // Animate after a tiny delay to ensure the transition works
-                setTimeout(() => {
-                    particle.style.left = `${endX}px`;
-                    particle.style.top = `${endY}px`;
-                    particle.style.opacity = "0";
-                    particle.style.transform = "scale(0.1)";
-                }, 15);
-                
-                // Remove particle after animation is complete
-                setTimeout(() => {
-                    particle.remove();
-                }, duration + 50);
-            }
-        }
-
-        // Function to handle when an expense reaches the bottom
-        function handleExpenseAtBottom(expense) {
-            // Update score based on expense type
-            if (expense.type === 'good') {
-                // Good expense reached the bottom - add points
-                score += expense.score;
-            } else {
-                // Bad expense reached the bottom - subtract points
-                score += expense.score; // This is negative already
-                
-                // Trigger screen shake for bad expenses reaching the bottom
-                shakeScreen();
-            }
-            
-            // Update the score display
-            scoreDisplay.textContent = `Score: ${score}`;
-            
-            // Check if the game is over
-            if (score < 0) {
-                endGame();
-            }
-            
-            // Remove the expense
-            expense.element.remove();
-            expense.toRemove = true;
-        }
-
-        // Main game loop
-        function gameLoop(timestamp) {
-            if (!gameActive) return;
-            
-            // Calculate delta time (in seconds)
-            const deltaTime = (timestamp - lastFrameTime) / 1000;
-            
-            // Update spawn timer - fixed calculation
-            spawnTimer += (timestamp - lastFrameTime);
-            
-            // Debug info if needed
-            // console.log(`SpawnTimer: ${spawnTimer}, SpawnInterval: ${spawnInterval}, FallSpeed: ${currentFallSpeed}`);
-            
-            // Spawn a new expense if it's time
-            if (spawnTimer >= spawnInterval) {
-                if (expenseData) {
-                    spawnExpense();
-                    console.log("Spawned new expense"); // Debug
-                } else {
-                    console.log("No expense data available yet"); // Debug
-                }
-                spawnTimer = 0;
-            }
-            
-            // Check if it's time to increase difficulty
-            if (timestamp - lastDifficultyIncrease > difficultyIncreaseInterval) {
-                // Increase fall speed
-                currentFallSpeed = Math.min(maxFallSpeed, currentFallSpeed * fallSpeedIncreaseRate);
-                
-                // Decrease spawn interval
-                spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
-                
-                lastDifficultyIncrease = timestamp;
-                console.log(`Difficulty increased: Speed ${currentFallSpeed.toFixed(1)}, Interval ${spawnInterval.toFixed(1)}`); // Debug
-            }
-            
-            // Update expense positions and check for those that reached the bottom
-            for (let i = 0; i < expenses.length; i++) {
-                const expense = expenses[i];
-                if (!expense.element) continue; // Skip if element is missing
-                
-                // Apply speed boost if spacebar is pressed
-                const speedMultiplier = isSpeedBoost ? 2.5 : 1.0;
-                
-                // Update Y position based on fall speed with speed boost if active
-                expense.y += currentFallSpeed * deltaTime * speedMultiplier;
-                
-                // Update the element position
-                expense.element.style.top = `${expense.y}px`;
-                
-                // Check if it reached the bottom
-                if (expense.y > gameContainer.offsetHeight - 30) { // Adjusted for element height
-                    handleExpenseAtBottom(expense);
-                }
-            }
-            
-            // Visual indicator for speed boost
-            if (isSpeedBoost) {
-                player.style.backgroundColor = '#FF9900'; // Orange for speed boost
-                player.style.boxShadow = '0 0 10px #FFCC00'; // Glow effect
-            } else {
-                player.style.backgroundColor = '#FF0000'; // Return to normal color
-                player.style.boxShadow = 'none';
-            }
-            
-            // Clean up expenses marked for removal
-            expenses = expenses.filter(expense => !expense.toRemove);
-            
-            // Check for collisions
-            checkCollisions();
-            
-            // Update time for next frame
-            lastFrameTime = timestamp;
-            
-            // Continue the game loop
-            requestAnimationFrame(gameLoop);
-        }
-
         // Add event listener for mouse movement
         gameContainer.addEventListener('mousemove', handleMouseMove);
         
@@ -718,6 +550,178 @@
                 isSpeedBoost = false;
             }
         });
+
+        // Function to check for collisions between player and expenses
+        function checkCollisions() {
+            const playerRect = player.getBoundingClientRect();
+            
+            for (let i = 0; i < expenses.length; i++) {
+                const expense = expenses[i];
+                
+                if (!expense.element || expense.collided) continue;
+                
+                const expenseRect = expense.element.getBoundingClientRect();
+                
+                // Check if the expense and player rectangles overlap
+                if (
+                    expenseRect.left < playerRect.right &&
+                    expenseRect.right > playerRect.left &&
+                    expenseRect.bottom > playerRect.top &&
+                    expenseRect.top < playerRect.bottom
+                ) {
+                    // Mark this expense as collided so we don't count it multiple times
+                    expense.collided = true;
+                    
+                    // Get the center position of the expense for the poof effect
+                    const expenseX = expenseRect.left + (expenseRect.width / 2);
+                    const expenseY = expenseRect.top + (expenseRect.height / 2);
+                    
+                    if (expense.type === 'bad') {
+                        // Successfully blocked a bad expense
+                        console.log("Blocked bad expense!");
+                        
+                        // Create pixel poof effect with red color
+                        createPoofEffect(expenseX, expenseY, '#FF0000');
+                        
+                        // Remove the expense element
+                        expense.element.remove();
+                        expense.toRemove = true;
+                    } else {
+                        // Penalize for blocking a good expense!
+                        console.log("Blocked good expense - penalty!");
+                        score -= 10;
+                        scoreDisplay.textContent = `Score: ${score}`;
+                        
+                        // Trigger screen shake when blocking a good expense
+                        shakeScreen();
+                        
+                        // Create pixel poof effect with green color
+                        createPoofEffect(expenseX, expenseY, '#00FF00');
+                        
+                        // Remove the expense element
+                        expense.element.remove();
+                        expense.toRemove = true;
+                        
+                        // Check if game over
+                        if (score < 0) {
+                            endGame();
+                        }
+                    }
+                }
+            }
+            
+            // Remove expenses marked for removal
+            expenses = expenses.filter(expense => !expense.toRemove);
+        }
+
+        // Function to handle when an expense reaches the bottom
+        function handleExpenseAtBottom(expense) {
+            if (!expense.element) return;
+            
+            // Update score based on expense type
+            if (expense.type === 'good') {
+                // Good expense reached the bottom - add points
+                score += expense.score;
+                console.log("Good expense scored!");
+            } else {
+                // Bad expense reached the bottom - subtract points
+                score += expense.score; // This is negative already
+                console.log("Bad expense penalty!");
+                
+                // Trigger screen shake for bad expenses reaching the bottom
+                shakeScreen();
+            }
+            
+            // Update the score display
+            scoreDisplay.textContent = `Score: ${score}`;
+            
+            // Check if the game is over
+            if (score < 0) {
+                endGame();
+            }
+            
+            // Remove the expense
+            expense.element.remove();
+            expense.toRemove = true;
+        }
+
+        // Main game loop
+        function gameLoop(timestamp) {
+            if (!gameActive) return;
+            
+            // Calculate delta time (in seconds)
+            const deltaTime = (timestamp - lastFrameTime) / 1000;
+            
+            // Update spawn timer - fixed calculation
+            spawnTimer += (timestamp - lastFrameTime);
+            
+            // Debug info if needed
+            // console.log(`SpawnTimer: ${spawnTimer}, SpawnInterval: ${spawnInterval}, FallSpeed: ${currentFallSpeed}`);
+            
+            // Spawn a new expense if it's time
+            if (spawnTimer >= spawnInterval) {
+                if (expenseData) {
+                    spawnExpense();
+                    // console.log("Spawned new expense"); // Debug
+                } else {
+                    console.log("No expense data available yet"); // Debug
+                }
+                spawnTimer = 0;
+            }
+            
+            // Check if it's time to increase difficulty
+            if (timestamp - lastDifficultyIncrease > difficultyIncreaseInterval) {
+                // Increase fall speed
+                currentFallSpeed = Math.min(maxFallSpeed, currentFallSpeed * fallSpeedIncreaseRate);
+                
+                // Decrease spawn interval
+                spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
+                
+                lastDifficultyIncrease = timestamp;
+                console.log(`Difficulty increased: Speed ${currentFallSpeed.toFixed(1)}, Interval ${spawnInterval.toFixed(1)}`); // Debug
+            }
+            
+            // Update expense positions and check for those that reached the bottom
+            for (let i = 0; i < expenses.length; i++) {
+                const expense = expenses[i];
+                if (!expense.element) continue; // Skip if element is missing
+                
+                // Apply speed boost if spacebar is pressed
+                const speedMultiplier = isSpeedBoost ? 2.0 : 1.0;
+                
+                // Update Y position based on fall speed with speed boost if active
+                expense.y += currentFallSpeed * deltaTime * speedMultiplier;
+                
+                // Update the element position
+                expense.element.style.top = `${expense.y}px`;
+                
+                // Check if it reached the bottom
+                if (expense.y > gameContainer.offsetHeight - 30) { // Adjusted for element height
+                    handleExpenseAtBottom(expense);
+                }
+            }
+            
+            // Visual indicator for speed boost
+            if (isSpeedBoost) {
+                player.style.backgroundColor = '#FF9900'; // Orange for speed boost
+                player.style.boxShadow = '0 0 10px #FFCC00'; // Glow effect
+            } else {
+                player.style.backgroundColor = '#FF0000'; // Return to normal color
+                player.style.boxShadow = 'none';
+            }
+            
+            // Clean up expenses marked for removal
+            expenses = expenses.filter(expense => !expense.toRemove);
+            
+            // Check for collisions
+            checkCollisions();
+            
+            // Update time for next frame
+            lastFrameTime = timestamp;
+            
+            // Continue the game loop
+            requestAnimationFrame(gameLoop);
+        }
 
         // Update the game area width if window is resized
         window.addEventListener('resize', function() {
