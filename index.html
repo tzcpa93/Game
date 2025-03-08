@@ -3,231 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Manager Mania</title>
+    <title>Expense Management Mania</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Montserrat:wght@400;600&display=swap">
     <style>
-        /* Early-2000s nostalgic styling */
-        body {
-            font-family: 'Courier New', monospace;
-            background-color: #000033;
-            color: #00ff00;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            overflow-x: hidden;
-            cursor: default;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            box-sizing: border-box;
-        }
+    /* Mario-inspired styling */
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background-color: #6AB5FF; /* Sky blue from Mario 64 cover */
+        color: #ffffff;
+        text-align: center;
+        margin: 0;
+        padding: 20px;
+        overflow-x: hidden;
+        cursor: default;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+        box-sizing: border-box;
+    }
 
-        h1 {
-            font-size: 36px;
-            color: #ffff00;
-            text-shadow: 2px 2px #000000;
-            margin-bottom: 5px;
-        }
+    /* Game Title (Bangers) */
+    h1 {
+        font-family: 'Bangers', cursive;
+        font-size: 48px;
+        color: #FFDE00; /* Mario yellow */
+        text-shadow: 3px 3px #1C4DA1; /* Mario blue shadow */
+        margin-bottom: 5px;
+    }
 
-        .tagline {
-            font-size: 18px;
-            color: #00ccff;
-            margin-bottom: 20px;
-        }
+    .tagline {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 18px;
+        color: #1C4DA1; /* Mario blue */
+        margin-bottom: 20px;
+    }
 
-        .game-area {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            width: 100%;
-            max-width: 1200px;
-        }
+    .game-area {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1200px;
+    }
 
-        #score-panel {
-            width: 150px;
-            margin-right: 15px;
-            text-align: center;
-        }
+    #score-panel {
+        width: 150px;
+        margin-right: 15px;
+        text-align: center;
+    }
 
-        #score-display-outer, #timer-display-outer {
-            background-color: #000044;
-            border: 2px solid #00ff00;
-            padding: 15px;
-            font-size: 24px;
-            color: #ffff00;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
+    /* "Time" & "Score" headings (Bangers), with Mario-inspired colors */
+    #score-display-outer, 
+    #timer-display-outer {
+        background-color: #FF4C4C;  /* Mario red */
+        border: 3px solid #FFDE00; /* Mario yellow */
+        padding: 15px;
+        font-size: 24px;
+        color: #ffffff;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        font-family: 'Bangers', cursive; 
+    }
 
-        #game-container {
-            position: relative;
-            width: 800px;
-            height: 600px;
-            border: 3px solid #00ff00;
-            background-color: #000022;
-            overflow: hidden;
-            cursor: none; /* Hide cursor during gameplay */
-        }
+    #game-container {
+        position: relative;
+        width: 800px;
+        height: 600px;
+        border: 3px solid #FFDE00; /* Mario yellow */
+        background-color: #1C4DA1;  /* Mario blue */
+        overflow: hidden;
+        cursor: none; /* Hide cursor during gameplay */
+    }
 
-        #game-instructions {
-            width: 200px;
-            margin-left: 15px;
-            background-color: #000044;
-            border: 2px solid #00ff00;
-            padding: 15px;
-            font-size: 16px;
-            line-height: 1.5;
-            text-align: left;
-            border-radius: 5px;
-        }
+    /* Instructions on the right side (Montserrat) */
+    #game-instructions {
+        width: 200px;
+        margin-left: 15px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 2px dashed #FF4C4C; /* Mario red */
+        padding: 15px;
+        font-size: 16px;
+        line-height: 1.5;
+        text-align: left;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+        color: #1C4DA1; /* Mario blue */
+    }
 
-        #score-display {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 24px;
-            color: #ffff00;
-            text-shadow: 2px 2px #000000;
-            z-index: 10;
-        }
+    /* Actual "Score" text */
+    #score-display {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 24px;
+        color: #ffffff;
+        text-shadow: 2px 2px #1C4DA1;
+        z-index: 10;
+        font-family: 'Bangers', cursive;
+    }
 
-        #player {
-            position: absolute;
-            bottom: 10px;
-            width: 100px;
-            height: 20px;
-            background-color: #ff0000;
-            border: 2px solid #ffffff;
-            transform: translateX(-50%);
-            z-index: 5;
-        }
+    /* Player "paddle" */
+    #player {
+        position: absolute;
+        bottom: 10px;
+        width: 100px;
+        height: 20px;
+        background-color: #FF4C4C; /* Mario red */
+        border: 2px solid #ffffff;
+        transform: translateX(-50%);
+        z-index: 5;
+    }
 
-        .expense {
-            position: absolute;
-            width: 100px;
-            height: 30px;
-            text-align: center;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            user-select: none;
-        }
+    /* Falling expenses */
+    .expense {
+        position: absolute;
+        width: 100px;
+        height: 30px;
+        text-align: center;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        user-select: none;
+        font-family: 'Montserrat', sans-serif;
+    }
 
-        .good-expense {
-            background-color: #00aa00;
-            border: 2px solid #00ff00;
-            color: white;
-        }
+    /* Good expense (lighter green so it's not dark) */
+    .good-expense {
+        background-color: #00AA00;
+        border: 2px solid #FFDE00;
+        color: #ffffff;
+    }
 
-        .bad-expense {
-            background-color: #aa0000;
-            border: 2px solid #ff0000;
-            color: white;
-        }
-        
-        /* Poof particle effect */
-        .particle {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            opacity: 1;
-            transition: all 0.5s ease-out;
-            z-index: 4;
-        }
+    /* Bad expense (Mario red) */
+    .bad-expense {
+        background-color: #FF4C4C;
+        border: 2px solid #FFDE00;
+        color: #ffffff;
+    }
+    
+    /* Poof particle effect */
+    .particle {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        background-color: #ffffff;
+        border-radius: 50%;
+        opacity: 1;
+        transition: all 0.5s ease-out;
+        z-index: 4;
+    }
 
-        #game-over {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #ff0000;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-        }
+    /* Game Over overlay (Bangers) */
+    #game-over {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+        color: #ffffff;
+        font-family: 'Bangers', cursive;
+    }
 
-        #game-over h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-            text-shadow: 3px 3px 0px #000000;
-        }
+    #game-over h1 {
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #FF4C4C; /* Mario red */
+        text-shadow: 3px 3px #1C4DA1;
+    }
 
-        #final-score {
-            font-size: 32px;
-            margin-bottom: 30px;
-            color: #ffff00;
-        }
+    #final-score {
+        font-size: 32px;
+        margin-bottom: 30px;
+        color: #FFDE00;  /* Mario yellow */
+        text-shadow: 2px 2px #1C4DA1;
+        font-family: 'Montserrat', sans-serif;
+    }
 
-        #restart-button {
-            padding: 10px 20px;
-            font-size: 24px;
-            background-color: #0000aa;
-            color: #ffffff;
-            border: 3px solid #0000ff;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
+    /* "Play Again" button */
+    #restart-button {
+        padding: 10px 20px;
+        font-size: 24px;
+        background-color: #FF4C4C;
+        color: #ffffff;
+        border: 3px solid #FFDE00;
+        cursor: pointer;
+        font-family: 'Bangers', cursive;
+        border-radius: 5px;
+    }
 
-        #restart-button:hover {
-            background-color: #0000ff;
-        }
+    #restart-button:hover {
+        background-color: #FFDE00; /* Mario yellow */
+        color: #1C4DA1;           /* Mario blue */
+    }
 
-        #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 50, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-        }
+    /* Start screen */
+    #start-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 50, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+    }
 
-        #start-screen h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #ffff00;
-            text-shadow: 3px 3px 0px #000000;
-        }
+    #start-screen h1 {
+        font-family: 'Bangers', cursive;
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #FFDE00;
+        text-shadow: 3px 3px #1C4DA1;
+    }
 
-        #start-button {
-            padding: 10px 20px;
-            font-size: 24px;
-            background-color: #0000aa;
-            color: #ffffff;
-            border: 3px solid #0000ff;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
+    #start-button {
+        padding: 10px 20px;
+        font-size: 24px;
+        background-color: #FF4C4C;
+        color: #ffffff;
+        border: 3px solid #FFDE00;
+        cursor: pointer;
+        font-family: 'Bangers', cursive;
+        border-radius: 5px;
+    }
 
-        #start-button:hover {
-            background-color: #0000ff;
-        }
+    #start-button:hover {
+        background-color: #FFDE00;
+        color: #1C4DA1;
+    }
 
-        #instructions {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 10px;
-            border: 2px dashed #00ff00;
-            font-size: 16px;
-            text-align: left;
-        }
+    /* Instructions modal on start screen */
+    #instructions {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 10px;
+        border: 2px dashed #FF4C4C;
+        font-size: 16px;
+        text-align: left;
+        font-family: 'Montserrat', sans-serif;
+        color: #1C4DA1;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 5px;
+    }
 
-        #instructions p {
-            margin: 10px 0;
-        }
-    </style>
+    #instructions p {
+        margin: 10px 0;
+    }
+</style>
+
 </head>
 <body>
     <h1>Expense Management Mania</h1>
