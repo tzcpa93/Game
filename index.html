@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Manager Mania</title>
     <style>
+        /* Mario-inspired styling */
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #5B9BD5;
+            background-color: #5B9BD5; /* Sky blue background from Mario 64 */
             color: #FFFFFF;
             text-align: center;
             margin: 0;
             padding: 20px;
             overflow-x: hidden;
+            cursor: default;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -22,8 +24,8 @@
 
         h1 {
             font-size: 36px;
-            color: #FFDD00;
-            text-shadow: 2px 2px #CC0000;
+            color: #FFDD00; /* Mario yellow */
+            text-shadow: 2px 2px #CC0000; /* Red shadow like Mario's cap */
             font-weight: bold;
             margin-bottom: 5px;
         }
@@ -49,8 +51,8 @@
         }
 
         #score-display-outer, #timer-display-outer {
-            background-color: #4166F5;
-            border: 2px solid #FFDD00;
+            background-color: #4166F5; /* Mario blue */
+            border: 2px solid #FFDD00; /* Mario yellow */
             padding: 15px;
             font-size: 24px;
             color: #FFFFFF;
@@ -62,9 +64,10 @@
             position: relative;
             width: 800px;
             height: 600px;
-            border: 3px solid #CC0000;
-            background-color: #8FDB5C;
+            border: 3px solid #CC0000; /* Mario red */
+            background-color: #8FDB5C; /* Mario grass green */
             overflow: hidden;
+            cursor: none; /* Hide cursor during gameplay */
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
@@ -72,8 +75,8 @@
         #game-instructions {
             width: 200px;
             margin-left: 15px;
-            background-color: #4166F5;
-            border: 2px solid #FFDD00;
+            background-color: #4166F5; /* Mario blue */
+            border: 2px solid #FFDD00; /* Mario yellow */
             padding: 15px;
             font-size: 16px;
             line-height: 1.5;
@@ -82,12 +85,22 @@
             color: #FFFFFF;
         }
 
+        #score-display {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: #FFDD00; /* Mario yellow */
+            text-shadow: 2px 2px #000000;
+            z-index: 10;
+        }
+
         #player {
             position: absolute;
             bottom: 10px;
             width: 100px;
             height: 20px;
-            background-color: #CC0000;
+            background-color: #CC0000; /* Mario red */
             border: 2px solid #FFFFFF;
             transform: translateX(-50%);
             z-index: 5;
@@ -110,15 +123,27 @@
         }
 
         .good-expense {
-            background-color: #8FDB5C;
+            background-color: #8FDB5C; /* Mario grass green */
             border: 2px solid #57A639;
             color: #FFFFFF;
         }
 
         .bad-expense {
-            background-color: #CC0000;
+            background-color: #CC0000; /* Mario red */
             border: 2px solid #990000;
             color: #FFFFFF;
+        }
+        
+        /* Poof particle effect */
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: #FFFF00;
+            border-radius: 50%;
+            opacity: 1;
+            transition: all 0.5s ease-out;
+            z-index: 4;
         }
 
         #game-over {
@@ -129,7 +154,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
-            color: #CC0000;
+            color: #CC0000; /* Mario red */
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -146,15 +171,15 @@
         #final-score {
             font-size: 32px;
             margin-bottom: 30px;
-            color: #FFDD00;
+            color: #FFDD00; /* Mario yellow */
         }
 
-        #restart-button, #start-button {
+        #restart-button {
             padding: 10px 20px;
             font-size: 24px;
-            background-color: #CC0000;
+            background-color: #CC0000; /* Mario red */
             color: #FFFFFF;
-            border: 3px solid #FFDD00;
+            border: 3px solid #FFDD00; /* Mario yellow */
             cursor: pointer;
             font-family: 'Arial', sans-serif;
             border-radius: 10px;
@@ -162,7 +187,7 @@
             transition: all 0.2s ease;
         }
 
-        #restart-button:hover, #start-button:hover {
+        #restart-button:hover {
             background-color: #FF0000;
             transform: scale(1.05);
         }
@@ -173,7 +198,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(65, 102, 245, 0.9);
+            background-color: rgba(65, 102, 245, 0.9); /* Mario blue with transparency */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -185,15 +210,33 @@
         #start-screen h1 {
             font-size: 48px;
             margin-bottom: 20px;
-            color: #FFDD00;
-            text-shadow: 3px 3px 0px #CC0000;
+            color: #FFDD00; /* Mario yellow */
+            text-shadow: 3px 3px 0px #CC0000; /* Red shadow */
+        }
+
+        #start-button {
+            padding: 10px 20px;
+            font-size: 24px;
+            background-color: #CC0000; /* Mario red */
+            color: #FFFFFF;
+            border: 3px solid #FFDD00; /* Mario yellow */
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        #start-button:hover {
+            background-color: #FF0000;
+            transform: scale(1.05);
         }
 
         #instructions {
             max-width: 600px;
             margin: 20px auto;
             padding: 15px;
-            border: 2px solid #FFDD00;
+            border: 2px solid #FFDD00; /* Mario yellow */
             font-size: 16px;
             text-align: left;
             background-color: rgba(0, 0, 0, 0.7);
@@ -223,19 +266,21 @@
         
         <div id="game-container">
             <div id="player"></div>
+
             <div id="start-screen">
                 <h1>Expense Manager Mania!</h1>
                 <div id="instructions">
                     <p>You are the company's Expense Manager!</p>
-                    <p>- <span style="color: #8FDB5C;">GREEN expenses</span> are legitimate. Let them reach the bottom for +1 point.</p>
+                    <p>- <span style="color: #8FDB5C;">GREEN expenses</span> are legitimate business expenses. Let them reach the bottom for +1 point.</p>
                     <p>- CAUTION: Blocking green expenses costs you 10 points!</p>
-                    <p>- <span style="color: #CC0000;">RED expenses</span> are unauthorized! Block them or lose points!</p>
-                    <p>- Move mouse or use LEFT/RIGHT arrows to control the blocker</p>
-                    <p>- Hold SPACEBAR to speed up (bonus challenge!)</p>
-                    <p>- Score below 0 = FIRED!</p>
+                    <p>- <span style="color: #CC0000;">RED expenses</span> are unauthorized! Block them with your red blocker or lose points!</p>
+                    <p>- Move your mouse or use LEFT/RIGHT arrow keys to control the blocker</p>
+                    <p>- Hold SPACEBAR to speed up the game (for bonus challenge!)</p>
+                    <p>- If your score goes below 0, you're FIRED!</p>
                 </div>
                 <button id="start-button">START GAME</button>
             </div>
+
             <div id="game-over">
                 <h1>GAME OVER</h1>
                 <div id="final-message">You lasted 0:00 before fraud ruined your business</div>
@@ -244,169 +289,274 @@
         </div>
         
         <div id="game-instructions">
-            Move mouse left/right to block bad expenses.<br><br>
+            Move mouse left and right to block bad expenses.<br><br>
             Don't block good expenses!<br><br>
-            Press spacebar to speed up.<br><br>
-            Negative score = game over!
+            Press space bar to speed up.<br><br>
+            If your score goes negative, you lose!
         </div>
     </div>
 
     <script>
         // Game variables
-        const gameContainer = document.getElementById('game-container');
-        const player = document.getElementById('player');
-        const scoreDisplay = document.getElementById('score-display');
-        const timerDisplay = document.getElementById('timer-display');
-        const startScreen = document.getElementById('start-screen');
-        const gameOverScreen = document.getElementById('game-over');
-        const finalMessageDisplay = document.getElementById('final-message');
-        const startButton = document.getElementById('start-button');
-        const restartButton = document.getElementById('restart-button');
-
         let gameActive = false;
         let score = 0;
-        let gameTime = 0;
+        let gameTime = 0; 
         let expenses = [];
+        let player = document.getElementById('player');
+        let gameContainer = document.getElementById('game-container');
+        let scoreDisplay = document.getElementById('score-display');
+        let timerDisplay = document.getElementById('timer-display');
+        let gameOverScreen = document.getElementById('game-over');
+        let finalMessageDisplay = document.getElementById('final-message');
+        let restartButton = document.getElementById('restart-button');
+        let startScreen = document.getElementById('start-screen');
+        let startButton = document.getElementById('start-button');
         let lastFrameTime = 0;
         let spawnTimer = 0;
         let spawnInterval = 750;
-        let fallSpeed = 200;
-        let playerX = 400;
+        let minSpawnInterval = 300;
+        let difficultyIncreaseRate = 0.90;
+        let difficultyIncreaseInterval = 5000;
+        let lastDifficultyIncrease = 0;
+        let initialFallSpeed = 200;
+        let currentFallSpeed = initialFallSpeed;
+        let maxFallSpeed = 500;
+        let fallSpeedIncreaseRate = 1.15;
+        let isSpeedBoost = false;
+        let gameAreaWidth = gameContainer.offsetWidth;
 
+        // Expense data
         const expenseData = {
-            good: ["Office Supplies", "CRM Subscription", "Hotels for Conference", "Business Lunch", "Software License"],
+            good: [
+                "Office Supplies",
+                "CRM Subscription", 
+                "Hotels for Conference",
+                "Business Lunch",
+                "Software License"
+            ],
             bad: [
                 { label: "Strippers", score: -100 },
                 { label: "Netflix", score: -25 },
-                { label: "Happy Hour", score: -10 },
-                { label: "Amazon", score: -20 },
-                { label: "Casino", score: -50 }
+                { label: "Happy hour no receipt", score: -10 },
+                { label: "Personal Amazon", score: -20 },
+                { label: "Casino Chips", score: -50 }
             ]
         };
 
-        // Event listeners
+        // Start button click handler
         startButton.addEventListener('click', startGame);
+
+        // Restart button click handler
         restartButton.addEventListener('click', startGame);
 
-        document.addEventListener('mousemove', (e) => {
-            if (gameActive) {
-                const rect = gameContainer.getBoundingClientRect();
-                playerX = Math.max(50, Math.min(750, e.clientX - rect.left));
-                player.style.left = `${playerX}px`;
+        // Function to create screen shake effect
+        function shakeScreen() {
+            // Save the original position
+            const originalPosition = gameContainer.style.position;
+            const originalTransform = gameContainer.style.transform;
+            
+            // Apply the shake
+            gameContainer.style.position = 'relative';
+            
+            // Shake sequence
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
+            setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
+            setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
+            
+            // Reset to original position
+            setTimeout(() => {
+                gameContainer.style.transform = originalTransform;
+                gameContainer.style.position = originalPosition;
+            }, 350);
+        }
+
+        // Function to create pixel poof effect
+        function createPoofEffect(x, y, color) {
+            const particleCount = 30; // Number of particles
+            const particleSize = 4;  // Size of particles
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Set particle initial position at the center of the expense
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                // Set particle color based on expense type
+                particle.style.backgroundColor = color;
+                
+                // Set random particle size with slight variation
+                const size = particleSize + Math.random() * 3;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Add to game container
+                gameContainer.appendChild(particle);
+                
+                // Animate particle outward in random direction
+                const angle = Math.random() * Math.PI * 2; // Random angle in radians
+                const speed = 2 + Math.random() * 5; // Random speed
+                const distance = 30 + Math.random() * 60; // Random distance
+                
+                // Calculate end position
+                const endX = x + Math.cos(angle) * distance;
+                const endY = y + Math.sin(angle) * distance;
+                
+                // Set transition duration
+                const duration = 300 + Math.random() * 500; // 300-800ms duration
+                particle.style.transition = `all ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
+                
+                // Animate after a tiny delay to ensure the transition works
+                setTimeout(() => {
+                    particle.style.left = `${endX}px`;
+                    particle.style.top = `${endY}px`;
+                    particle.style.opacity = "0";
+                    particle.style.transform = "scale(0.1)";
+                }, 15);
+                
+                // Remove particle after animation is complete
+                setTimeout(() => {
+                    particle.remove();
+                }, duration + 50);
             }
-        });
+        }
 
-        document.addEventListener('keydown', (e) => {
-            if (gameActive) {
-                if (e.key === 'ArrowLeft') playerX = Math.max(50, playerX - 20);
-                if (e.key === 'ArrowRight') playerX = Math.min(750, playerX + 20);
-                if (e.key === ' ') fallSpeed = 400;
-                player.style.left = `${playerX}px`;
-            }
-        });
-
-        document.addEventListener('keyup', (e) => {
-            if (e.key === ' ' && gameActive) fallSpeed = 200;
-        });
-
-        // Game functions
+        // Function to format time as MM:SS
+        function formatTime(timeInSeconds) {
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = Math.floor(timeInSeconds % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Function to start or restart the game
         function startGame() {
-            gameActive = true;
+            // Reset game state
             score = 0;
             gameTime = 0;
             expenses = [];
+            currentFallSpeed = initialFallSpeed;
+            spawnInterval = 750;
+            lastDifficultyIncrease = 0;
             spawnTimer = 0;
-            playerX = 400;
-            player.style.left = `${playerX}px`;
-
-            scoreDisplay.textContent = score;
-            timerDisplay.textContent = '0:00';
+            isSpeedBoost = false;
+            
+            // Clear any existing expenses
+            document.querySelectorAll('.expense').forEach(expense => expense.remove());
+            
+            // Update the score display
+            scoreDisplay.textContent = `${score}`;
+            timerDisplay.textContent = formatTime(gameTime);
+            
+            // Hide the start screen and game over screen
             startScreen.style.display = 'none';
             gameOverScreen.style.display = 'none';
-
-            document.querySelectorAll('.expense').forEach(e => e.remove());
+            
+            // Set game as active
+            gameActive = true;
+            
+            // Start the game loop
             lastFrameTime = performance.now();
-            gameLoop();
-        }
-
-        function gameLoop(currentTime) {
-            if (!gameActive) return;
-
-            const deltaTime = (currentTime - lastFrameTime) / 1000;
-            lastFrameTime = currentTime;
-
-            // Update timer
-            gameTime += deltaTime;
-            timerDisplay.textContent = formatTime(gameTime);
-
-            // Spawn expenses
-            spawnTimer += deltaTime * 1000;
-            if (spawnTimer >= spawnInterval) {
-                spawnExpense();
-                spawnTimer = 0;
-            }
-
-            // Update expenses
-            expenses.forEach((expense, index) => {
-                expense.y += fallSpeed * deltaTime;
-                expense.element.style.top = `${expense.y}px`;
-
-                // Collision detection
-                if (expense.y + 30 > 570 && expense.y < 600) {
-                    if (Math.abs(playerX - expense.x) < 75) {
-                        if (expense.type === 'good') score -= 10;
-                        else score += Math.abs(expense.score);
-                        expenses.splice(index, 1);
-                        expense.element.remove();
-                    }
-                } else if (expense.y > 600) {
-                    if (expense.type === 'good') score += 1;
-                    else score += expense.score;
-                    expenses.splice(index, 1);
-                    expense.element.remove();
-                }
-            });
-
-            // Update score and check game over
-            scoreDisplay.textContent = score;
-            if (score < 0) {
-                gameActive = false;
-                finalMessageDisplay.textContent = `You lasted ${formatTime(gameTime)} before fraud ruined your business`;
-                gameOverScreen.style.display = 'flex';
-                return;
-            }
-
             requestAnimationFrame(gameLoop);
+            
+            // Force spawn first expense immediately
+            setTimeout(() => {
+                if (gameActive) spawnExpense();
+            }, 500);
         }
 
+        // Function to end the game
+        function endGame() {
+            gameActive = false;
+            finalMessageDisplay.textContent = `You lasted ${formatTime(gameTime)} before fraud ruined your business`;
+            gameOverScreen.style.display = 'flex';
+        }
+
+        // Function to spawn a new expense
         function spawnExpense() {
-            const isGood = Math.random() < 0.7;
-            const data = isGood ? expenseData.good : expenseData.bad;
-            const item = isGood ? data[Math.floor(Math.random() * data.length)] : data[Math.floor(Math.random() * data.length)];
-
+            if (!gameActive) return;
+            
+            // Decide if this will be a good or bad expense - 90% chance for good expenses
+            const isGood = Math.random() < 0.9;
+            
+            let expenseObj;
+            
+            if (isGood) {
+                // Choose a random good expense
+                const randomIndex = Math.floor(Math.random() * expenseData.good.length);
+                expenseObj = {
+                    label: expenseData.good[randomIndex],
+                    score: 1,
+                    type: 'good'
+                };
+            } else {
+                // Choose a random bad expense
+                const randomIndex = Math.floor(Math.random() * expenseData.bad.length);
+                expenseObj = {
+                    label: expenseData.bad[randomIndex].label,
+                    score: expenseData.bad[randomIndex].score,
+                    type: 'bad'
+                };
+            }
+            
+            // Create the expense element
             const expense = document.createElement('div');
-            expense.classList.add('expense', isGood ? 'good-expense' : 'bad-expense');
-            expense.textContent = isGood ? item : item.label;
-
-            const x = Math.random() * (750 - 50) + 50;
-            expense.style.left = `${x}px`;
-            expense.style.top = '0px';
+            expense.classList.add('expense');
+            expense.classList.add(isGood ? 'good-expense' : 'bad-expense');
+            expense.textContent = expenseObj.label;
+            
+            // Set its initial position
+            // Random X position, staying within the bounds of the game area
+            const containerWidth = gameContainer.offsetWidth;
+            const expenseWidth = 100;
+            const maxX = containerWidth - expenseWidth;
+            const randomX = Math.floor(Math.random() * maxX);
+            
+            expense.style.left = `${randomX}px`;
+            expense.style.top = '-30px'; // Start above the game area
+            
+            // Add to the DOM
             gameContainer.appendChild(expense);
-
+            
+            // Store the expense object and element
             expenses.push({
                 element: expense,
-                x: x,
-                y: 0,
-                type: isGood ? 'good' : 'bad',
-                score: isGood ? 1 : item.score
+                x: randomX,
+                y: -30,
+                width: expenseWidth,
+                height: 30,
+                type: expenseObj.type,
+                score: expenseObj.score,
+                collided: false,
+                toRemove: false
             });
         }
 
-        function formatTime(time) {
-            const minutes = Math.floor(time / 60);
-            const seconds = Math.floor(time % 60);
-            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        // Function to handle mouse movement
+        function handleMouseMove(event) {
+            if (!gameActive) return;
+            
+            // Get the mouse X position relative to the game container
+            const containerRect = gameContainer.getBoundingClientRect();
+            const relativeX = event.clientX - containerRect.left;
+            
+            // Keep the player within the game container bounds
+            const playerWidth = player.offsetWidth;
+            const maxX = containerRect.width - playerWidth / 2;
+            const minX = playerWidth / 2;
+            
+            let playerX = Math.max(minX, Math.min(relativeX, maxX));
+            
+            // Set the player position
+            player.style.left = `${playerX}px`;
         }
-    </script>
-</body>
-</html>
+
+        // Add event listener for mouse movement
+        gameContainer.addEventListener('mousemove', handleMouseMove);
+        
+        // Add keyboard controls (left and right arrow keys, spacebar for speed boost)
+        window.addEventListener('keydown', function(event) {
