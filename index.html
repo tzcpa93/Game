@@ -1,4 +1,27 @@
-<!DOCTYPE html>
+// Function to create screen shake effect
+        function shakeScreen() {
+            // Save the original position
+            const originalPosition = gameContainer.style.position;
+            const originalTransform = gameContainer.style.transform;
+            
+            // Apply the shake
+            gameContainer.style.position = 'relative';
+            
+            // Shake sequence
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
+            setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
+            setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
+            
+            // Reset to original position
+            setTimeout(() => {
+                gameContainer.style.transform = originalTransform;
+                gameContainer.style.position = originalPosition;
+            }, 350);
+        }<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -70,6 +93,18 @@
             background-color: #aa0000;
             border: 2px solid #ff0000;
             color: white;
+        }
+        
+        /* Poof particle effect */
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            opacity: 1;
+            transition: all 0.5s ease-out;
+            z-index: 4;
         }
 
         #game-over {
@@ -172,8 +207,10 @@
             <div id="instructions">
                 <p>You are the company's Expense Manager!</p>
                 <p>- <span style="color: #00ff00;">GREEN expenses</span> are legitimate business expenses. Let them reach the bottom for +1 point.</p>
+                <p>- CAUTION: Blocking green expenses costs you 10 points!</p>
                 <p>- <span style="color: #ff0000;">RED expenses</span> are unauthorized! Block them with your red blocker or lose points!</p>
-                <p>- Move your mouse left and right to control the blocker</p>
+                <p>- Move your mouse or use LEFT/RIGHT arrow keys to control the blocker</p>
+                <p>- Hold SPACEBAR to speed up the game (for bonus challenge!)</p>
                 <p>- If your score goes below 0, you're FIRED!</p>
             </div>
             <button id="start-button">START GAME</button>
@@ -201,17 +238,18 @@
         let startButton = document.getElementById('start-button');
         let lastFrameTime = 0;
         let spawnTimer = 0;
-        let spawnInterval = 2000; // milliseconds between spawns (initial)
-        let minSpawnInterval = 500; // Minimum spawn interval (maximum difficulty)
-        let difficultyIncreaseRate = 0.95; // Rate at which spawn interval decreases
-        let difficultyIncreaseInterval = 10000; // How often to increase difficulty (milliseconds)
+        let spawnInterval = 1500; // milliseconds between spawns (initial) - faster start
+        let minSpawnInterval = 400; // Minimum spawn interval (maximum difficulty)
+        let difficultyIncreaseRate = 0.90; // Rate at which spawn interval decreases - faster progression
+        let difficultyIncreaseInterval = 5000; // How often to increase difficulty (milliseconds) - more frequent increases
         let lastDifficultyIncrease = 0;
-        let initialFallSpeed = 100; // pixels per second (initial)
+        let initialFallSpeed = 150; // pixels per second (initial) - faster start
         let currentFallSpeed = initialFallSpeed;
-        let maxFallSpeed = 300; // Maximum fall speed (pixels per second)
-        let fallSpeedIncreaseRate = 1.1; // Rate at which fall speed increases
+        let maxFallSpeed = 400; // Maximum fall speed (pixels per second) - higher max speed
+        let fallSpeedIncreaseRate = 1.15; // Rate at which fall speed increases - faster progression
         let expenseData = null;
         let gameAreaWidth = 800;
+        let isSpeedBoost = false; // Track if speed boost is active
 
         // Function to fetch the expense data from data.json
         function fetchExpenseData() {
@@ -282,9 +320,10 @@
             score = 0;
             expenses = [];
             currentFallSpeed = initialFallSpeed;
-            spawnInterval = 2000;
+            spawnInterval = 1500; // Faster initial spawn rate
             lastDifficultyIncrease = 0;
             spawnTimer = 0;
+            isSpeedBoost = false;
             
             // Clear any existing expenses
             document.querySelectorAll('.expense').forEach(expense => expense.remove());
@@ -328,8 +367,8 @@
                 return; // Don't spawn if game isn't active
             }
             
-            // Decide if this will be a good or bad expense
-            const isGood = Math.random() < 0.6; // 60% chance of good expenses
+            // Decide if this will be a good or bad expense - 90% chance for good expenses
+            const isGood = Math.random() < 0.9; // 90% chance of good expenses
             
             let expenseObj;
             try {
@@ -425,23 +464,57 @@
             expenses.forEach(expense => {
                 const expenseRect = expense.element.getBoundingClientRect();
                 
-                // Only check for collisions with bad expenses that haven't been marked as collided
-                if (expense.type === 'bad' && !expense.collided) {
-                    // Check if the expense and player rectangles overlap
-                    if (
-                        expenseRect.left < playerRect.right &&
-                        expenseRect.right > playerRect.left &&
-                        expenseRect.bottom > playerRect.top &&
-                        expenseRect.top < playerRect.bottom
-                    ) {
-                        // Mark this expense as collided so we don't count it multiple times
-                        expense.collided = true;
+                // Check if the expense and player rectangles overlap
+                if (
+                    expenseRect.left < playerRect.right &&
+                    expenseRect.right > playerRect.left &&
+                    expenseRect.bottom > playerRect.top &&
+                    expenseRect.top < playerRect.bottom &&
+                    !expense.collided
+                ) {
+                    // Mark this expense as collided so we don't count it multiple times
+                    expense.collided = true;
+                    
+                    // Get the center position of the expense for the poof effect
+                    const expenseX = expenseRect.left + (expenseRect.width / 2);
+                    const expenseY = expenseRect.top + (expenseRect.height / 2);
+                    
+                    if (expense.type === 'bad') {
+                        // Successfully blocked a bad expense
+                        // Create pixel poof effect with red color
+                        createPoofEffect(expenseX, expenseY, '#FF0000');
                         
                         // Remove the expense element
                         expense.element.remove();
+                        expense.toRemove = true;
+                    } else {
+                        // Penalize for blocking a good expense!
+                        score -= 10;
+                        scoreDisplay.textContent = `Score: ${score}`;
+                        
+                        // Trigger screen shake when blocking a good expense
+                        shakeScreen();
+                        
+                        // Create pixel poof effect with green color
+                        createPoofEffect(expenseX, expenseY, '#00FF00');
+                        
+                        // Add a visual indicator
+                        expense.element.style.backgroundColor = '#AA0000';
+                        expense.element.style.borderColor = '#FF0000';
+                        expense.element.textContent = '-10!';
                         
                         // Mark for removal
-                        expense.toRemove = true;
+                        setTimeout(() => {
+                            if (expense.element) {
+                                expense.element.remove();
+                                expense.toRemove = true;
+                            }
+                        }, 500);
+                        
+                        // Check if game over
+                        if (score < 0) {
+                            endGame();
+                        }
                     }
                 }
             });
@@ -450,29 +523,56 @@
             expenses = expenses.filter(expense => !expense.toRemove);
         }
 
-        // Function to create screen shake effect
-        function shakeScreen() {
-            // Save the original position
-            const originalPosition = gameContainer.style.position;
-            const originalTransform = gameContainer.style.transform;
+        // Function to create pixel poof effect
+        function createPoofEffect(x, y, color) {
+            const particleCount = 30; // Number of particles
+            const particleSize = 4;  // Size of particles
             
-            // Apply the shake
-            gameContainer.style.position = 'relative';
-            
-            // Shake sequence
-            setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
-            setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
-            setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
-            setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
-            
-            // Reset to original position
-            setTimeout(() => {
-                gameContainer.style.transform = originalTransform;
-                gameContainer.style.position = originalPosition;
-            }, 350);
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Set particle initial position at the center of the expense
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                // Set particle color based on expense type
+                particle.style.backgroundColor = color;
+                
+                // Set random particle size with slight variation
+                const size = particleSize + Math.random() * 3;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Add to game container
+                gameContainer.appendChild(particle);
+                
+                // Animate particle outward in random direction
+                const angle = Math.random() * Math.PI * 2; // Random angle in radians
+                const speed = 2 + Math.random() * 5; // Random speed
+                const distance = 30 + Math.random() * 60; // Random distance
+                
+                // Calculate end position
+                const endX = x + Math.cos(angle) * distance;
+                const endY = y + Math.sin(angle) * distance;
+                
+                // Set transition duration
+                const duration = 300 + Math.random() * 500; // 300-800ms duration
+                particle.style.transition = `all ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
+                
+                // Animate after a tiny delay to ensure the transition works
+                setTimeout(() => {
+                    particle.style.left = `${endX}px`;
+                    particle.style.top = `${endY}px`;
+                    particle.style.opacity = "0";
+                    particle.style.transform = "scale(0.1)";
+                }, 15);
+                
+                // Remove particle after animation is complete
+                setTimeout(() => {
+                    particle.remove();
+                }, duration + 50);
+            }
         }
 
         // Function to handle when an expense reaches the bottom
@@ -485,7 +585,7 @@
                 // Bad expense reached the bottom - subtract points
                 score += expense.score; // This is negative already
                 
-                // Trigger screen shake
+                // Trigger screen shake for bad expenses reaching the bottom
                 shakeScreen();
             }
             
@@ -543,8 +643,11 @@
                 const expense = expenses[i];
                 if (!expense.element) continue; // Skip if element is missing
                 
-                // Update Y position based on fall speed
-                expense.y += currentFallSpeed * deltaTime;
+                // Apply speed boost if spacebar is pressed
+                const speedMultiplier = isSpeedBoost ? 2.5 : 1.0;
+                
+                // Update Y position based on fall speed with speed boost if active
+                expense.y += currentFallSpeed * deltaTime * speedMultiplier;
                 
                 // Update the element position
                 expense.element.style.top = `${expense.y}px`;
@@ -553,6 +656,15 @@
                 if (expense.y > gameContainer.offsetHeight - 30) { // Adjusted for element height
                     handleExpenseAtBottom(expense);
                 }
+            }
+            
+            // Visual indicator for speed boost
+            if (isSpeedBoost) {
+                player.style.backgroundColor = '#FF9900'; // Orange for speed boost
+                player.style.boxShadow = '0 0 10px #FFCC00'; // Glow effect
+            } else {
+                player.style.backgroundColor = '#FF0000'; // Return to normal color
+                player.style.boxShadow = 'none';
             }
             
             // Clean up expenses marked for removal
@@ -571,7 +683,7 @@
         // Add event listener for mouse movement
         gameContainer.addEventListener('mousemove', handleMouseMove);
         
-        // Add keyboard controls (left and right arrow keys)
+        // Add keyboard controls (left and right arrow keys, spacebar for speed boost)
         window.addEventListener('keydown', function(event) {
             if (!gameActive) return;
             
@@ -591,10 +703,20 @@
             } else if (event.key === 'ArrowRight') {
                 // Move right (20 pixels per keypress)
                 currentX = Math.min(maxX, currentX + 20);
+            } else if (event.key === ' ' || event.key === 'Spacebar') {
+                // Spacebar activates speed boost
+                isSpeedBoost = true;
             }
             
             // Update player position
             player.style.left = `${currentX}px`;
+        });
+        
+        // Listen for keyup to deactivate speed boost when spacebar is released
+        window.addEventListener('keyup', function(event) {
+            if (event.key === ' ' || event.key === 'Spacebar') {
+                isSpeedBoost = false;
+            }
         });
 
         // Update the game area width if window is resized
