@@ -1,0 +1,154 @@
+/* 
+  styles.css
+  Basic styling for the game container, player, falling items, 
+  and special effects like screen shake.
+*/
+
+/* 
+  Body: set background, remove default margins, 
+  and set up a retro-ish font and color scheme if desired.
+*/
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #ffeecc; /* Light retro color */
+  overflow: hidden; /* Hide scrollbars if items go off-screen */
+}
+
+/* Center the game container on desktop; fill screen on mobile */
+#game-container {
+  position: relative;
+  margin: 0 auto;
+  max-width: 600px; /* Constrain width on desktop */
+  height: 100vh;    /* Fill vertical space */
+  background: #fff8e1; /* Slightly different background for game area */
+  border: 2px solid #000;
+  overflow: hidden; /* Ensure falling items that go out of bounds are hidden */
+}
+
+/* Score Display (top-left or top-center) */
+#score-display {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 100;
+  color: #333;
+}
+
+/* Game Over Screen overlay */
+#game-over-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200; /* Above all game elements */
+}
+
+/* Hidden utility class */
+.hidden {
+  display: none !important;
+}
+
+/* Final Score in game over screen */
+#final-score {
+  margin: 20px 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Restart button */
+#restart-button {
+  font-size: 18px;
+  padding: 10px 20px;
+  cursor: pointer;
+  background: #f90;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Player (the "blocker") */
+#player {
+  position: absolute;
+  bottom: 20px; 
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background-color: #f33; /* Distinct color for the player */
+  transform: translateX(-50%); /* Center based on 50% left */
+  border: 2px solid #000;
+}
+
+/* 
+  Falling items will be dynamically generated with a .falling-item class.
+  We define a default style here. 
+*/
+.falling-item {
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 50px;
+  background-color: #39f; /* Distinct color for good items or override in JS */
+  border: 2px solid #000;
+  text-align: center;
+  line-height: 50px;
+  font-weight: bold;
+  color: #fff;
+  user-select: none;
+}
+
+/* 
+  We'll add a special "bad" style in JS 
+  or we can define it here if we want a red background. 
+*/
+.falling-item.bad {
+  background-color: #a00;
+}
+
+/* 
+  Shake animation for the entire game-container 
+  whenever a bad expense slips through.
+*/
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-5px, 0); }
+  40% { transform: translate(5px, 0); }
+  60% { transform: translate(-5px, 0); }
+  80% { transform: translate(5px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+.shake {
+  animation: shake 0.3s;
+}
+
+/* 
+  Mobile controls: 
+  We can always show them or toggle them with JS based on screen width.
+*/
+#mobile-controls {
+  position: absolute;
+  bottom: 80px;
+  width: 100%;
+  text-align: center;
+  z-index: 150;
+}
+
+#mobile-controls button {
+  font-size: 24px;
+  margin: 0 10px;
+  padding: 10px;
+  border: 2px solid #000;
+  background: #ff0;
+  cursor: pointer;
+  border-radius: 4px;
+}
