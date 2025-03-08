@@ -3,20 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Mario Expense Manager</title>
+    <title>Expense Manager Mania</title>
     <style>
-        /* Super Mario 64 styling */
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap');
-        
+        /* Early-2000s nostalgic styling */
         body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #5090FF; /* Mario 64 sky blue */
-            background-image: url('https://cdnjs.cloudflare.com/ajax/libs/simple-icons/3.0.1/cloud.svg'), 
-                              url('https://cdnjs.cloudflare.com/ajax/libs/simple-icons/3.0.1/cloud.svg');
-            background-position: 20% 20%, 80% 60%;
-            background-repeat: no-repeat;
-            background-size: 300px, 200px;
-            color: #000000;
+            font-family: 'Courier New', monospace;
+            background-color: #000033;
+            color: #00ff00;
             text-align: center;
             margin: 0;
             padding: 20px;
@@ -30,19 +23,15 @@
         }
 
         h1 {
-            font-size: 42px;
-            color: #FF0000; /* Mario red */
-            text-shadow: 3px 3px #000000, -1px -1px #FFD700; /* Black and gold shadow for 3D effect */
+            font-size: 36px;
+            color: #ffff00;
+            text-shadow: 2px 2px #000000;
             margin-bottom: 5px;
-            letter-spacing: 2px;
-            transform: skew(-5deg, 0deg); /* Slight skew for Mario style */
-            font-weight: 800;
         }
 
         .tagline {
             font-size: 18px;
-            color: #FFFFFF;
-            text-shadow: 1px 1px #000000;
+            color: #00ccff;
             margin-bottom: 20px;
         }
 
@@ -61,47 +50,45 @@
         }
 
         #score-display-outer, #timer-display-outer {
-            background-color: #FFD700; /* Mario gold */
-            border: 3px solid #FF0000; /* Mario red */
-            border-radius: 10px;
+            background-color: #000044;
+            border: 2px solid #00ff00;
             padding: 15px;
             font-size: 24px;
-            color: #FF0000; /* Mario red */
+            color: #ffff00;
             margin-bottom: 20px;
-            box-shadow: 5px 5px 0px #000000; /* 3D effect */
-            transform: rotate(-2deg); /* Slight rotation for Mario style */
-        }
-
-        #timer-display-outer {
-            transform: rotate(2deg); /* Different rotation for variety */
+            border-radius: 5px;
         }
 
         #game-container {
             position: relative;
             width: 800px;
             height: 600px;
-            border: 5px solid #FF0000; /* Mario red */
-            background-color: #87CEEB; /* Lighter blue for game area */
-            background-image: linear-gradient(to bottom, #87CEEB, #5090FF); /* Sky gradient */
+            border: 3px solid #00ff00;
+            background-color: #000022;
             overflow: hidden;
             cursor: none; /* Hide cursor during gameplay */
-            border-radius: 15px;
-            box-shadow: 8px 8px 0px #000000; /* 3D effect */
         }
 
         #game-instructions {
             width: 200px;
             margin-left: 15px;
-            background-color: #FFD700; /* Mario gold */
-            border: 3px solid #FF0000; /* Mario red */
+            background-color: #000044;
+            border: 2px solid #00ff00;
             padding: 15px;
             font-size: 16px;
             line-height: 1.5;
             text-align: left;
-            border-radius: 10px;
-            box-shadow: 5px 5px 0px #000000; /* 3D effect */
-            transform: rotate(1deg); /* Slight rotation */
-            color: #000000;
+            border-radius: 5px;
+        }
+
+        #score-display {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: #ffff00;
+            text-shadow: 2px 2px #000000;
+            z-index: 10;
         }
 
         #player {
@@ -109,11 +96,9 @@
             bottom: 10px;
             width: 100px;
             height: 20px;
-            background-color: #FF0000; /* Mario red */
-            border: 2px solid #FFFFFF;
+            background-color: #ff0000;
+            border: 2px solid #ffffff;
             transform: translateX(-50%);
-            border-radius: 10px;
-            box-shadow: 0px 4px 0px #8B0000; /* Darker red for 3D effect */
             z-index: 5;
         }
 
@@ -122,29 +107,24 @@
             width: 100px;
             height: 30px;
             text-align: center;
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             user-select: none;
-            border-radius: 8px;
-            box-shadow: 2px 2px 0px #000000;
         }
 
         .good-expense {
-            background-color: #00AA00;
-            border: 2px solid #00FF00;
+            background-color: #00aa00;
+            border: 2px solid #00ff00;
             color: white;
-            box-shadow: 0px 3px 0px #006600;
         }
 
         .bad-expense {
-            background-color: #AA0000;
-            border: 2px solid #FF0000;
+            background-color: #aa0000;
+            border: 2px solid #ff0000;
             color: white;
-            box-shadow: 0px 3px 0px #660000;
         }
         
         /* Poof particle effect */
@@ -167,12 +147,11 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
-            color: #FF0000;
+            color: #ff0000;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 20;
-            border-radius: 15px;
         }
 
         #game-over h1 {
@@ -184,26 +163,21 @@
         #final-score {
             font-size: 32px;
             margin-bottom: 30px;
-            color: #FFD700; /* Gold */
+            color: #ffff00;
         }
 
         #restart-button {
-            padding: 15px 25px;
-            font-size: 26px;
-            background-color: #FF0000; /* Mario red */
-            color: #FFFFFF;
-            border: 3px solid #FFD700; /* Gold border */
-            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 24px;
+            background-color: #0000aa;
+            color: #ffffff;
+            border: 3px solid #0000ff;
             cursor: pointer;
-            font-family: 'Nunito', sans-serif;
-            box-shadow: 5px 5px 0px #000000;
-            transform: rotate(-2deg);
-            transition: all 0.2s ease;
+            font-family: 'Courier New', monospace;
         }
 
         #restart-button:hover {
-            background-color: #FF4500;
-            transform: rotate(-2deg) scale(1.05);
+            background-color: #0000ff;
         }
 
         #start-screen {
@@ -212,96 +186,52 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(80, 144, 255, 0.9);
-            background-image: url('/api/placeholder/400/320');
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: contain;
+            background-color: rgba(0, 0, 50, 0.9);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 20;
-            border-radius: 15px;
         }
 
         #start-screen h1 {
             font-size: 48px;
             margin-bottom: 20px;
-            color: #FF0000; /* Mario red */
-            text-shadow: 3px 3px 0px #000000, -1px -1px #FFD700;
-            transform: skew(-5deg, 0deg);
+            color: #ffff00;
+            text-shadow: 3px 3px 0px #000000;
         }
 
         #start-button {
-            padding: 15px 25px;
-            font-size: 26px;
-            background-color: #FF0000; /* Mario red */
-            color: #FFFFFF;
-            border: 3px solid #FFD700; /* Gold border */
-            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 24px;
+            background-color: #0000aa;
+            color: #ffffff;
+            border: 3px solid #0000ff;
             cursor: pointer;
-            font-family: 'Bangers', cursive;
-            box-shadow: 5px 5px 0px #000000;
-            transform: rotate(-2deg);
-            transition: all 0.2s ease;
+            font-family: 'Courier New', monospace;
         }
 
         #start-button:hover {
-            background-color: #FF4500;
-            transform: rotate(-2deg) scale(1.05);
+            background-color: #0000ff;
         }
 
         #instructions {
             max-width: 600px;
             margin: 20px auto;
-            padding: 15px;
-            border: 3px dashed #FF0000; /* Mario red */
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            font-size: 18px;
+            padding: 10px;
+            border: 2px dashed #00ff00;
+            font-size: 16px;
             text-align: left;
         }
 
         #instructions p {
             margin: 10px 0;
-            color: #000000;
-        }
-        
-        /* Ground styling (Mario 64 green hills) */
-        .ground {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 100px;
-            background-color: #00AA00;
-            border-top: 5px solid #008800;
-            z-index: 1;
-        }
-        
-        /* Mario 64 style coin */
-        .coin {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #FFD700;
-            border-radius: 50%;
-            border: 2px solid #FFA500;
-            box-shadow: 0 0 10px #FFFF00;
-            z-index: 2;
-            animation: spin 2s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotateY(0deg); box-shadow: 0 0 10px #FFFF00; }
-            50% { transform: rotateY(90deg); box-shadow: 0 0 5px #FFFF00; }
-            100% { transform: rotateY(0deg); box-shadow: 0 0 10px #FFFF00; }
         }
     </style>
 </head>
 <body>
-    <h1>Super Mario Expense Manager</h1>
-    <div class="tagline">It's-a me, your expense manager! Let's-a go!</div>
+    <h1>Expense Management Mania</h1>
+    <div class="tagline">Have prepaid expenses? Stop playing games and check out Accruer already.</div>
     
     <div class="game-area">
         <div id="score-panel">
@@ -316,26 +246,18 @@
         </div>
         
         <div id="game-container">
-            <!-- Add Mario 64 style ground -->
-            <div class="ground"></div>
-            
-            <!-- Add some decorative coins -->
-            <div class="coin" style="bottom: 120px; left: 100px;"></div>
-            <div class="coin" style="bottom: 150px; right: 200px;"></div>
-            <div class="coin" style="bottom: 180px; left: 400px;"></div>
-            
             <div id="player"></div>
 
             <div id="start-screen">
-                <h1>Super Mario Expense Manager!</h1>
+                <h1>Expense Manager Mania!</h1>
                 <div id="instructions">
-                    <p>You are-a the company's Expense Manager!</p>
-                    <p>- <span style="color: #02be01;">GREEN expenses</span> are legitimate business expenses. Let them reach the bottom for +1 point.</p>
-                    <p>- MAMMA MIA! Blocking green expenses costs you 10 points!</p>
-                    <p>- <span style="color: #e60012;">RED expenses</span> are unauthorized! Block them with your red blocker or lose points!</p>
+                    <p>You are the company's Expense Manager!</p>
+                    <p>- <span style="color: #00ff00;">GREEN expenses</span> are legitimate business expenses. Let them reach the bottom for +1 point.</p>
+                    <p>- CAUTION: Blocking green expenses costs you 10 points!</p>
+                    <p>- <span style="color: #ff0000;">RED expenses</span> are unauthorized! Block them with your red blocker or lose points!</p>
                     <p>- Move your mouse or use LEFT/RIGHT arrow keys to control the blocker</p>
                     <p>- Hold SPACEBAR to speed up the game (for bonus challenge!)</p>
-                    <p>- If your score goes below 0, GAME OVER!</p>
+                    <p>- If your score goes below 0, you're FIRED!</p>
                 </div>
                 <button id="start-button">START GAME</button>
             </div>
@@ -438,66 +360,35 @@
         // Restart button click handler
         restartButton.addEventListener('click', startGame);
 
-        // Function to create screen shake effect - enhanced for N64 feel
+        // Function to create screen shake effect
         function shakeScreen() {
             // Save the original position
             const originalPosition = gameContainer.style.position;
             const originalTransform = gameContainer.style.transform;
             
-            // Apply the shake - more dramatic for N64 style
+            // Apply the shake
             gameContainer.style.position = 'relative';
             
-            // More intense shake sequence with rotation for N64 style
-            setTimeout(() => { gameContainer.style.transform = 'translate(8px, 8px) rotate(0.5deg)'; }, 0);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-8px, -10px) rotate(-0.5deg)'; }, 60);
-            setTimeout(() => { gameContainer.style.transform = 'translate(10px, -6px) rotate(1deg)'; }, 120);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-10px, 8px) rotate(-1deg)'; }, 180);
-            setTimeout(() => { gameContainer.style.transform = 'translate(6px, 6px) rotate(0.5deg)'; }, 240);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-6px, -4px) rotate(-0.5deg)'; }, 300);
-            setTimeout(() => { gameContainer.style.transform = 'translate(3px, -3px) rotate(0.25deg)'; }, 360);
-            setTimeout(() => { gameContainer.style.transform = 'translate(-3px, 2px) rotate(-0.25deg)'; }, 420);
-            setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px) rotate(0deg)'; }, 480);
+            // Shake sequence
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
+            setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
+            setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
+            setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
+            setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
             
             // Reset to original position
             setTimeout(() => {
                 gameContainer.style.transform = originalTransform;
                 gameContainer.style.position = originalPosition;
-            }, 500);
+            }, 350);
         }
 
-        // Function to create pixel poof effect - Mario 64 style
+        // Function to create pixel poof effect
         function createPoofEffect(x, y, color) {
-            const particleCount = 35; // Number of particles
-            const particleSize = 6;  // Base size of particles
-            
-            // Add Mario 64 style "poof" text
-            const poofText = document.createElement('div');
-            poofText.style.position = 'absolute';
-            poofText.style.left = `${x - 20}px`;
-            poofText.style.top = `${y - 15}px`;
-            poofText.style.color = '#ffffff';
-            poofText.style.fontSize = '24px';
-            poofText.style.fontFamily = 'Bangers, cursive';
-            poofText.style.textShadow = '2px 2px 0px #000000';
-            poofText.style.zIndex = '6';
-            poofText.textContent = 'POW!';
-            poofText.style.opacity = '1';
-            poofText.style.transition = 'all 400ms ease-out';
-            
-            gameContainer.appendChild(poofText);
-            
-            // Animate and remove poof text
-            setTimeout(() => {
-                poofText.style.transform = 'translateY(-30px) scale(1.5)';
-                poofText.style.opacity = '0';
-            }, 50);
-            
-            setTimeout(() => {
-                poofText.remove();
-            }, 450);
-            
-            // Star-shaped particles in Mario colors
-            const marioColors = ['#e60012', '#ffcc00', '#02be01', '#ffffff'];
+            const particleCount = 30; // Number of particles
+            const particleSize = 4;  // Size of particles
             
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
@@ -507,34 +398,28 @@
                 particle.style.left = `${x}px`;
                 particle.style.top = `${y}px`;
                 
-                // Use Mario colors for particles
-                const marioColor = marioColors[Math.floor(Math.random() * marioColors.length)];
-                particle.style.backgroundColor = marioColor;
+                // Set particle color based on expense type
+                particle.style.backgroundColor = color;
                 
-                // Set random particle size with more variation
-                const size = particleSize + Math.random() * 6;
+                // Set random particle size with slight variation
+                const size = particleSize + Math.random() * 3;
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
-                
-                // Make some particles star-shaped (Mario 64 style)
-                if (Math.random() > 0.6) {
-                    particle.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
-                }
                 
                 // Add to game container
                 gameContainer.appendChild(particle);
                 
                 // Animate particle outward in random direction
                 const angle = Math.random() * Math.PI * 2; // Random angle in radians
-                const speed = 3 + Math.random() * 8; // Random speed
-                const distance = 50 + Math.random() * 100; // Random distance
+                const speed = 2 + Math.random() * 5; // Random speed
+                const distance = 30 + Math.random() * 60; // Random distance
                 
                 // Calculate end position
                 const endX = x + Math.cos(angle) * distance;
                 const endY = y + Math.sin(angle) * distance;
                 
                 // Set transition duration
-                const duration = 400 + Math.random() * 600; // 400-1000ms duration
+                const duration = 300 + Math.random() * 500; // 300-800ms duration
                 particle.style.transition = `all ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
                 
                 // Animate after a tiny delay to ensure the transition works
@@ -542,7 +427,7 @@
                     particle.style.left = `${endX}px`;
                     particle.style.top = `${endY}px`;
                     particle.style.opacity = "0";
-                    particle.style.transform = "scale(0.2) rotate(" + (Math.random() * 360) + "deg)";
+                    particle.style.transform = "scale(0.1)";
                 }, 15);
                 
                 // Remove particle after animation is complete
@@ -769,4 +654,177 @@
                 if (
                     expenseRect.left < playerRect.right &&
                     expenseRect.right > playerRect.left &&
-                    expenseRect.bottom > playerRect.
+                    expenseRect.bottom > playerRect.top &&
+                    expenseRect.top < playerRect.bottom
+                ) {
+                    // Mark this expense as collided so we don't count it multiple times
+                    expense.collided = true;
+                    
+                    // Get the center position of the expense for the poof effect
+                    const expenseX = expenseRect.left + (expenseRect.width / 2);
+                    const expenseY = expenseRect.top + (expenseRect.height / 2);
+                    
+                    if (expense.type === 'bad') {
+                        // Successfully blocked a bad expense
+                        console.log("Blocked bad expense!");
+                        
+                        // Create pixel poof effect with red color
+                        createPoofEffect(expenseX, expenseY, '#FF0000');
+                        
+                        // Remove the expense element
+                        expense.element.remove();
+                        expense.toRemove = true;
+                    } else {
+                        // Penalize for blocking a good expense!
+                        console.log("Blocked good expense - penalty!");
+                        score -= 10;
+                        scoreDisplay.textContent = `${score}`;
+                        
+                        // Trigger screen shake when blocking a good expense
+                        shakeScreen();
+                        
+                        // Create pixel poof effect with green color
+                        createPoofEffect(expenseX, expenseY, '#00FF00');
+                        
+                        // Remove the expense element
+                        expense.element.remove();
+                        expense.toRemove = true;
+                        
+                        // Check if game over
+                        if (score < 0) {
+                            endGame();
+                        }
+                    }
+                }
+            }
+            
+            // Remove expenses marked for removal
+            expenses = expenses.filter(expense => !expense.toRemove);
+        }
+
+        // Function to handle when an expense reaches the bottom
+        function handleExpenseAtBottom(expense) {
+            if (!expense.element) return;
+            
+            // Update score based on expense type
+            if (expense.type === 'good') {
+                // Good expense reached the bottom - add points
+                score += expense.score;
+                console.log("Good expense scored!");
+            } else {
+                // Bad expense reached the bottom - subtract points
+                score += expense.score; // This is negative already
+                console.log("Bad expense penalty!");
+                
+                // Trigger screen shake for bad expenses reaching the bottom
+                shakeScreen();
+            }
+            
+            // Update the score display
+            scoreDisplay.textContent = `${score}`;
+            
+            // Check if the game is over
+            if (score < 0) {
+                endGame();
+            }
+            
+            // Remove the expense
+            expense.element.remove();
+            expense.toRemove = true;
+        }
+
+        // Main game loop
+        function gameLoop(timestamp) {
+            if (!gameActive) return;
+            
+            // Calculate delta time (in seconds)
+            const deltaTime = (timestamp - lastFrameTime) / 1000;
+            
+            // Update game time
+            gameTime += deltaTime;
+            timerDisplay.textContent = formatTime(gameTime);
+            
+            // Update spawn timer - fixed calculation
+            spawnTimer += (timestamp - lastFrameTime);
+            
+            // Debug info if needed
+            // console.log(`SpawnTimer: ${spawnTimer}, SpawnInterval: ${spawnInterval}, FallSpeed: ${currentFallSpeed}`);
+            
+            // Spawn a new expense if it's time
+            if (spawnTimer >= spawnInterval) {
+                if (expenseData) {
+                    spawnExpense();
+                    // console.log("Spawned new expense"); // Debug
+                } else {
+                    console.log("No expense data available yet"); // Debug
+                }
+                spawnTimer = 0;
+            }
+            
+            // Check if it's time to increase difficulty
+            if (timestamp - lastDifficultyIncrease > difficultyIncreaseInterval) {
+                // Increase fall speed
+                currentFallSpeed = Math.min(maxFallSpeed, currentFallSpeed * fallSpeedIncreaseRate);
+                
+                // Decrease spawn interval
+                spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
+                
+                lastDifficultyIncrease = timestamp;
+                console.log(`Difficulty increased: Speed ${currentFallSpeed.toFixed(1)}, Interval ${spawnInterval.toFixed(1)}`); // Debug
+            }
+            
+            // Update expense positions and check for those that reached the bottom
+            for (let i = 0; i < expenses.length; i++) {
+                const expense = expenses[i];
+                if (!expense.element) continue; // Skip if element is missing
+                
+                // Apply speed boost if spacebar is pressed
+                const speedMultiplier = isSpeedBoost ? 2.0 : 1.0;
+                
+                // Update Y position based on fall speed with speed boost if active
+                expense.y += currentFallSpeed * deltaTime * speedMultiplier;
+                
+                // Update the element position
+                expense.element.style.top = `${expense.y}px`;
+                
+                // Check if it reached the bottom
+                if (expense.y > gameContainer.offsetHeight - 30) { // Adjusted for element height
+                    handleExpenseAtBottom(expense);
+                }
+            }
+            
+            // Visual indicator for speed boost
+            if (isSpeedBoost) {
+                player.style.backgroundColor = '#FF9900'; // Orange for speed boost
+                player.style.boxShadow = '0 0 10px #FFCC00'; // Glow effect
+            } else {
+                player.style.backgroundColor = '#FF0000'; // Return to normal color
+                player.style.boxShadow = 'none';
+            }
+            
+            // Clean up expenses marked for removal
+            expenses = expenses.filter(expense => !expense.toRemove);
+            
+            // Check for collisions
+            checkCollisions();
+            
+            // Update time for next frame
+            lastFrameTime = timestamp;
+            
+            // Continue the game loop
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Update the game area width if window is resized
+        window.addEventListener('resize', function() {
+            gameAreaWidth = gameContainer.offsetWidth;
+        });
+
+        // Initial setting
+        gameAreaWidth = gameContainer.offsetWidth;
+        
+        // Position the player initially in the middle
+        player.style.left = `${gameAreaWidth / 2}px`;
+    </script>
+</body>
+</html>
