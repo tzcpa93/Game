@@ -1,0 +1,8 @@
+{
+  "good": ["Office Supplies", "CRM Subscription", "Hotels for Conference"],
+  "bad": [
+    { "label": "Strippers", "score": -100 },
+    { "label": "Netflix", "score": -25 },
+    { "label": "Happy hour no receipt", "score": -1 }
+  ]
+}
