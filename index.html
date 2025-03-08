@@ -215,20 +215,50 @@
 
         // Function to fetch the expense data from data.json
         function fetchExpenseData() {
+            console.log('Fetching expense data...');
             fetch('data.json')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Expense data loaded successfully:', data);
                     expenseData = data;
                     // Start screen is already shown by default
                 })
                 .catch(error => {
                     console.error('Error loading expense data:', error);
-                    alert('Failed to load expense data. Please check data.json file.');
+                    alert('Failed to load expense data. Please check data.json file and ensure it\'s in the same directory as index.html');
                 });
         }
 
         // Call this function to fetch the data when the page loads
         fetchExpenseData();
+        
+        // Fallback data in case the JSON file can't be loaded
+        setTimeout(() => {
+            if (!expenseData) {
+                console.log('Using fallback expense data');
+                expenseData = {
+                    "good": [
+                        "Office Supplies",
+                        "CRM Subscription", 
+                        "Hotels for Conference",
+                        "Business Lunch",
+                        "Software License"
+                    ],
+                    "bad": [
+                        { "label": "Strippers", "score": -100 },
+                        { "label": "Netflix", "score": -25 },
+                        { "label": "Happy hour no receipt", "score": -10 },
+                        { "label": "Personal Amazon", "score": -20 },
+                        { "label": "Casino Chips", "score": -50 }
+                    ]
+                };
+            }
+        }, 3000); // Wait 3 seconds before using fallback data
 
         // Start button click handler
         startButton.addEventListener('click', startGame);
@@ -238,12 +268,23 @@
 
         // Function to start or restart the game
         function startGame() {
+            // Make sure we have expense data before starting
+            if (!expenseData) {
+                console.log("Waiting for expense data to load before starting game...");
+                // Retry in a second if data isn't loaded yet
+                setTimeout(startGame, 1000);
+                return;
+            }
+            
+            console.log("Starting game with data:", expenseData);
+            
             // Reset game state
             score = 0;
             expenses = [];
             currentFallSpeed = initialFallSpeed;
             spawnInterval = 2000;
             lastDifficultyIncrease = 0;
+            spawnTimer = 0;
             
             // Clear any existing expenses
             document.querySelectorAll('.expense').forEach(expense => expense.remove());
@@ -261,6 +302,11 @@
             // Start the game loop
             lastFrameTime = performance.now();
             requestAnimationFrame(gameLoop);
+            
+            // Force spawn first expense immediately
+            setTimeout(() => {
+                if (gameActive) spawnExpense();
+            }, 500);
         }
 
         // Function to end the game
@@ -272,59 +318,85 @@
 
         // Function to spawn a new expense
         function spawnExpense() {
-            if (!expenseData) return; // If data isn't loaded yet, don't spawn
+            if (!expenseData) {
+                console.error("Cannot spawn expense: expense data not loaded");
+                return; // If data isn't loaded yet, don't spawn
+            }
+            
+            if (!gameActive) {
+                console.log("Game not active, not spawning expenses");
+                return; // Don't spawn if game isn't active
+            }
             
             // Decide if this will be a good or bad expense
             const isGood = Math.random() < 0.6; // 60% chance of good expenses
             
             let expenseObj;
-            if (isGood) {
-                // Choose a random good expense
-                const randomIndex = Math.floor(Math.random() * expenseData.good.length);
-                expenseObj = {
-                    label: expenseData.good[randomIndex],
-                    score: 1,
-                    type: 'good'
-                };
-            } else {
-                // Choose a random bad expense
-                const randomIndex = Math.floor(Math.random() * expenseData.bad.length);
-                expenseObj = {
-                    label: expenseData.bad[randomIndex].label,
-                    score: expenseData.bad[randomIndex].score,
-                    type: 'bad'
-                };
+            try {
+                if (isGood) {
+                    // Choose a random good expense from the loaded data
+                    const goodExpenses = expenseData.good;
+                    if (!goodExpenses || !goodExpenses.length) {
+                        console.error("No good expenses found in data");
+                        return;
+                    }
+                    
+                    const randomIndex = Math.floor(Math.random() * goodExpenses.length);
+                    expenseObj = {
+                        label: goodExpenses[randomIndex],
+                        score: 1,
+                        type: 'good'
+                    };
+                } else {
+                    // Choose a random bad expense from the loaded data
+                    const badExpenses = expenseData.bad;
+                    if (!badExpenses || !badExpenses.length) {
+                        console.error("No bad expenses found in data");
+                        return;
+                    }
+                    
+                    const randomIndex = Math.floor(Math.random() * badExpenses.length);
+                    expenseObj = {
+                        label: badExpenses[randomIndex].label,
+                        score: badExpenses[randomIndex].score,
+                        type: 'bad'
+                    };
+                }
+                
+                console.log(`Creating ${expenseObj.type} expense: ${expenseObj.label} (${expenseObj.score})`);
+                
+                // Create the expense element
+                const expense = document.createElement('div');
+                expense.classList.add('expense');
+                expense.classList.add(isGood ? 'good-expense' : 'bad-expense');
+                expense.textContent = expenseObj.label;
+                
+                // Set its initial position
+                // Random X position, staying within the bounds of the game area
+                const containerWidth = gameContainer.offsetWidth;
+                const expenseWidth = 100; // Width of expense element from CSS
+                const maxX = containerWidth - expenseWidth;
+                const randomX = Math.floor(Math.random() * maxX);
+                
+                expense.style.left = `${randomX}px`;
+                expense.style.top = '-30px'; // Start above the game area
+                
+                // Add to the DOM
+                gameContainer.appendChild(expense);
+                
+                // Store the expense object and element
+                expenses.push({
+                    element: expense,
+                    x: randomX,
+                    y: -30,
+                    width: expenseWidth,
+                    height: 30, // Height of expense element from CSS
+                    type: expenseObj.type,
+                    score: expenseObj.score
+                });
+            } catch (error) {
+                console.error("Error spawning expense:", error);
             }
-            
-            // Create the expense element
-            const expense = document.createElement('div');
-            expense.classList.add('expense');
-            expense.classList.add(isGood ? 'good-expense' : 'bad-expense');
-            expense.textContent = expenseObj.label;
-            
-            // Set its initial position
-            // Random X position, staying within the bounds of the game area
-            const containerWidth = gameContainer.offsetWidth;
-            const expenseWidth = 100; // Width of expense element from CSS
-            const maxX = containerWidth - expenseWidth;
-            const randomX = Math.random() * maxX;
-            
-            expense.style.left = `${randomX}px`;
-            expense.style.top = '-30px'; // Start above the game area
-            
-            // Add to the DOM
-            gameContainer.appendChild(expense);
-            
-            // Store the expense object and element
-            expenses.push({
-                element: expense,
-                x: randomX,
-                y: -30,
-                width: expenseWidth,
-                height: 30, // Height of expense element from CSS
-                type: expenseObj.type,
-                score: expenseObj.score
-            });
         }
 
         // Function to handle mouse movement
@@ -436,14 +508,21 @@
             
             // Calculate delta time (in seconds)
             const deltaTime = (timestamp - lastFrameTime) / 1000;
-            lastFrameTime = timestamp;
             
-            // Update spawn timer
-            spawnTimer += timestamp - lastFrameTime;
+            // Update spawn timer - fixed calculation
+            spawnTimer += (timestamp - lastFrameTime);
+            
+            // Debug info if needed
+            // console.log(`SpawnTimer: ${spawnTimer}, SpawnInterval: ${spawnInterval}, FallSpeed: ${currentFallSpeed}`);
             
             // Spawn a new expense if it's time
             if (spawnTimer >= spawnInterval) {
-                spawnExpense();
+                if (expenseData) {
+                    spawnExpense();
+                    console.log("Spawned new expense"); // Debug
+                } else {
+                    console.log("No expense data available yet"); // Debug
+                }
                 spawnTimer = 0;
             }
             
@@ -456,10 +535,14 @@
                 spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
                 
                 lastDifficultyIncrease = timestamp;
+                console.log(`Difficulty increased: Speed ${currentFallSpeed.toFixed(1)}, Interval ${spawnInterval.toFixed(1)}`); // Debug
             }
             
             // Update expense positions and check for those that reached the bottom
-            expenses.forEach(expense => {
+            for (let i = 0; i < expenses.length; i++) {
+                const expense = expenses[i];
+                if (!expense.element) continue; // Skip if element is missing
+                
                 // Update Y position based on fall speed
                 expense.y += currentFallSpeed * deltaTime;
                 
@@ -467,10 +550,10 @@
                 expense.element.style.top = `${expense.y}px`;
                 
                 // Check if it reached the bottom
-                if (expense.y > gameContainer.offsetHeight) {
+                if (expense.y > gameContainer.offsetHeight - 30) { // Adjusted for element height
                     handleExpenseAtBottom(expense);
                 }
-            });
+            }
             
             // Clean up expenses marked for removal
             expenses = expenses.filter(expense => !expense.toRemove);
@@ -478,12 +561,41 @@
             // Check for collisions
             checkCollisions();
             
+            // Update time for next frame
+            lastFrameTime = timestamp;
+            
             // Continue the game loop
             requestAnimationFrame(gameLoop);
         }
 
         // Add event listener for mouse movement
         gameContainer.addEventListener('mousemove', handleMouseMove);
+        
+        // Add keyboard controls (left and right arrow keys)
+        window.addEventListener('keydown', function(event) {
+            if (!gameActive) return;
+            
+            const playerRect = player.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            const playerWidth = player.offsetWidth;
+            const maxX = containerRect.width - playerWidth / 2;
+            const minX = playerWidth / 2;
+            
+            // Get current player position
+            let currentX = playerRect.left + playerWidth / 2 - containerRect.left;
+            
+            // Move based on arrow keys
+            if (event.key === 'ArrowLeft') {
+                // Move left (20 pixels per keypress)
+                currentX = Math.max(minX, currentX - 20);
+            } else if (event.key === 'ArrowRight') {
+                // Move right (20 pixels per keypress)
+                currentX = Math.min(maxX, currentX + 20);
+            }
+            
+            // Update player position
+            player.style.left = `${currentX}px`;
+        });
 
         // Update the game area width if window is resized
         window.addEventListener('resize', function() {
