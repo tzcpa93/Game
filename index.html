@@ -15,6 +15,11 @@
             padding: 20px;
             overflow-x: hidden;
             cursor: default;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
         }
 
         h1 {
@@ -30,25 +35,50 @@
             margin-bottom: 20px;
         }
 
+        .game-area {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        #score-panel {
+            width: 150px;
+            margin-right: 15px;
+            text-align: center;
+        }
+
+        #score-display-outer {
+            background-color: #000044;
+            border: 2px solid #00ff00;
+            padding: 15px;
+            font-size: 24px;
+            color: #ffff00;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
         #game-container {
             position: relative;
             width: 800px;
             height: 600px;
-            margin: 10px auto;
             border: 3px solid #00ff00;
             background-color: #000022;
             overflow: hidden;
             cursor: none; /* Hide cursor during gameplay */
         }
 
-        #bottom-instructions {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 15px;
-            border: 2px solid #00ff00;
+        #game-instructions {
+            width: 200px;
+            margin-left: 15px;
             background-color: #000044;
+            border: 2px solid #00ff00;
+            padding: 15px;
             font-size: 16px;
             line-height: 1.5;
+            text-align: left;
+            border-radius: 5px;
         }
 
         #score-display {
@@ -203,36 +233,44 @@
     <h1>Expense Management Mania</h1>
     <div class="tagline">Have prepaid expenses? Stop playing games and check out Accruer already.</div>
     
-    <div id="game-container">
-        <div id="score-display">Score: 0</div>
-        <div id="player"></div>
-
-        <div id="start-screen">
-            <h1>Expense Manager Mania!</h1>
-            <div id="instructions">
-                <p>You are the company's Expense Manager!</p>
-                <p>- <span style="color: #00ff00;">GREEN expenses</span> are legitimate business expenses. Let them reach the bottom for +1 point.</p>
-                <p>- CAUTION: Blocking green expenses costs you 10 points!</p>
-                <p>- <span style="color: #ff0000;">RED expenses</span> are unauthorized! Block them with your red blocker or lose points!</p>
-                <p>- Move your mouse or use LEFT/RIGHT arrow keys to control the blocker</p>
-                <p>- Hold SPACEBAR to speed up the game (for bonus challenge!)</p>
-                <p>- If your score goes below 0, you're FIRED!</p>
+    <div class="game-area">
+        <div id="score-panel">
+            <div id="score-display-outer">
+                <div>SCORE</div>
+                <div id="score-display">0</div>
             </div>
-            <button id="start-button">START GAME</button>
         </div>
+        
+        <div id="game-container">
+            <div id="player"></div>
 
-        <div id="game-over">
-            <h1>GAME OVER</h1>
-            <div id="final-score">Final Score: 0</div>
-            <button id="restart-button">PLAY AGAIN</button>
+            <div id="start-screen">
+                <h1>Expense Manager Mania!</h1>
+                <div id="instructions">
+                    <p>You are the company's Expense Manager!</p>
+                    <p>- <span style="color: #00ff00;">GREEN expenses</span> are legitimate business expenses. Let them reach the bottom for +1 point.</p>
+                    <p>- CAUTION: Blocking green expenses costs you 10 points!</p>
+                    <p>- <span style="color: #ff0000;">RED expenses</span> are unauthorized! Block them with your red blocker or lose points!</p>
+                    <p>- Move your mouse or use LEFT/RIGHT arrow keys to control the blocker</p>
+                    <p>- Hold SPACEBAR to speed up the game (for bonus challenge!)</p>
+                    <p>- If your score goes below 0, you're FIRED!</p>
+                </div>
+                <button id="start-button">START GAME</button>
+            </div>
+
+            <div id="game-over">
+                <h1>GAME OVER</h1>
+                <div id="final-score">Final Score: 0</div>
+                <button id="restart-button">PLAY AGAIN</button>
+            </div>
         </div>
-    </div>
-    
-    <div id="bottom-instructions">
-        Move mouse left and right to block bad expenses.<br>
-        Don't block good expenses!<br> 
-        Press space bar to speed up.<br>
-        If your score goes negative, you lose!
+        
+        <div id="game-instructions">
+            Move mouse left and right to block bad expenses.<br><br>
+            Don't block good expenses!<br><br>
+            Press space bar to speed up.<br><br>
+            If your score goes negative, you lose!
+        </div>
     </div>
 
     <script>
@@ -418,7 +456,7 @@
             document.querySelectorAll('.expense').forEach(expense => expense.remove());
             
             // Update the score display
-            scoreDisplay.textContent = `Score: ${score}`;
+            scoreDisplay.textContent = `${score}`;
             
             // Hide the start screen and game over screen
             startScreen.style.display = 'none';
@@ -625,7 +663,7 @@
                         // Penalize for blocking a good expense!
                         console.log("Blocked good expense - penalty!");
                         score -= 10;
-                        scoreDisplay.textContent = `Score: ${score}`;
+                        scoreDisplay.textContent = `${score}`;
                         
                         // Trigger screen shake when blocking a good expense
                         shakeScreen();
@@ -668,7 +706,7 @@
             }
             
             // Update the score display
-            scoreDisplay.textContent = `Score: ${score}`;
+            scoreDisplay.textContent = `${score}`;
             
             // Check if the game is over
             if (score < 0) {
