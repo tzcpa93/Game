@@ -1,8 +1,26 @@
 {
-  "good": ["Office Supplies", "CRM Subscription", "Hotels for Conference"],
+  "good": [
+    "Office Supplies",
+    "CRM Subscription", 
+    "Hotels for Conference",
+    "Business Lunch",
+    "Software License",
+    "Client Gifts",
+    "Training Materials",
+    "Travel Reimbursement",
+    "Professional Books",
+    "Office Equipment"
+  ],
   "bad": [
     { "label": "Strippers", "score": -100 },
     { "label": "Netflix", "score": -25 },
-    { "label": "Happy hour no receipt", "score": -1 }
+    { "label": "Happy hour no receipt", "score": -10 },
+    { "label": "Personal Amazon", "score": -20 },
+    { "label": "Casino Chips", "score": -50 },
+    { "label": "Jet Ski Rental", "score": -30 },
+    { "label": "Dog Boarding", "score": -15 },
+    { "label": "Spouse's Dinner", "score": -15 },
+    { "label": "Gaming Console", "score": -35 },
+    { "label": "Vacation Rental", "score": -40 }
   ]
 }
