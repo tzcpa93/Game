@@ -652,7 +652,10 @@
         console.log("Game not active, not spawning expenses");
         return;
       }
-      const isGood = Math.random() < 0.9;
+      // Increase bad expense frequency during hypergrowth
+const badExpenseChance = isSpeedBoost ? 0.33 : 0.11; // 33% bad expenses during hypergrowth, otherwise 11%
+const isGood = Math.random() >= badExpenseChance;
+
       let expenseObj;
       try {
         if (isGood) {
