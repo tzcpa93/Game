@@ -49,6 +49,25 @@
       align-items: flex-start;
       width: 100%;
       max-width: 1200px;
+      flex-direction: column;
+    }
+
+    /* Hypergrowth message */
+    .hypergrowth-message {
+      font-family: 'Bangers', cursive;
+      font-size: 24px;
+      color: #FF9900;
+      text-shadow: 2px 2px #1C4DA1;
+      margin-top: 15px;
+      text-align: center;
+      width: 100%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
     /* Score Panel (now Reputation Meter & Time) */
@@ -351,6 +370,8 @@
       Press space bar to speed up.<br><br>
       If your score goes negative, you lose!
     </div>
+
+    <div class="hypergrowth-message">Hold SPACE to enter hypergrowth ⚡</div>
   </div>
 
   <script>
