@@ -41,6 +41,25 @@
       font-weight: bold;
       margin-bottom: 20px;
     }
+    
+    .tagline-link {
+  font-family: 'Bangers', cursive;
+  font-size: 38px;
+  color: #FFFFFF; /* White */
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-decoration: none; /* Remove underline */
+}
+
+.highlight {
+  color: #FDD932; /* Red */
+}
+
+.tagline-link:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+
 
     /* Game area container */
     .game-area {
@@ -142,6 +161,25 @@
       font-family: 'Bangers', cursive;
       color: #1C4DA1; /* Blue */
     }
+    
+    .instructions-title {
+  font-family: 'Bangers', cursive;
+  font-size: 48px; /* matches the main title size */
+  color: #050A35; /* dark blue */
+  text-shadow: 3px 3px #63ACFB;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#instructions p {
+  text-align: center; /* Center the instructions text */
+  margin-top: 0;
+}
+
+#instructions {
+  margin-bottom: 30px; /* add padding below instructions box to separate from button */
+}
+
 
     /* Player "paddle" */
     #player {
@@ -259,23 +297,23 @@
     }
 
     #start-screen h1 {
-      font-family: 'Bangers', cursive;
-      font-size: 48px;
-      margin-bottom: 20px;
-      color: #FFDE00;
-      text-shadow: 3px 3px #1C4DA1;
-    }
+  font-family: 'Bangers', cursive;
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #FFDE00;
+  text-shadow: 3px 3px #1C4DA1;
+}
 
-    #start-button {
-      padding: 10px 20px;
-      font-size: 24px;
-      background-color: #FF4C4C;
-      color: #ffffff;
-      border: 3px solid #FFDE00;
-      cursor: pointer;
-      font-family: 'Bangers', cursive;
-      border-radius: 5px;
-    }
+   #start-button {
+  padding: 10px 20px;
+  font-size: 24px;
+  background-color: #FF4C4C;
+  color: #ffffff;
+  border: 3px solid #FFDE00;
+  cursor: pointer;
+  font-family: 'Bangers', cursive;
+  border-radius: 5px;
+}
 
     #start-button:hover {
       background-color: #FFDE00;
@@ -284,17 +322,17 @@
 
     /* Instructions modal on start screen */
     #instructions {
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 10px;
-      border: 2px dashed #FF4C4C;
-      font-size: 16px;
-      text-align: left;
-      font-family: 'Bangers', cursive;
-      color: #1C4DA1;
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 5px;
-    }
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 15px;
+  border: 2px solid #FF4C4C; /* solid border, not dashed */
+  font-size: 24px; /* 1.5x bigger from original 16px */
+  text-align: left;
+  font-family: 'Bangers', cursive;
+  color: #1C4DA1;
+  background-color: #FFFFFF; /* fully white background */
+  border-radius: 5px;
+}
 
     #instructions p {
       margin: 10px 0;
@@ -307,12 +345,33 @@
     margin-bottom: 5px;
 }
 
+    #hypergrowth-message {
+  margin-top: 20px;
+  font-family: 'Bangers', cursive;
+  font-size: 39px;
+  color: #FFFFFF;
+  animation: pulse 1.5s infinite alternate;
+}
+
+#hypergrowth-message .highlight {
+  color: #FFDE00; /* Yellow color for emphasis (you can adjust if desired) */
+}
+
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
     
   </style>
 </head>
 <body>
   <img src="images/title.svg" alt="Expense Management Mania" id="game-title">
-  <div class="tagline">Have prepaid expenses?<br> Stop playing games and check out Accruer already.</div>
+ <a href="https://finoptimal.com/accruer" class="tagline-link">
+  Have <span class="highlight">prepaid expenses</span>?<br> Stop playing games. Use <span class="highlight">Accruer</span> already.
+</a>
   
   <div class="game-area">
     <div id="score-panel">
@@ -333,19 +392,19 @@
     <div id="game-container">
       <div id="player"></div>
 
-      <div id="start-screen">
-        <h1>Expense Management Mania!</h1>
-        <div id="instructions">
-          <p>You are the company's Expense Manager!</p>
-          <p>- <span style="color: #00ff00;">GREEN expenses</span> are legitimate business expenses. Let them reach the bottom for +1 point.</p>
-          <p>- CAUTION: Blocking green expenses costs you 10 points!</p>
-          <p>- <span style="color: #ff0000;">RED expenses</span> are unauthorized! Block them with your red blocker or lose points!</p>
-          <p>- Move your mouse or use LEFT/RIGHT arrow keys to control the blocker</p>
-          <p>- Hold SPACEBAR to speed up the game (for bonus challenge!)</p>
-          <p>- If your score goes below 0, you're FIRED!</p>
-        </div>
-        <button id="start-button">START GAME</button>
-      </div>
+     <div id="start-screen">
+  <h1>Can you get from Seed to Exit?</h1>
+  
+  <div id="instructions">
+    <div class="instructions-title">How to play:</div>
+    <p>- Catch bad expenses before fraud kills your company<br>
+    - don't stop good expenses or your team will hate you</p>
+  </div>
+
+  <button id="start-button">LAUNCH</button>
+</div>
+
+
 
       <div id="game-over">
         <h1>GAME OVER</h1>
@@ -355,12 +414,12 @@
     </div>
     
     <div id="game-instructions">
-      Move mouse left and right to block bad expenses.<br><br>
-      Don't block good expenses!<br><br>
-      Press space bar to speed up.<br><br>
-      If your score goes negative, you lose!
+      use your mouse to move left and right.<br><br>
+      If your reputation goes too low, you lose!
     </div>
   </div>
+
+    <div id="hypergrowth-message">Hold <span class="highlight">space</span> for <span class="highlight">hypergrowth</span> mode</div>
 
   <script>
     // Game variables
