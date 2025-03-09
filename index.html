@@ -476,6 +476,8 @@
     let levelDuration = 20; // 20 seconds per level
     let nextLevelTime = levelDuration;
     let levelDisplay = document.getElementById('level-display');
+    let acceleratedLevelTime = 0;
+
 
 
     // Fetch expense data from data.json
@@ -546,12 +548,12 @@
 
     // Update Level
     function updateLevel() {
-  if (gameTime >= nextLevelTime && currentLevelIndex < levels.length - 1) {
+  if (acceleratedLevelTime >= nextLevelTime && currentLevelIndex < levels.length - 1) {
     currentLevelIndex++;
     currentLevel = levels[currentLevelIndex];
     nextLevelTime += levelDuration;
 
-    // Increase difficulty at each level (this will be expanded in the next step)
+    // Increase difficulty per level (exactly as discussed)
     currentFallSpeed *= 1.5;
     spawnInterval /= 1.5;
 
@@ -559,7 +561,6 @@
   }
   levelDisplay.textContent = currentLevel;
 }
-
     
     // Pixel poof effect
     function createPoofEffect(x, y, color) {
@@ -735,6 +736,21 @@
       }
     });
 
+    window.addEventListener('keydown', function(event) {
+  if (!gameActive) return;
+  
+  if (event.key === ' ' || event.key === 'Spacebar') {
+    isSpeedBoost = true;
+  }
+});
+
+window.addEventListener('keyup', function(event) {
+  if (event.key === ' ' || event.key === 'Spacebar') {
+    isSpeedBoost = false;
+  }
+});
+
+
     // Check collisions between player and expenses
     function checkCollisions() {
       const playerRect = player.getBoundingClientRect();
@@ -797,6 +813,13 @@
   // Calculate time passed since last frame
   const deltaTime = (timestamp - lastFrameTime) / 1000;
   gameTime += deltaTime;
+
+      if (isSpeedBoost) {
+  acceleratedLevelTime += deltaTime * 2; // hypergrowth counts double
+} else {
+  acceleratedLevelTime += deltaTime;
+}
+
 
   // Update visual timer display (unchanged visually)
   timerDisplay.textContent = formatTime(gameTime);
