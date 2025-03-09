@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -59,6 +59,27 @@
   text-decoration: none;
   cursor: pointer;
 }
+
+    /* Ensure text that changes (timer, countdown, level) is #1C91D1 */
+#timer-display, 
+#level-display, 
+#next-level-timer {
+  color: #1C91D1; /* bright blue color */
+}
+
+/* Adjust Next Round box alignment and margin */
+#next-level-display-outer {
+  background-color: #FFFFFF;
+  border: 3px solid #FF4C4C;
+  padding: 15px;
+  font-size: 30px;
+  color: #FF4C4C;
+  margin-top: 20px; /* Ensure consistent spacing */
+  border-radius: 5px;
+  font-family: 'Bangers', cursive;
+  text-align: center;
+}
+
 
 
     /* Game area container */
@@ -413,17 +434,17 @@
     <div id="timer-display">0:00</div>
   </div>
 
-  <!-- Level Box (new!) -->
+  <!-- Level Box -->
   <div id="level-display-outer">
-    <div>Stage:</div>
+    <div>STAGE:</div>
     <div id="level-display">Seed</div>
   </div>
-</div>
 
-    <!-- New Countdown Element -->
-<div id="next-level-display-outer">
-  <div>NEXT ROUND IN</div>
-  <div id="next-level-timer">20s</div>
+  <!-- Next Round Countdown (exactly here) -->
+  <div id="next-level-display-outer">
+    <div>NEXT ROUND IN</div>
+    <div id="next-level-timer">20 Sec</div>
+  </div>
 </div>
     
     <div id="game-container">
@@ -627,31 +648,42 @@
     }
 
     // Start/restart the game
-    function startGame() {
-      if (!expenseData) {
-        console.log("Waiting for expense data to load before starting game...");
-        setTimeout(startGame, 1000);
-        return;
-      }
-      console.log("Starting game with data:", expenseData);
-      score = 0;
-      gameTime = 0;
-      expenses = [];
-      currentFallSpeed = initialFallSpeed;
-      spawnInterval = 750;
-      lastDifficultyIncrease = 0;
-      spawnTimer = 0;
-      isSpeedBoost = false;
-      document.querySelectorAll('.expense').forEach(expense => expense.remove());
-      updateReputationMeter();
-      timerDisplay.textContent = formatTime(gameTime);
-      startScreen.style.display = 'none';
-      gameOverScreen.style.display = 'none';
-      gameActive = true;
-      lastFrameTime = performance.now();
-      requestAnimationFrame(gameLoop);
-      setTimeout(() => { if (gameActive) spawnExpense(); }, 500);
-    }
+          function startGame() {
+              if (!expenseData) {
+                setTimeout(startGame, 1000);
+                return;
+              }
+            
+              score = 0;
+              gameTime = 0;
+              acceleratedLevelTime = 0;
+              currentLevelIndex = 0;
+              currentLevel = levels[currentLevelIndex];
+              nextLevelTime = levelDuration;
+              currentFallSpeed = initialFallSpeed;
+              spawnInterval = 750;
+              lastDifficultyIncrease = 0;
+              spawnTimer = 0;
+              isSpeedBoost = false;
+            
+              document.querySelectorAll('.expense').forEach(expense => expense.remove());
+            
+              updateReputationMeter();
+              timerDisplay.textContent = formatTime(gameTime);
+              levelDisplay.textContent = currentLevel;
+              nextLevelTimerDisplay.textContent = `${levelDuration} Sec`;
+            
+              startScreen.style.display = 'none';
+              gameOverScreen.style.display = 'none';
+              gameActive = true;
+              lastFrameTime = performance.now();
+              expenses = [];
+            
+              requestAnimationFrame(gameLoop);
+            
+              setTimeout(() => { if (gameActive) spawnExpense(); }, 500);
+            }
+      
 
     // End game
     function endGame() {
@@ -849,7 +881,7 @@ window.addEventListener('keyup', function(event) {
 
   // --- NEW Countdown logic added HERE ---
   let timeRemainingToNextLevel = Math.max(0, nextLevelTime - acceleratedLevelTime);
-  nextLevelTimerDisplay.textContent = Math.ceil(timeRemainingToNextLevel) + 's';
+  nextLevelTimerDisplay.textContent = Math.ceil(timeRemainingToNextLevel) + ' sec';
   // --------------------------------------
 
   spawnTimer += (timestamp - lastFrameTime);
