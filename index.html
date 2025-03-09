@@ -136,6 +136,19 @@
       font-family: 'Bangers', cursive;
     }
 
+    /* Level Box styling */
+#level-display-outer {
+  background-color: #FFFFFF; /* White background */
+  border: 3px solid #FF4C4C; /* Red border matching your theme */
+  padding: 15px;
+  font-size: 30px;
+  color: #FF4C4C; /* Red text */
+  margin-top: 20px;
+  border-radius: 5px;
+  font-family: 'Bangers', cursive;
+  text-align: center;
+}
+
     /* Game container */
     #game-container {
       position: relative;
@@ -375,19 +388,27 @@
   
   <div class="game-area">
     <div id="score-panel">
-      <!-- Reputation Meter (replacing Score) -->
-      <div id="score-display-outer">
-        <div id="score-label">REPUTATION</div>
-        <div id="reputation-meter">
-          <div id="reputation-meter-fill"></div>
-        </div>
-      </div>
-      <!-- Time Box remains -->
-      <div id="timer-display-outer">
-        <div>TIME</div>
-        <div id="timer-display">0:00</div>
-      </div>
+  <!-- Reputation Meter -->
+  <div id="score-display-outer">
+    <div id="score-label">REPUTATION</div>
+    <div id="reputation-meter">
+      <div id="reputation-meter-fill"></div>
     </div>
+  </div>
+
+  <!-- Time Box -->
+  <div id="timer-display-outer">
+    <div>TIME</div>
+    <div id="timer-display">0:00</div>
+  </div>
+
+  <!-- Level Box (new!) -->
+  <div id="level-display-outer">
+    <div>LEVEL</div>
+    <div id="level-display">Seed</div>
+  </div>
+</div>
+
     
     <div id="game-container">
       <div id="player"></div>
@@ -449,6 +470,13 @@
     let expenseData = null;
     let gameAreaWidth = 800;
     let isSpeedBoost = false;
+    let levels = ['Seed', 'Series A', 'Series B', 'Series C', 'Series D', 'IPO'];
+    let currentLevelIndex = 0;
+    let currentLevel = levels[currentLevelIndex];
+    let levelDuration = 20; // 20 seconds per level
+    let nextLevelTime = levelDuration;
+    let levelDisplay = document.getElementById('level-display');
+
 
     // Fetch expense data from data.json
     function fetchExpenseData() {
@@ -516,6 +544,23 @@
       }, 350);
     }
 
+    // Update Level
+    function updateLevel() {
+  if (gameTime >= nextLevelTime && currentLevelIndex < levels.length - 1) {
+    currentLevelIndex++;
+    currentLevel = levels[currentLevelIndex];
+    nextLevelTime += levelDuration;
+
+    // Increase difficulty at each level (this will be expanded in the next step)
+    currentFallSpeed *= 1.5;
+    spawnInterval /= 1.5;
+
+    console.log(`Advanced to level: ${currentLevel}`);
+  }
+  levelDisplay.textContent = currentLevel;
+}
+
+    
     // Pixel poof effect
     function createPoofEffect(x, y, color) {
       const particleCount = 30;
@@ -747,47 +792,58 @@
 
     // Main game loop
     function gameLoop(timestamp) {
-      if (!gameActive) return;
-      const deltaTime = (timestamp - lastFrameTime) / 1000;
-      gameTime += deltaTime;
-      timerDisplay.textContent = formatTime(gameTime);
-      spawnTimer += (timestamp - lastFrameTime);
-      if (spawnTimer >= spawnInterval) {
-        if (expenseData) {
-          spawnExpense();
-        } else {
-          console.log("No expense data available yet");
-        }
-        spawnTimer = 0;
-      }
-      if (timestamp - lastDifficultyIncrease > difficultyIncreaseInterval) {
-        currentFallSpeed = Math.min(maxFallSpeed, currentFallSpeed * fallSpeedIncreaseRate);
-        spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
-        lastDifficultyIncrease = timestamp;
-        console.log(`Difficulty increased: Speed ${currentFallSpeed.toFixed(1)}, Interval ${spawnInterval.toFixed(1)}`);
-      }
-      for (let i = 0; i < expenses.length; i++) {
-        const expense = expenses[i];
-        if (!expense.element) continue;
-        const speedMultiplier = isSpeedBoost ? 2.0 : 1.0;
-        expense.y += currentFallSpeed * deltaTime * speedMultiplier;
-        expense.element.style.top = `${expense.y}px`;
-        if (expense.y > gameContainer.offsetHeight - 30) {
-          handleExpenseAtBottom(expense);
-        }
-      }
-      if (isSpeedBoost) {
-        player.style.backgroundColor = '#FF9900';
-        player.style.boxShadow = '0 0 10px #FFCC00';
-      } else {
-        player.style.backgroundColor = '#FF4C4C';
-        player.style.boxShadow = 'none';
-      }
-      expenses = expenses.filter(expense => !expense.toRemove);
-      checkCollisions();
-      lastFrameTime = timestamp;
-      requestAnimationFrame(gameLoop);
+  if (!gameActive) return;
+
+  // Calculate time passed since last frame
+  const deltaTime = (timestamp - lastFrameTime) / 1000;
+  gameTime += deltaTime;
+
+  // Update visual timer display (unchanged visually)
+  timerDisplay.textContent = formatTime(gameTime);
+
+  // NEW LINE BELOW:
+  updateLevel();  // <--- THIS LINE IS THE EXACT INSERTION POINT
+
+  spawnTimer += (timestamp - lastFrameTime);
+  if (spawnTimer >= spawnInterval) {
+    if (expenseData) {
+      spawnExpense();
     }
+    spawnTimer = 0;
+  }
+
+  if (timestamp - lastDifficultyIncrease > difficultyIncreaseInterval) {
+    currentFallSpeed = Math.min(maxFallSpeed, currentFallSpeed * fallSpeedIncreaseRate);
+    spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
+    lastDifficultyIncrease = timestamp;
+  }
+
+  for (let i = 0; i < expenses.length; i++) {
+    const expense = expenses[i];
+    if (!expense.element) continue;
+    const speedMultiplier = isSpeedBoost ? 2.0 : 1.0;
+    expense.y += currentFallSpeed * deltaTime * speedMultiplier;
+    expense.element.style.top = `${expense.y}px`;
+    if (expense.y > gameContainer.offsetHeight - 30) {
+      handleExpenseAtBottom(expense);
+    }
+  }
+
+  if (isSpeedBoost) {
+    player.style.backgroundColor = '#FF9900';
+    player.style.boxShadow = '0 0 10px #FFCC00';
+  } else {
+    player.style.backgroundColor = '#FF4C4C';
+    player.style.boxShadow = 'none';
+  }
+
+  expenses = expenses.filter(expense => !expense.toRemove);
+  checkCollisions();
+
+  lastFrameTime = timestamp;
+  requestAnimationFrame(gameLoop);
+}
+
 
     window.addEventListener('resize', function() {
       gameAreaWidth = gameContainer.offsetWidth;
