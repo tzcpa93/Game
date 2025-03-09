@@ -149,6 +149,17 @@
   text-align: center;
 }
 
+    #next-level-display-outer {
+  background-color: #FFFFFF;
+  border: 3px solid #FF4C4C;
+  padding: 15px;
+  font-size: 30px;
+  color: #FF4C4C;
+  margin-top: 20px;
+  border-radius: 5px;
+  font-family: 'Bangers', cursive;
+  text-align: center;
+}
     /* Game container */
     #game-container {
       position: relative;
@@ -404,11 +415,16 @@
 
   <!-- Level Box (new!) -->
   <div id="level-display-outer">
-    <div>LEVEL</div>
+    <div>Stage:</div>
     <div id="level-display">Seed</div>
   </div>
 </div>
 
+    <!-- New Countdown Element -->
+<div id="next-level-display-outer">
+  <div>NEXT ROUND IN</div>
+  <div id="next-level-timer">20s</div>
+</div>
     
     <div id="game-container">
       <div id="player"></div>
@@ -477,6 +493,8 @@
     let nextLevelTime = levelDuration;
     let levelDisplay = document.getElementById('level-display');
     let acceleratedLevelTime = 0;
+    let nextLevelTimerDisplay = document.getElementById('next-level-timer');
+
 
 
 
@@ -653,7 +671,7 @@
         return;
       }
       // Increase bad expense frequency during hypergrowth
-const badExpenseChance = isSpeedBoost ? 0.33 : 0.11; // 33% bad expenses during hypergrowth, otherwise 11%
+const badExpenseChance = isSpeedBoost ? 0.5 : 0.25; // 33% bad expenses during hypergrowth, otherwise 11%
 const isGood = Math.random() >= badExpenseChance;
 
       let expenseObj;
@@ -813,22 +831,26 @@ window.addEventListener('keyup', function(event) {
     function gameLoop(timestamp) {
   if (!gameActive) return;
 
-  // Calculate time passed since last frame
   const deltaTime = (timestamp - lastFrameTime) / 1000;
   gameTime += deltaTime;
 
-      if (isSpeedBoost) {
-  acceleratedLevelTime += deltaTime * 2; // hypergrowth counts double
-} else {
-  acceleratedLevelTime += deltaTime;
-}
+  // Increment accelerated level timer (2x in hypergrowth mode)
+  if (isSpeedBoost) {
+    acceleratedLevelTime += deltaTime * 2;
+  } else {
+    acceleratedLevelTime += deltaTime;
+  }
 
-
-  // Update visual timer display (unchanged visually)
+  // Update visual game timer (unchanged visually by hypergrowth)
   timerDisplay.textContent = formatTime(gameTime);
 
-  // NEW LINE BELOW:
-  updateLevel();  // <--- THIS LINE IS THE EXACT INSERTION POINT
+  // Update level logic
+  updateLevel();
+
+  // --- NEW Countdown logic added HERE ---
+  let timeRemainingToNextLevel = Math.max(0, nextLevelTime - acceleratedLevelTime);
+  nextLevelTimerDisplay.textContent = Math.ceil(timeRemainingToNextLevel) + 's';
+  // --------------------------------------
 
   spawnTimer += (timestamp - lastFrameTime);
   if (spawnTimer >= spawnInterval) {
@@ -869,6 +891,7 @@ window.addEventListener('keyup', function(event) {
   lastFrameTime = timestamp;
   requestAnimationFrame(gameLoop);
 }
+
 
 
     window.addEventListener('resize', function() {
