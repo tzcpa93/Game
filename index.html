@@ -7,7 +7,7 @@
   <!-- Google Fonts -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap">
   <style>
-    /* Basic Styles */
+    /* Mario-inspired styling */
     body {
       font-family: 'Bangers', cursive;
       background-color: #6AB5FF; /* Sky blue */
@@ -23,65 +23,87 @@
       height: 100vh;
       box-sizing: border-box;
     }
-    
-    /* Custom cursor */
+
     body {
-      cursor: url('images/mouse.png') 16 16, auto !important;
-    }
-    
-    /* Header */
+  cursor: url('images/mouse.png') 16 16, auto !important;
+}
+
+    /* Header: use Bangers, red with white shadow */
     h1 {
       font-family: 'Bangers', cursive;
       font-size: 48px;
-      color: #FF4C4C;
-      text-shadow: 3px 3px #FFFFFF;
+      color: #FF4C4C; /* Red */
+      text-shadow: 3px 3px #FFFFFF; /* White shadow */
       margin-bottom: 5px;
     }
-    
-    /* Tagline */
+
+    /* Tagline: bold and white */
     .tagline {
       font-family: 'Bangers', cursive;
       font-size: 18px;
-      color: #FFFFFF;
+      color: #FFFFFF; /* White */
       font-weight: bold;
       margin-bottom: 20px;
     }
     
     .tagline-link {
-      font-family: 'Bangers', cursive;
-      font-size: 38px;
-      color: #FFFFFF;
-      font-weight: bold;
-      margin-bottom: 20px;
-      text-decoration: none;
+  font-family: 'Bangers', cursive;
+  font-size: 38px;
+  color: #FFFFFF; /* White */
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-decoration: none; /* Remove underline */
+}
+
+.highlight {
+  color: #FDD932; /* Red */
+}
+
+.tagline-link:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+    /* Ensure text that changes (timer, countdown, level) is #1C91D1 */
+#timer-display, 
+#level-display, 
+#next-level-timer {
+  color: #1C91D1; /* bright blue color */
+}
+
+/* Adjust Next Round box alignment and margin */
+#next-level-display-outer {
+  background-color: #FFFFFF;
+  border: 3px solid #FF4C4C;
+  padding: 15px;
+  font-size: 30px;
+  color: #FF4C4C;
+  margin-top: 20px; /* Ensure consistent spacing */
+  border-radius: 5px;
+  font-family: 'Bangers', cursive;
+  text-align: center;
+}
+
+    /* Game area container */
+    .game-area {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 1200px;
     }
-    
-    .highlight {
-      color: #FDD932;
-    }
-    
-    .tagline-link:hover {
-      text-decoration: none;
-      cursor: pointer;
-    }
-    
-    /* Timer, Level, and Next Round Text Colors */
-    #timer-display,
-    #level-display,
-    #next-level-timer {
-      color: #1C91D1;
-    }
-    
-    /* Score Panel */
+
+    /* Score Panel (now Reputation Meter & Time) */
     #score-panel {
       width: 150px;
       margin-right: 15px;
       text-align: center;
     }
-    
+
+   /* Reputation Meter styling */
     #score-display-outer {
-      background-color: #FFFFFF;
-      border: 3px solid #FB4648;
+      background-color: #FFFFFF; /* White background */
+      border: 3px solid #FB4648; /* Red border */
       margin-bottom: 20px;
       border-radius: 5px;
       font-family: 'Bangers', cursive;
@@ -93,140 +115,170 @@
       justify-content: center;
       position: relative;
     }
-    
+
     #score-label {
       font-size: 30px;
       margin-bottom: 5px;
-      color: #FB4648;
+      color: #FB4648; /* Red label */
     }
-    
+
+    /* The half-circle reputation meter */
     #reputation-meter {
       position: relative;
       width: 100px;
       height: 50px; /* Half circle */
-      background-color: #1D9E4F;
+      background-color: #1D9E4F; /* new green color */
       border-top-left-radius: 100px;
       border-top-right-radius: 100px;
       overflow: hidden;
       margin: 0 auto;
     }
-    
+
+    /* The fill element rotates from 0° to 180° */
     #reputation-meter-fill {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: #FB4648;
+      background-color: #FB4648; /* Red fill */
       transform-origin: bottom center;
       transform: rotate(0deg);
       transition: transform 0.3s ease;
     }
-    
-    /* Time Box */
+
+    /* Time Box styling */
     #timer-display-outer {
-      background-color: #FFFFFF;
-      border: 3px solid #FF4C4C;
+      background-color: #FFFFFF; /* White background */
+      border: 3px solid #FF4C4C; /* Yellow border */
       padding: 15px;
       font-size: 30px;
-      color: #FF4C4C;
+      color: #FF4C4C; /* Red text */
       margin-bottom: 20px;
       border-radius: 5px;
       font-family: 'Bangers', cursive;
     }
-    
-    /* Level Box */
-    #level-display-outer {
-      background-color: #FFFFFF;
-      border: 3px solid #FF4C4C;
-      padding: 15px;
-      font-size: 30px;
-      color: #FF4C4C;
-      margin-top: 20px;
-      border-radius: 5px;
-      font-family: 'Bangers', cursive;
-      text-align: center;
-    }
-    
-    /* Next Round Countdown */
+
+    /* Level Box styling */
+#level-display-outer {
+  background-color: #FFFFFF; /* White background */
+  border: 3px solid #FF4C4C; /* Red border matching your theme */
+  padding: 15px;
+  font-size: 30px;
+  color: #FF4C4C; /* Red text */
+  margin-top: 20px;
+  border-radius: 5px;
+  font-family: 'Bangers', cursive;
+  text-align: center;
+}
+
     #next-level-display-outer {
-      background-color: #FFFFFF;
-      border: 3px solid #FF4C4C;
-      padding: 15px;
-      font-size: 30px;
-      color: #FF4C4C;
-      margin-top: 20px;
-      border-radius: 5px;
-      font-family: 'Bangers', cursive;
-      text-align: center;
-    }
-    
-    /* Game Area Container */
-    .game-area {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      width: 100%;
-      max-width: 1200px;
-    }
-    
-    /* Game Container */
+  background-color: #FFFFFF;
+  border: 3px solid #FF4C4C;
+  padding: 15px;
+  font-size: 30px;
+  color: #FF4C4C;
+  margin-top: 20px;
+  border-radius: 5px;
+  font-family: 'Bangers', cursive;
+  text-align: center;
+}
+    /* Game container */
     #game-container {
       position: relative;
       width: 800px;
       height: 600px;
-      border: 3px solid #FFDE00;
-      background-color: #1C4DA1;
+      border: 3px solid #FFDE00; /* Yellow */
+      background-color: #1C4DA1;  /* Mario blue */
       overflow: hidden;
       cursor: none;
     }
+
+    #hypergrowth-particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 5; /* lower than UI elements */
+  overflow: hidden;
+}
+
+.hyper-particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #FDD932; /* bright yellow */
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: floatParticle 3s infinite ease-in-out;
+}
+
+@keyframes particleFloat {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.2); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes particleFade {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+}
+   
+@keyframes particlePulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+
     
-    /* Instructions (if any) */
+    /* Instructions on the right side */
     #game-instructions {
       width: 200px;
       margin-left: 15px;
       background-color: rgba(255, 255, 255, 0.9);
-      border: 2px dashed #FF4C4C;
+      border: 2px dashed #FF4C4C; /* Red */
       padding: 15px;
       font-size: 16px;
       line-height: 1.5;
       text-align: left;
       border-radius: 5px;
       font-family: 'Bangers', cursive;
-      color: #1C4DA1;
+      color: #1C4DA1; /* Blue */
     }
     
     .instructions-title {
-      font-family: 'Bangers', cursive;
-      font-size: 48px;
-      color: #050A35;
-      text-shadow: 3px 3px #63ACFB;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    
-    #instructions p {
-      text-align: center;
-      margin-top: 0;
-    }
-    
-    #instructions {
-      margin-bottom: 30px;
-    }
-    
-    /* Player Paddle */
+  font-family: 'Bangers', cursive;
+  font-size: 48px; /* matches the main title size */
+  color: #050A35; /* dark blue */
+  text-shadow: 3px 3px #63ACFB;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#instructions p {
+  text-align: center; /* Center the instructions text */
+  margin-top: 0;
+}
+
+#instructions {
+  margin-bottom: 30px; /* add padding below instructions box to separate from button */
+}
+
+
+    /* Player "paddle" */
     #player {
       position: absolute;
       bottom: 10px;
       width: 100px;
       height: 20px;
-      background-color: #FF4C4C;
+      background-color: #FF4C4C; /* Red */
       border: 2px solid #ffffff;
       transform: translateX(-50%);
       z-index: 5;
     }
-    
-    /* Falling Expenses */
+
+    /* Falling expenses */
     .expense {
       position: absolute;
       width: 100px;
@@ -240,20 +292,20 @@
       user-select: none;
       font-family: 'Bangers', cursive;
     }
-    
+
     .good-expense {
       background-color: #00AA00;
       border: 2px solid #FFDE00;
       color: #ffffff;
     }
-    
+
     .bad-expense {
       background-color: #FF4C4C;
       border: 2px solid #FFDE00;
       color: #ffffff;
     }
     
-    /* Poof Particle Effect */
+    /* Poof particle effect */
     .particle {
       position: absolute;
       width: 5px;
@@ -264,8 +316,8 @@
       transition: all 0.5s ease-out;
       z-index: 4;
     }
-    
-    /* Game Over Overlay */
+
+    /* Game Over overlay */
     #game-over {
       display: none;
       position: absolute;
@@ -281,23 +333,23 @@
       font-family: 'Bangers', cursive;
       color: #ffffff;
     }
-    
+
     #game-over h1 {
       font-size: 48px;
       margin-bottom: 20px;
-      color: #FF4C4C;
-      text-shadow: 3px 3px #FFDE00;
+      color: #FF4C4C; /* Red */
+      text-shadow: 3px 3px #FFDE00; /* Yellow shadow */
     }
-    
+
     #final-score {
       font-size: 32px;
       margin-bottom: 30px;
-      color: #FFDE00;
+      color: #FFDE00;  /* Yellow */
       text-shadow: 2px 2px #1C4DA1;
       font-family: 'Bangers', cursive;
     }
-    
-    /* "Play Again" Button */
+
+    /* "Play Again" button */
     #restart-button {
       padding: 10px 20px;
       font-size: 24px;
@@ -308,13 +360,13 @@
       font-family: 'Bangers', cursive;
       border-radius: 5px;
     }
-    
+
     #restart-button:hover {
       background-color: #FFDE00;
       color: #1C4DA1;
     }
-    
-    /* Start Screen */
+
+    /* Start screen */
     #start-screen {
       position: absolute;
       top: 0;
@@ -328,512 +380,631 @@
       align-items: center;
       z-index: 20;
     }
-    
+
     #start-screen h1 {
-      font-family: 'Bangers', cursive;
-      font-size: 48px;
-      margin-bottom: 20px;
-      color: #FFDE00;
-      text-shadow: 3px 3px #1C4DA1;
-    }
-    
-    #start-button {
-      padding: 10px 20px;
-      font-size: 24px;
-      background-color: #FF4C4C;
-      color: #ffffff;
-      border: 3px solid #FFDE00;
-      cursor: pointer;
-      font-family: 'Bangers', cursive;
-      border-radius: 5px;
-    }
-    
+  font-family: 'Bangers', cursive;
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #FFDE00;
+  text-shadow: 3px 3px #1C4DA1;
+}
+
+   #start-button {
+  padding: 10px 20px;
+  font-size: 24px;
+  background-color: #FF4C4C;
+  color: #ffffff;
+  border: 3px solid #FFDE00;
+  cursor: pointer;
+  font-family: 'Bangers', cursive;
+  border-radius: 5px;
+}
+
     #start-button:hover {
       background-color: #FFDE00;
       color: #1C4DA1;
     }
-    
-    /* Hypergrowth Message */
+
+    /* Instructions modal on start screen */
+    #instructions {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 15px;
+  border: 2px solid #FF4C4C; /* solid border, not dashed */
+  font-size: 24px; /* 1.5x bigger from original 16px */
+  text-align: left;
+  font-family: 'Bangers', cursive;
+  color: #1C4DA1;
+  background-color: #FFFFFF; /* fully white background */
+  border-radius: 5px;
+}
+
+    #instructions p {
+      margin: 10px 0;
+    }
+
+  #game-title {
+    width: 800px !important;
+    max-width: none;
+    height: auto;
+    margin-bottom: 5px;
+}
+
     #hypergrowth-message {
-      margin-top: 20px;
-      font-family: 'Bangers', cursive;
-      font-size: 39px;
-      color: #FFFFFF;
-      animation: pulse 1.5s infinite alternate;
-    }
+  margin-top: 20px;
+  font-family: 'Bangers', cursive;
+  font-size: 39px;
+  color: #FFFFFF;
+  animation: pulse 1.5s infinite alternate;
+}
+
+#hypergrowth-message .highlight {
+  color: #FFDE00; /* Yellow color for emphasis (you can adjust if desired) */
+}
+
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
     
-    #hypergrowth-message .highlight {
-      color: #FFDE00;
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.9; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    
-    /* Updated Hypergrowth Particles (Claude's cooler graphics) */
-    #hypergrowth-particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 1; /* Put behind game elements but above background */
-      overflow: hidden;
-    }
-    
-    .hyper-particle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background-color: #FDD932; /* bright yellow */
-      border-radius: 50%;
-      opacity: 0.8;
-      animation: floatParticle 3s infinite ease-in-out;
-    }
-    
-    @keyframes floatParticle {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0); }
-    }
   </style>
 </head>
 <body>
   <img src="images/title.svg" alt="Expense Management Mania" id="game-title">
-  <a href="https://finoptimal.com/accruer" class="tagline-link">
-    Have <span class="highlight">prepaid expenses</span>?<br> Stop playing games. Use <span class="highlight">Accruer</span> already.
-  </a>
+ <a href="https://finoptimal.com/accruer" class="tagline-link">
+  Have <span class="highlight">prepaid expenses</span>?<br> Stop playing games. Use <span class="highlight">Accruer</span> already.
+</a>
+  
   <div class="game-area">
     <div id="score-panel">
-      <!-- Reputation Meter -->
-      <div id="score-display-outer">
-        <div id="score-label">REPUTATION</div>
-        <div id="reputation-meter">
-          <div id="reputation-meter-fill"></div>
-        </div>
-      </div>
-      <!-- Time Box -->
-      <div id="timer-display-outer">
-        <div>TIME</div>
-        <div id="timer-display">0:00</div>
-      </div>
-      <!-- Level Box -->
-      <div id="level-display-outer">
-        <div>STAGE:</div>
-        <div id="level-display">Seed</div>
-      </div>
-      <!-- Next Round Countdown -->
-      <div id="next-level-display-outer">
-        <div>NEXT ROUND IN</div>
-        <div id="next-level-timer">20 Sec</div>
-      </div>
+  <!-- Reputation Meter -->
+  <div id="score-display-outer">
+    <div id="score-label">REPUTATION</div>
+    <div id="reputation-meter">
+      <div id="reputation-meter-fill"></div>
     </div>
+  </div>
+
+  <!-- Time Box -->
+  <div id="timer-display-outer">
+    <div>TIME</div>
+    <div id="timer-display">0:00</div>
+  </div>
+
+  <!-- Level Box -->
+  <div id="level-display-outer">
+    <div>STAGE:</div>
+    <div id="level-display">Seed</div>
+  </div>
+
+  <!-- Next Round Countdown (exactly here) -->
+  <div id="next-level-display-outer">
+    <div>NEXT ROUND IN</div>
+    <div id="next-level-timer">20 Sec</div>
+  </div>
+</div>
+    
     <div id="game-container">
       <div id="player"></div>
-      <div id="start-screen">
-        <h1>Can you get from Seed to Exit?</h1>
-        <div id="instructions">
-          <div class="instructions-title">How to play:</div>
-          <p>- Catch bad expenses before fraud kills your company<br>
-          - don't stop good expenses or your team will hate you</p>
-        </div>
-        <button id="start-button">LAUNCH</button>
-      </div>
+
+     <div id="start-screen">
+  <h1>Can you get from Seed to Exit?</h1>
+  
+  <div id="instructions">
+    <div class="instructions-title">How to play:</div>
+    <p>- Catch bad expenses before fraud kills your company<br>
+    - don't stop good expenses or your team will hate you</p>
+  </div>
+
+  <button id="start-button">LAUNCH</button>
+</div>
+
+
+
       <div id="game-over">
         <h1>GAME OVER</h1>
         <div id="final-message">You lasted 0:00 before fraud ruined your business</div>
         <button id="restart-button">PLAY AGAIN</button>
       </div>
     </div>
+    
     <div id="game-instructions">
       use your mouse to move left and right.<br><br>
       If your reputation goes too low, you lose!
     </div>
   </div>
-  <div id="hypergrowth-message">Hold <span class="highlight">space</span> for <span class="highlight">hypergrowth</span> mode</div>
-  <div id="hypergrowth-container"></div>
-  <div id="hypergrowth-particles"></div>
+
+    <div id="hypergrowth-message">Hold <span class="highlight">space</span> for <span class="highlight">hypergrowth</span> mode</div>
+
+    <div id="hypergrowth-container"></div>
+    <div id="hypergrowth-particles"></div>
+
+
   <script>
-    // Game variables
-    let gameActive = false;
-    let score = 0;
-    let gameTime = 0; // seconds
-    let expenses = [];
-    let player = document.getElementById('player');
-    let gameContainer = document.getElementById('game-container');
-    let timerDisplay = document.getElementById('timer-display');
-    let gameOverScreen = document.getElementById('game-over');
-    let finalMessageDisplay = document.getElementById('final-message');
-    let restartButton = document.getElementById('restart-button');
-    let startScreen = document.getElementById('start-screen');
-    let startButton = document.getElementById('start-button');
-    let lastFrameTime = 0;
-    let spawnTimer = 0;
-    let spawnInterval = 750; // ms
-    let minSpawnInterval = 300;
-    let difficultyIncreaseRate = 0.90;
-    let difficultyIncreaseInterval = 5000; // ms
-    let lastDifficultyIncrease = 0;
-    let initialFallSpeed = 350; // px per sec
-    let currentFallSpeed = initialFallSpeed;
-    let maxFallSpeed = 700;
-    let fallSpeedIncreaseRate = 1.15;
-    let expenseData = null;
-    let gameAreaWidth = 800;
-    let isSpeedBoost = false;
-    let levels = ['Seed', 'Series A', 'Series B', 'Series C', 'Series D', 'IPO'];
-    let currentLevelIndex = 0;
-    let currentLevel = levels[currentLevelIndex];
-    let levelDuration = 20; // 20 seconds per level
-    let nextLevelTime = levelDuration;
-    let levelDisplay = document.getElementById('level-display');
-    let acceleratedLevelTime = 0;
-    let nextLevelTimerDisplay = document.getElementById('next-level-timer');
-    let hypergrowthParticles = document.getElementById('hypergrowth-particles');
-    let hypergrowthInterval = null; // holds interval ID for rocket spawning
+  // Game variables
+  let gameActive = false;
+  let score = 0;
+  let gameTime = 0; // seconds
+  let expenses = [];
+  let player = document.getElementById('player');
+  let gameContainer = document.getElementById('game-container');
+  let timerDisplay = document.getElementById('timer-display');
+  let gameOverScreen = document.getElementById('game-over');
+  let finalMessageDisplay = document.getElementById('final-message');
+  let restartButton = document.getElementById('restart-button');
+  let startScreen = document.getElementById('start-screen');
+  let startButton = document.getElementById('start-button');
+  let lastFrameTime = 0;
+  let spawnTimer = 0;
+  let spawnInterval = 750; // ms
+  let minSpawnInterval = 300;
+  let difficultyIncreaseRate = 0.90;
+  let difficultyIncreaseInterval = 5000; // ms
+  let lastDifficultyIncrease = 0;
+  let initialFallSpeed = 350; // px per sec
+  let currentFallSpeed = initialFallSpeed;
+  let maxFallSpeed = 700;
+  let fallSpeedIncreaseRate = 1.15;
+  let expenseData = null;
+  let gameAreaWidth = 800;
+  let isSpeedBoost = false;
+  let levels = ['Seed', 'Series A', 'Series B', 'Series C', 'Series D', 'IPO'];
+  let currentLevelIndex = 0;
+  let currentLevel = levels[currentLevelIndex];
+  let levelDuration = 20; // 20 seconds per level
+  let nextLevelTime = levelDuration;
+  let levelDisplay = document.getElementById('level-display');
+  let acceleratedLevelTime = 0;
+  let nextLevelTimerDisplay = document.getElementById('next-level-timer');
+  let hypergrowthParticles = document.getElementById('hypergrowth-particles');
+  let hypergrowthInterval = null; // will hold our interval ID for continuous rocket spawning
 
-    // Fetch expense data from data.json
-    function fetchExpenseData() {
-      console.log('Fetching expense data...');
-      fetch('data.json')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.statusText);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log('Expense data loaded successfully:', data);
-          expenseData = data;
-        })
-        .catch(error => {
-          console.error('Error loading expense data:', error);
-          alert('Failed to load expense data. Please check data.json file and ensure it\'s in the same directory as index.html');
-        });
+  // Fetch expense data from data.json
+  function fetchExpenseData() {
+    console.log('Fetching expense data...');
+    fetch('data.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Expense data loaded successfully:', data);
+        expenseData = data;
+      })
+      .catch(error => {
+        console.error('Error loading expense data:', error);
+        alert('Failed to load expense data. Please check data.json file and ensure it\'s in the same directory as index.html');
+      });
+  }
+  fetchExpenseData();
+  
+  // Fallback expense data after 3 seconds
+  setTimeout(() => {
+    if (!expenseData) {
+      console.log('Using fallback expense data');
+      expenseData = {
+        "good": [
+          "Office Supplies",
+          "CRM Subscription", 
+          "Hotels for Conference",
+          "Business Lunch",
+          "Software License"
+        ],
+        "bad": [
+          { "label": "Strippers", "score": -100 },
+          { "label": "Netflix", "score": -25 },
+          { "label": "Happy hour no receipt", "score": -10 },
+          { "label": "Personal Amazon", "score": -20 },
+          { "label": "Casino Chips", "score": -50 }
+        ]
+      };
     }
-    fetchExpenseData();
-    
-    // Fallback expense data after 3 seconds
+  }, 3000);
+
+  // Start and restart button handlers
+  startButton.addEventListener('click', startGame);
+  restartButton.addEventListener('click', startGame);
+
+  // Screen shake effect
+  function shakeScreen() {
+    const originalPosition = gameContainer.style.position;
+    const originalTransform = gameContainer.style.transform;
+    gameContainer.style.position = 'relative';
+    setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
+    setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
+    setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
+    setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
+    setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
+    setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
+    setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
     setTimeout(() => {
-      if (!expenseData) {
-        console.log('Using fallback expense data');
-        expenseData = {
-          "good": [
-            "Office Supplies",
-            "CRM Subscription", 
-            "Hotels for Conference",
-            "Business Lunch",
-            "Software License"
-          ],
-          "bad": [
-            { "label": "Strippers", "score": -100 },
-            { "label": "Netflix", "score": -25 },
-            { "label": "Happy hour no receipt", "score": -10 },
-            { "label": "Personal Amazon", "score": -20 },
-            { "label": "Casino Chips", "score": -50 }
-          ]
-        };
-      }
-    }, 3000);
+      gameContainer.style.transform = originalTransform;
+      gameContainer.style.position = originalPosition;
+    }, 350);
+  }
 
-    // Start and restart button handlers
-    startButton.addEventListener('click', startGame);
-    restartButton.addEventListener('click', startGame);
-
-    // Screen shake effect
-    function shakeScreen() {
-      const originalPosition = gameContainer.style.position;
-      const originalTransform = gameContainer.style.transform;
-      gameContainer.style.position = 'relative';
-      setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
-      setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
-      setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
-      setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
-      setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
-      setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
-      setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
-      setTimeout(() => {
-        gameContainer.style.transform = originalTransform;
-        gameContainer.style.position = originalPosition;
-      }, 350);
-    }
-
-    // Update Level
-    function updateLevel() {
-      if (acceleratedLevelTime >= nextLevelTime && currentLevelIndex < levels.length - 1) {
-        currentLevelIndex++;
-        currentLevel = levels[currentLevelIndex];
-        nextLevelTime += levelDuration;
-        // Increase difficulty per level
-        currentFallSpeed *= 1.5;
-        spawnInterval /= 1.5;
-        console.log(`Advanced to level: ${currentLevel}`);
-      }
-      levelDisplay.textContent = currentLevel;
-    }
-    
-    // Pixel poof effect
-    function createPoofEffect(x, y, color) {
-      const particleCount = 30;
-      const particleSize = 4;
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-        particle.style.left = `${x}px`;
-        particle.style.top = `${y}px`;
-        particle.style.backgroundColor = color;
-        const size = particleSize + Math.random() * 3;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        gameContainer.appendChild(particle);
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 30 + Math.random() * 60;
-        const endX = x + Math.cos(angle) * distance;
-        const endY = y + Math.sin(angle) * distance;
-        const duration = 300 + Math.random() * 500;
-        particle.style.transition = `all ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
-        setTimeout(() => {
-          particle.style.left = `${endX}px`;
-          particle.style.top = `${endY}px`;
-          particle.style.opacity = "0";
-          particle.style.transform = "scale(0.1)";
-        }, 15);
-        setTimeout(() => { particle.remove(); }, duration + 50);
-      }
-    }
-
-    // Create a single rocket particle flying upward like a comet
-    function createHyperParticle() {
-      const particle = document.createElement('div');
-      particle.classList.add('hyper-particle');
-      // Position at random X but at bottom of viewport
-      const startX = Math.random() * window.innerWidth;
-      const startY = window.innerHeight + 50;
-      particle.style.position = "absolute";
-      particle.style.left = `${startX}px`;
-      particle.style.top = `${startY}px`;
-      particle.style.zIndex = "-1"; // Ensure rockets are behind game elements
-      // Set rocket emoji as content and randomize font size
-      particle.innerHTML = '🚀';
-      particle.style.fontSize = `${Math.random() * 15 + 20}px`; // between 20px and 35px
-      particle.style.transform = "rotate(-90deg)"; // Point rockets upward
-      // Remove any background styling so only the emoji shows
-      particle.style.background = 'none';
-      // Set transition for upward flying comet effect
-      particle.style.transition = 'top 1.5s linear, opacity 0.3s linear';
-      hypergrowthParticles.appendChild(particle);
-      // After a brief delay, set upward movement and eventual fade
-      setTimeout(() => {
-        const distance = window.innerHeight + 100 + (Math.random() * 200);
-        particle.style.top = `${startY - distance}px`;
-        particle.style.opacity = '1';
-      }, 50);
-      // Add a fade-out effect toward the end of animation
-      setTimeout(() => {
-        particle.style.opacity = '0';
-      }, 1200);
-      // Remove the particle after animation completes
-      setTimeout(() => {
-        particle.remove();
-      }, 1550);
-    }
-
-    // Spawn multiple rocket particles
-    function spawnHyperParticles(count) {
-      for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-          createHyperParticle();
-        }, i * 50);
-      }
-    }
-
-    // Clear all hypergrowth particles immediately
-    function clearHyperParticles() {
-      hypergrowthParticles.innerHTML = '';
-    }
-    
-    // Format time as MM:SS
-    function formatTime(timeInSeconds) {
-      const minutes = Math.floor(timeInSeconds / 60);
-      const seconds = Math.floor(timeInSeconds % 60);
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    }
-    
-    // Update the Reputation Meter (half-circle gauge)
-    function updateReputationMeter() {
-      const meterFill = document.getElementById('reputation-meter-fill');
-      const maxScore = 100;
-      const clampedScore = Math.min(Math.max(score, 0), maxScore);
-      const rotation = (clampedScore / maxScore) * 180;
-      meterFill.style.transform = `rotate(${rotation}deg)`;
-    }
-
-    // Start/restart the game
-    function startGame() {
-      if (!expenseData) {
-        setTimeout(startGame, 1000);
-        return;
-      }
-      score = 0;
-      gameTime = 0;
-      acceleratedLevelTime = 0;
-      currentLevelIndex = 0;
+  // Update Level
+  function updateLevel() {
+    if (acceleratedLevelTime >= nextLevelTime && currentLevelIndex < levels.length - 1) {
+      currentLevelIndex++;
       currentLevel = levels[currentLevelIndex];
-      nextLevelTime = levelDuration;
-      currentFallSpeed = initialFallSpeed;
-      spawnInterval = 750;
-      lastDifficultyIncrease = 0;
-      spawnTimer = 0;
-      isSpeedBoost = false;
-      document.querySelectorAll('.expense').forEach(expense => expense.remove());
-      updateReputationMeter();
-      timerDisplay.textContent = formatTime(gameTime);
-      levelDisplay.textContent = currentLevel;
-      nextLevelTimerDisplay.textContent = `${levelDuration} Sec`;
-      startScreen.style.display = 'none';
-      gameOverScreen.style.display = 'none';
-      gameActive = true;
-      lastFrameTime = performance.now();
-      expenses = [];
-      requestAnimationFrame(gameLoop);
-      setTimeout(() => { if (gameActive) spawnExpense(); }, 500);
+      nextLevelTime += levelDuration;
+
+      // Increase difficulty per level
+      currentFallSpeed *= 1.5;
+      spawnInterval /= 1.5;
+
+      console.log(`Advanced to level: ${currentLevel}`);
     }
+    levelDisplay.textContent = currentLevel;
+  }
+
+  // Pixel poof effect for expenses
+  function createPoofEffect(x, y, color) {
+    const particleCount = 30;
+    const particleSize = 4;
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.classList.add('particle');
+      particle.style.left = `${x}px`;
+      particle.style.top = `${y}px`;
+      particle.style.backgroundColor = color;
+      const size = particleSize + Math.random() * 3;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      gameContainer.appendChild(particle);
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 30 + Math.random() * 60;
+      const endX = x + Math.cos(angle) * distance;
+      const endY = y + Math.sin(angle) * distance;
+      const duration = 300 + Math.random() * 500;
+      particle.style.transition = `all ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
+      setTimeout(() => {
+        particle.style.left = `${endX}px`;
+        particle.style.top = `${endY}px`;
+        particle.style.opacity = "0";
+        particle.style.transform = "scale(0.1)";
+      }, 15);
+      setTimeout(() => { particle.remove(); }, duration + 50);
+    }
+  }
+
+  // Create a single rocket particle with shooting star effect
+  function createHyperParticle() {
+    const particle = document.createElement('div');
+    particle.classList.add('hyper-particle');
+    // Random starting position across the viewport
+    const startX = Math.random() * window.innerWidth;
+    const startY = Math.random() * window.innerHeight;
+    particle.style.position = "absolute";
+    particle.style.left = `${startX}px`;
+    particle.style.top = `${startY}px`;
+    // Set rocket emoji as content and randomize font size
+    particle.innerHTML = '🚀';
+    particle.style.fontSize = `${Math.random() * 15 + 20}px`; // between 20px and 35px
+    // Remove any background styling so only the emoji shows
+    particle.style.background = 'none';
+    // Set transition for a shooting star effect
+    particle.style.transition = 'transform 0.7s linear, opacity 0.7s linear';
+    hypergrowthParticles.appendChild(particle);
+    // After a brief delay, set a random translation and fade out
+    setTimeout(() => {
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = 100 + Math.random() * 200; // random distance between 100 and 300px
+      const translateX = Math.cos(angle) * distance;
+      const translateY = Math.sin(angle) * distance;
+      particle.style.transform = `translate(${translateX}px, ${translateY}px)`;
+      particle.style.opacity = '0';
+    }, 50);
+    // Remove the particle after animation completes
+    setTimeout(() => {
+      particle.remove();
+    }, 750);
+  }
+
+  // Spawn multiple rocket particles
+  function spawnHyperParticles(count) {
+    for (let i = 0; i < count; i++) {
+      createHyperParticle();
+    }
+  }
+
+  // Clear all hypergrowth particles immediately
+  function clearHyperParticles() {
+    hypergrowthParticles.innerHTML = '';
+  }
+
+  // Format time as MM:SS
+  function formatTime(timeInSeconds) {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+    
+  // Update the Reputation Meter (half-circle gauge)
+  function updateReputationMeter() {
+    const meterFill = document.getElementById('reputation-meter-fill');
+    const maxScore = 100;
+    const clampedScore = Math.min(Math.max(score, 0), maxScore);
+    const rotation = (clampedScore / maxScore) * 180;
+    meterFill.style.transform = `rotate(${rotation}deg)`;
+  }
+
+  // Start/restart the game
+  function startGame() {
+    if (!expenseData) {
+      setTimeout(startGame, 1000);
+      return;
+    }
+    score = 0;
+    gameTime = 0;
+    acceleratedLevelTime = 0;
+    currentLevelIndex = 0;
+    currentLevel = levels[currentLevelIndex];
+    nextLevelTime = levelDuration;
+    currentFallSpeed = initialFallSpeed;
+    spawnInterval = 750;
+    lastDifficultyIncrease = 0;
+    spawnTimer = 0;
+    isSpeedBoost = false;
+    document.querySelectorAll('.expense').forEach(expense => expense.remove());
+    updateReputationMeter();
+    timerDisplay.textContent = formatTime(gameTime);
+    levelDisplay.textContent = currentLevel;
+    nextLevelTimerDisplay.textContent = `${levelDuration} Sec`;
+    startScreen.style.display = 'none';
+    gameOverScreen.style.display = 'none';
+    gameActive = true;
+    lastFrameTime = performance.now();
+    expenses = [];
+    requestAnimationFrame(gameLoop);
+    setTimeout(() => { if (gameActive) spawnExpense(); }, 500);
+  }
       
-    // End game
-    function endGame() {
-      gameActive = false;
-      finalMessageDisplay.textContent = `You lasted ${formatTime(gameTime)} before fraud ruined your business`;
-      gameOverScreen.style.display = 'flex';
-    }
+  // End game
+  function endGame() {
+    gameActive = false;
+    finalMessageDisplay.textContent = `You lasted ${formatTime(gameTime)} before fraud ruined your business`;
+    gameOverScreen.style.display = 'flex';
+  }
 
-    // Spawn a new expense
-    function spawnExpense() {
-      if (!expenseData) {
-        console.error("Cannot spawn expense: expense data not loaded");
-        return;
-      }
-      if (!gameActive) {
-        console.log("Game not active, not spawning expenses");
-        return;
-      }
-      const badExpenseChance = isSpeedBoost ? 0.5 : 0.25;
-      const isGood = Math.random() >= badExpenseChance;
-      let expenseObj;
-      try {
-        if (isGood) {
-          const goodExpenses = expenseData.good;
-          if (!goodExpenses || !goodExpenses.length) {
-            console.error("No good expenses found in data");
-            return;
-          }
-          const randomIndex = Math.floor(Math.random() * goodExpenses.length);
-          expenseObj = { label: goodExpenses[randomIndex], score: 1, type: 'good' };
-        } else {
-          const badExpenses = expenseData.bad;
-          if (!badExpenses || !badExpenses.length) {
-            console.error("No bad expenses found in data");
-            return;
-          }
-          const randomIndex = Math.floor(Math.random() * badExpenses.length);
-          expenseObj = { label: badExpenses[randomIndex].label, score: badExpenses[randomIndex].score, type: 'bad' };
+  // Spawn a new expense
+  function spawnExpense() {
+    if (!expenseData) {
+      console.error("Cannot spawn expense: expense data not loaded");
+      return;
+    }
+    if (!gameActive) {
+      console.log("Game not active, not spawning expenses");
+      return;
+    }
+    // Increase bad expense frequency during hypergrowth
+    const badExpenseChance = isSpeedBoost ? 0.5 : 0.25;
+    const isGood = Math.random() >= badExpenseChance;
+    let expenseObj;
+    try {
+      if (isGood) {
+        const goodExpenses = expenseData.good;
+        if (!goodExpenses || !goodExpenses.length) {
+          console.error("No good expenses found in data");
+          return;
         }
-        console.log(`Creating ${expenseObj.type} expense: ${expenseObj.label} (${expenseObj.score})`);
-        const expense = document.createElement('div');
-        expense.classList.add('expense');
-        expense.classList.add(isGood ? 'good-expense' : 'bad-expense');
-        expense.textContent = expenseObj.label;
-        const containerWidth = gameContainer.offsetWidth;
-        const expenseWidth = 100;
-        const maxX = containerWidth - expenseWidth;
-        const randomX = Math.floor(Math.random() * maxX);
-        expense.style.left = `${randomX}px`;
-        expense.style.top = '-30px';
-        gameContainer.appendChild(expense);
-        expenses.push({
-          element: expense,
-          x: randomX,
-          y: -30,
-          width: expenseWidth,
-          height: 30,
-          type: expenseObj.type,
-          score: expenseObj.score
+        const randomIndex = Math.floor(Math.random() * goodExpenses.length);
+        expenseObj = { label: goodExpenses[randomIndex], score: 1, type: 'good' };
+      } else {
+        const badExpenses = expenseData.bad;
+        if (!badExpenses || !badExpenses.length) {
+          console.error("No bad expenses found in data");
+          return;
+        }
+        const randomIndex = Math.floor(Math.random() * badExpenses.length);
+        expenseObj = { label: badExpenses[randomIndex].label, score: badExpenses[randomIndex].score, type: 'bad' };
+      }
+      console.log(`Creating ${expenseObj.type} expense: ${expenseObj.label} (${expenseObj.score})`);
+      const expense = document.createElement('div');
+      expense.classList.add('expense');
+      expense.classList.add(isGood ? 'good-expense' : 'bad-expense');
+      expense.textContent = expenseObj.label;
+      const containerWidth = gameContainer.offsetWidth;
+      const expenseWidth = 100;
+      const maxX = containerWidth - expenseWidth;
+      const randomX = Math.floor(Math.random() * maxX);
+      expense.style.left = `${randomX}px`;
+      expense.style.top = '-30px';
+      gameContainer.appendChild(expense);
+      expenses.push({
+        element: expense,
+        x: randomX,
+        y: -30,
+        width: expenseWidth,
+        height: 30,
+        type: expenseObj.type,
+        score: expenseObj.score
+      });
+    } catch (error) {
+      console.error("Error spawning expense:", error);
+    }
+  }
+
+  // Handle mouse movement
+  function handleMouseMove(event) {
+    if (!gameActive) return;
+    const containerRect = gameContainer.getBoundingClientRect();
+    const relativeX = event.clientX - containerRect.left;
+    const playerWidth = player.offsetWidth;
+    const maxX = containerRect.width - playerWidth / 2;
+    const minX = playerWidth / 2;
+    let playerX = Math.max(minX, Math.min(relativeX, maxX));
+    player.style.left = `${playerX}px`;
+  }
+  gameContainer.addEventListener('mousemove', handleMouseMove);
+
+  // Keyboard controls: unified for left/right movement and hypergrowth activation
+  window.addEventListener('keydown', function(event) {
+    if (!gameActive) return;
+    // Get player's current position info
+    const playerRect = player.getBoundingClientRect();
+    const containerRect = gameContainer.getBoundingClientRect();
+    const playerWidth = player.offsetWidth;
+    const maxX = containerRect.width - playerWidth / 2;
+    const minX = playerWidth / 2;
+    let currentX = playerRect.left + playerWidth / 2 - containerRect.left;
+    
+    if (event.key === 'ArrowLeft') {
+      currentX = Math.max(minX, currentX - 20);
+    } else if (event.key === 'ArrowRight') {
+      currentX = Math.min(maxX, currentX + 20);
+    } else if (event.key === ' ' || event.key === 'Spacebar') {
+      if (!isSpeedBoost) {
+        isSpeedBoost = true;
+        console.log("Hypergrowth mode activated: spawning rockets continuously");
+        // Start spawning rockets every 200 ms
+        hypergrowthInterval = setInterval(() => {
+          spawnHyperParticles(10);
+        }, 200);
+      }
+    }
+    player.style.left = `${currentX}px`;
+  });
+
+  window.addEventListener('keyup', function(event) {
+    if (event.key === ' ' || event.key === 'Spacebar') {
+      if (isSpeedBoost) {
+        isSpeedBoost = false;
+        console.log("Hypergrowth mode deactivated: poofing rockets");
+        if (hypergrowthInterval) {
+          clearInterval(hypergrowthInterval);
+          hypergrowthInterval = null;
+        }
+        document.querySelectorAll('.hyper-particle').forEach(particle => {
+          particle.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
+          particle.style.transform = 'scale(0)';
+          particle.style.opacity = '0';
+          setTimeout(() => particle.remove(), 400);
         });
-      } catch (error) {
-        console.error("Error spawning expense:", error);
       }
     }
+  });
 
-    // Handle mouse movement
-    function handleMouseMove(event) {
-      if (!gameActive) return;
-      const containerRect = gameContainer.getBoundingClientRect();
-      const relativeX = event.clientX - containerRect.left;
-      const playerWidth = player.offsetWidth;
-      const maxX = containerRect.width - playerWidth / 2;
-      const minX = playerWidth / 2;
-      let playerX = Math.max(minX, Math.min(relativeX, maxX));
-      player.style.left = `${playerX}px`;
+  // Check collisions between player and expenses
+  function checkCollisions() {
+    const playerRect = player.getBoundingClientRect();
+    const containerRect = gameContainer.getBoundingClientRect();
+    for (let i = 0; i < expenses.length; i++) {
+      const expense = expenses[i];
+      if (!expense.element || expense.collided) continue;
+      const expenseRect = expense.element.getBoundingClientRect();
+      if (
+        expenseRect.left < playerRect.right &&
+        expenseRect.right > playerRect.left &&
+        expenseRect.bottom > playerRect.top &&
+        expenseRect.top < playerRect.bottom
+      ) {
+        expense.collided = true;
+        const expenseX = expenseRect.left + (expenseRect.width / 2) - containerRect.left;
+        const expenseY = expenseRect.top + (expenseRect.height / 2) - containerRect.top;
+        if (expense.type === 'bad') {
+          console.log("Blocked bad expense!");
+          createPoofEffect(expenseX, expenseY, '#FF0000');
+          expense.element.remove();
+          expense.toRemove = true;
+          score += Math.abs(expense.score);
+        } else {
+          console.log("Blocked good expense - penalty!");
+          score -= 10;
+          shakeScreen();
+          createPoofEffect(expenseX, expenseY, '#00FF00');
+          expense.element.remove();
+          expense.toRemove = true;
+          if (score < 0) endGame();
+        }
+        updateReputationMeter();
+      }
     }
-    gameContainer.addEventListener('mousemove', handleMouseMove);
+    expenses = expenses.filter(expense => !expense.toRemove);
+  }
 
-    // Keyboard controls: unified for left/right movement and hypergrowth activation
-    window.addEventListener('keydown', function(event) {
-      if (!gameActive) return;
-      const playerRect = player.getBoundingClientRect();
-      const containerRect = gameContainer.getBoundingClientRect();
-      const playerWidth = player.offsetWidth;
-      const maxX = containerRect.width - playerWidth / 2;
-      const minX = playerWidth / 2;
-      let currentX = playerRect.left + playerWidth / 2 - containerRect.left;
-      if (event.key === 'ArrowLeft') {
-        currentX = Math.max(minX, currentX - 20);
-      } else if (event.key === 'ArrowRight') {
-        currentX = Math.min(maxX, currentX + 20);
-      } else if (event.key === ' ' || event.key === 'Spacebar') {
-        if (!isSpeedBoost) {
-          isSpeedBoost = true;
-          console.log("Hypergrowth mode activated: spawning rockets continuously");
-          hypergrowthInterval = setInterval(() => {
-            spawnHyperParticles(10);
-          }, 200);
-        }
+  // Handle expense reaching bottom
+  function handleExpenseAtBottom(expense) {
+    if (!expense.element) return;
+    if (expense.type === 'good') {
+      score += expense.score;
+      console.log("Good expense scored!");
+    } else {
+      score += expense.score;
+      console.log("Bad expense penalty!");
+      shakeScreen();
+    }
+    updateReputationMeter();
+    if (score < 0) endGame();
+    expense.element.remove();
+    expense.toRemove = true;
+  }
+
+  // Main game loop
+  function gameLoop(timestamp) {
+    if (!gameActive) return;
+    const deltaTime = (timestamp - lastFrameTime) / 1000;
+    gameTime += deltaTime;
+    // Increment accelerated level timer (2x in hypergrowth mode)
+    if (isSpeedBoost) {
+      acceleratedLevelTime += deltaTime * 2;
+    } else {
+      acceleratedLevelTime += deltaTime;
+    }
+    // Update visual game timer (remains unaffected by hypergrowth)
+    timerDisplay.textContent = formatTime(gameTime);
+    // Update level logic
+    updateLevel();
+    // Update countdown for next level
+    let timeRemainingToNextLevel = Math.max(0, nextLevelTime - acceleratedLevelTime);
+    nextLevelTimerDisplay.textContent = Math.ceil(timeRemainingToNextLevel) + ' sec';
+    spawnTimer += (timestamp - lastFrameTime);
+    if (spawnTimer >= spawnInterval) {
+      if (expenseData) {
+        spawnExpense();
       }
-      player.style.left = `${currentX}px`;
-    });
-
-    window.addEventListener('keyup', function(event) {
-      if (event.key === ' ' || event.key === 'Spacebar') {
-        if (isSpeedBoost) {
-          isSpeedBoost = false;
-          console.log("Hypergrowth mode deactivated: removing rockets");
-          if (hypergrowthInterval) {
-            clearInterval(hypergrowthInterval);
-            hypergrowthInterval = null;
-          }
-          document.querySelectorAll('.hyper-particle').forEach(particle => {
-            particle.style.transition = 'opacity 0.4s ease-out';
-            particle.style.opacity = '0';
-            setTimeout(() => particle.remove(), 400);
-          });
-        }
+      spawnTimer = 0;
+    }
+    if (timestamp - lastDifficultyIncrease > difficultyIncreaseInterval) {
+      currentFallSpeed = Math.min(maxFallSpeed, currentFallSpeed * fallSpeedIncreaseRate);
+      spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
+      lastDifficultyIncrease = timestamp;
+    }
+    for (let i = 0; i < expenses.length; i++) {
+      const expense = expenses[i];
+      if (!expense.element) continue;
+      const speedMultiplier = isSpeedBoost ? 2.0 : 1.0;
+      expense.y += currentFallSpeed * deltaTime * speedMultiplier;
+      expense.element.style.top = `${expense.y}px`;
+      if (expense.y > gameContainer.offsetHeight - 30) {
+        handleExpenseAtBottom(expense);
       }
-    });
+    }
+    if (isSpeedBoost) {
+      player.style.backgroundColor = '#FF9900';
+      player.style.boxShadow = '0 0 10px #FFCC00';
+    } else {
+      player.style.backgroundColor = '#FF4C4C';
+      player.style.boxShadow = 'none';
+    }
+    expenses = expenses.filter(expense => !expense.toRemove);
+    checkCollisions();
+    lastFrameTime = timestamp;
+    requestAnimationFrame(gameLoop);
+  }
 
-    // Check collisions between player and expenses
-    function checkCollisions() {
-      const playerRect = player.getBoundingClientRect();
-      const containerRect = gameContainer.getBoundingClientRect();
-      for (let i = 0; i < expenses.length; i++) {
-        const expense = expenses[i];
-        if (!expense.element || expense.collided) continue;
-        const expenseRect = expense.element.getBoundingClientRect();
-        if (
-          expenseRect.left < playerRect.right &&
-          expenseRect.right > playerRect.left &&
-          expenseRect.bottom > playerRect.top &&
-          expenseRect.top < playerRect.bottom
-        ) {
-          expense.collided = tru
+  window.addEventListener('resize', function() {
+    gameAreaWidth = gameContainer.offsetWidth;
+  });
+  gameAreaWidth = gameContainer.offsetWidth;
+  player.style.left = `${gameAreaWidth / 2}px`;
+</script>
+
+</body>
+</html>
