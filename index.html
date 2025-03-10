@@ -524,503 +524,487 @@
 
 
   <script>
-    // Game variables
-    let gameActive = false;
-    let score = 0;
-    let gameTime = 0; // seconds
-    let expenses = [];
-    let player = document.getElementById('player');
-    let gameContainer = document.getElementById('game-container');
-    let timerDisplay = document.getElementById('timer-display');
-    let gameOverScreen = document.getElementById('game-over');
-    let finalMessageDisplay = document.getElementById('final-message');
-    let restartButton = document.getElementById('restart-button');
-    let startScreen = document.getElementById('start-screen');
-    let startButton = document.getElementById('start-button');
-    let lastFrameTime = 0;
-    let spawnTimer = 0;
-    let spawnInterval = 750; // ms
-    let minSpawnInterval = 300;
-    let difficultyIncreaseRate = 0.90;
-    let difficultyIncreaseInterval = 5000; // ms
-    let lastDifficultyIncrease = 0;
-    let initialFallSpeed = 350; // px per sec
-    let currentFallSpeed = initialFallSpeed;
-    let maxFallSpeed = 700;
-    let fallSpeedIncreaseRate = 1.15;
-    let expenseData = null;
-    let gameAreaWidth = 800;
-    let isSpeedBoost = false;
-    let levels = ['Seed', 'Series A', 'Series B', 'Series C', 'Series D', 'IPO'];
-    let currentLevelIndex = 0;
-    let currentLevel = levels[currentLevelIndex];
-    let levelDuration = 20; // 20 seconds per level
-    let nextLevelTime = levelDuration;
-    let levelDisplay = document.getElementById('level-display');
-    let acceleratedLevelTime = 0;
-    let nextLevelTimerDisplay = document.getElementById('next-level-timer');
-    let hypergrowthParticles = document.getElementById('hypergrowth-particles');
+  // Game variables
+  let gameActive = false;
+  let score = 0;
+  let gameTime = 0; // seconds
+  let expenses = [];
+  let player = document.getElementById('player');
+  let gameContainer = document.getElementById('game-container');
+  let timerDisplay = document.getElementById('timer-display');
+  let gameOverScreen = document.getElementById('game-over');
+  let finalMessageDisplay = document.getElementById('final-message');
+  let restartButton = document.getElementById('restart-button');
+  let startScreen = document.getElementById('start-screen');
+  let startButton = document.getElementById('start-button');
+  let lastFrameTime = 0;
+  let spawnTimer = 0;
+  let spawnInterval = 750; // ms
+  let minSpawnInterval = 300;
+  let difficultyIncreaseRate = 0.90;
+  let difficultyIncreaseInterval = 5000; // ms
+  let lastDifficultyIncrease = 0;
+  let initialFallSpeed = 350; // px per sec
+  let currentFallSpeed = initialFallSpeed;
+  let maxFallSpeed = 700;
+  let fallSpeedIncreaseRate = 1.15;
+  let expenseData = null;
+  let gameAreaWidth = 800;
+  let isSpeedBoost = false;
+  let levels = ['Seed', 'Series A', 'Series B', 'Series C', 'Series D', 'IPO'];
+  let currentLevelIndex = 0;
+  let currentLevel = levels[currentLevelIndex];
+  let levelDuration = 20; // 20 seconds per level
+  let nextLevelTime = levelDuration;
+  let levelDisplay = document.getElementById('level-display');
+  let acceleratedLevelTime = 0;
+  let nextLevelTimerDisplay = document.getElementById('next-level-timer');
+  let hypergrowthParticles = document.getElementById('hypergrowth-particles');
+  let hypergrowthInterval = null; // will hold our interval ID for continuous rocket spawning
 
-
-
-
-
-    // Fetch expense data from data.json
-    function fetchExpenseData() {
-      console.log('Fetching expense data...');
-      fetch('data.json')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.statusText);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log('Expense data loaded successfully:', data);
-          expenseData = data;
-        })
-        .catch(error => {
-          console.error('Error loading expense data:', error);
-          alert('Failed to load expense data. Please check data.json file and ensure it\'s in the same directory as index.html');
-        });
-    }
-    fetchExpenseData();
-    
-    // Fallback expense data after 3 seconds
-    setTimeout(() => {
-      if (!expenseData) {
-        console.log('Using fallback expense data');
-        expenseData = {
-          "good": [
-            "Office Supplies",
-            "CRM Subscription", 
-            "Hotels for Conference",
-            "Business Lunch",
-            "Software License"
-          ],
-          "bad": [
-            { "label": "Strippers", "score": -100 },
-            { "label": "Netflix", "score": -25 },
-            { "label": "Happy hour no receipt", "score": -10 },
-            { "label": "Personal Amazon", "score": -20 },
-            { "label": "Casino Chips", "score": -50 }
-          ]
-        };
-      }
-    }, 3000);
-
-    // Start and restart button handlers
-    startButton.addEventListener('click', startGame);
-    restartButton.addEventListener('click', startGame);
-
-    // Screen shake effect
-    function shakeScreen() {
-      const originalPosition = gameContainer.style.position;
-      const originalTransform = gameContainer.style.transform;
-      gameContainer.style.position = 'relative';
-      setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
-      setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
-      setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
-      setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
-      setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
-      setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
-      setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
-      setTimeout(() => {
-        gameContainer.style.transform = originalTransform;
-        gameContainer.style.position = originalPosition;
-      }, 350);
-    }
-
-    // Update Level
-    function updateLevel() {
-  if (acceleratedLevelTime >= nextLevelTime && currentLevelIndex < levels.length - 1) {
-    currentLevelIndex++;
-    currentLevel = levels[currentLevelIndex];
-    nextLevelTime += levelDuration;
-
-    // Increase difficulty per level (exactly as discussed)
-    currentFallSpeed *= 1.5;
-    spawnInterval /= 1.5;
-
-    console.log(`Advanced to level: ${currentLevel}`);
-  }
-  levelDisplay.textContent = currentLevel;
-}
-    
-    // Pixel poof effect
-    function createPoofEffect(x, y, color) {
-      const particleCount = 30;
-      const particleSize = 4;
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-        particle.style.left = `${x}px`;
-        particle.style.top = `${y}px`;
-        particle.style.backgroundColor = color;
-        const size = particleSize + Math.random() * 3;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        gameContainer.appendChild(particle);
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 30 + Math.random() * 60;
-        const endX = x + Math.cos(angle) * distance;
-        const endY = y + Math.sin(angle) * distance;
-        const duration = 300 + Math.random() * 500;
-        particle.style.transition = `all ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
-        setTimeout(() => {
-          particle.style.left = `${endX}px`;
-          particle.style.top = `${endY}px`;
-          particle.style.opacity = "0";
-          particle.style.transform = "scale(0.1)";
-        }, 15);
-        setTimeout(() => { particle.remove(); }, duration + 50);
-      }
-    }
-
-   function createHyperParticle() {
-  const particle = document.createElement('div');
-  particle.classList.add('hyper-particle');
-  
-  // Position randomly across the viewport
-  particle.style.left = `${Math.random() * 100}vw`;
-  particle.style.top = `${Math.random() * 100}vh`;
-  
-  // Set the content to a rocket emoji and randomize the font size for variety
-  particle.innerHTML = '🚀';
-  particle.style.fontSize = `${Math.random() * 15 + 20}px`; // between 20px and 35px
-  
-  // Remove any default background styles so only the emoji shows
-  particle.style.background = 'none';
-  particle.style.borderRadius = '0';
-  
-  // Optionally, add your animations (if you already have keyframes defined)
-  particle.style.animation = 'particleFloat 2s infinite ease-in-out, particleFade 2s infinite ease-in-out';
-  
-  console.log("Spawning rocket particle");
-  hypergrowthParticles.appendChild(particle);
-}
-
-function spawnHyperParticles(count) {
-  for (let i = 0; i < count; i++) {
-    createHyperParticle();
-  }
-}
-
-function clearHyperParticles() {
-  hypergrowthParticles.innerHTML = ''; // instantly removes all particles
-}
-
-    
-    // Format time as MM:SS
-    function formatTime(timeInSeconds) {
-      const minutes = Math.floor(timeInSeconds / 60);
-      const seconds = Math.floor(timeInSeconds % 60);
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    }
-    
-    // Update the Reputation Meter (half-circle gauge)
-    function updateReputationMeter() {
-      const meterFill = document.getElementById('reputation-meter-fill');
-      const maxScore = 100; // Adjust maximum score as needed
-      const clampedScore = Math.min(Math.max(score, 0), maxScore);
-      const rotation = (clampedScore / maxScore) * 180; // 0° to 180°
-      meterFill.style.transform = `rotate(${rotation}deg)`;
-    }
-
-    // Start/restart the game
-          function startGame() {
-              if (!expenseData) {
-                setTimeout(startGame, 1000);
-                return;
-              }
-            
-              score = 0;
-              gameTime = 0;
-              acceleratedLevelTime = 0;
-              currentLevelIndex = 0;
-              currentLevel = levels[currentLevelIndex];
-              nextLevelTime = levelDuration;
-              currentFallSpeed = initialFallSpeed;
-              spawnInterval = 750;
-              lastDifficultyIncrease = 0;
-              spawnTimer = 0;
-              isSpeedBoost = false;
-            
-              document.querySelectorAll('.expense').forEach(expense => expense.remove());
-            
-              updateReputationMeter();
-              timerDisplay.textContent = formatTime(gameTime);
-              levelDisplay.textContent = currentLevel;
-              nextLevelTimerDisplay.textContent = `${levelDuration} Sec`;
-            
-              startScreen.style.display = 'none';
-              gameOverScreen.style.display = 'none';
-              gameActive = true;
-              lastFrameTime = performance.now();
-              expenses = [];
-            
-              requestAnimationFrame(gameLoop);
-            
-              setTimeout(() => { if (gameActive) spawnExpense(); }, 500);
-            }
-      
-
-    // End game
-    function endGame() {
-      gameActive = false;
-      finalMessageDisplay.textContent = `You lasted ${formatTime(gameTime)} before fraud ruined your business`;
-      gameOverScreen.style.display = 'flex';
-    }
-
-    // Spawn a new expense
-    function spawnExpense() {
-      if (!expenseData) {
-        console.error("Cannot spawn expense: expense data not loaded");
-        return;
-      }
-      if (!gameActive) {
-        console.log("Game not active, not spawning expenses");
-        return;
-      }
-      // Increase bad expense frequency during hypergrowth
-const badExpenseChance = isSpeedBoost ? 0.5 : 0.25; // 33% bad expenses during hypergrowth, otherwise 11%
-const isGood = Math.random() >= badExpenseChance;
-
-      let expenseObj;
-      try {
-        if (isGood) {
-          const goodExpenses = expenseData.good;
-          if (!goodExpenses || !goodExpenses.length) {
-            console.error("No good expenses found in data");
-            return;
-          }
-          const randomIndex = Math.floor(Math.random() * goodExpenses.length);
-          expenseObj = { label: goodExpenses[randomIndex], score: 1, type: 'good' };
-        } else {
-          const badExpenses = expenseData.bad;
-          if (!badExpenses || !badExpenses.length) {
-            console.error("No bad expenses found in data");
-            return;
-          }
-          const randomIndex = Math.floor(Math.random() * badExpenses.length);
-          expenseObj = { label: badExpenses[randomIndex].label, score: badExpenses[randomIndex].score, type: 'bad' };
+  // Fetch expense data from data.json
+  function fetchExpenseData() {
+    console.log('Fetching expense data...');
+    fetch('data.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.statusText);
         }
-        console.log(`Creating ${expenseObj.type} expense: ${expenseObj.label} (${expenseObj.score})`);
-        const expense = document.createElement('div');
-        expense.classList.add('expense');
-        expense.classList.add(isGood ? 'good-expense' : 'bad-expense');
-        expense.textContent = expenseObj.label;
-        const containerWidth = gameContainer.offsetWidth;
-        const expenseWidth = 100;
-        const maxX = containerWidth - expenseWidth;
-        const randomX = Math.floor(Math.random() * maxX);
-        expense.style.left = `${randomX}px`;
-        expense.style.top = '-30px';
-        gameContainer.appendChild(expense);
-        expenses.push({
-          element: expense,
-          x: randomX,
-          y: -30,
-          width: expenseWidth,
-          height: 30,
-          type: expenseObj.type,
-          score: expenseObj.score
-        });
-      } catch (error) {
-        console.error("Error spawning expense:", error);
-      }
-    }
-
-    // Handle mouse movement
-    function handleMouseMove(event) {
-      if (!gameActive) return;
-      const containerRect = gameContainer.getBoundingClientRect();
-      const relativeX = event.clientX - containerRect.left;
-      const playerWidth = player.offsetWidth;
-      const maxX = containerRect.width - playerWidth / 2;
-      const minX = playerWidth / 2;
-      let playerX = Math.max(minX, Math.min(relativeX, maxX));
-      player.style.left = `${playerX}px`;
-    }
-    gameContainer.addEventListener('mousemove', handleMouseMove);
-
-    // Keyboard controls: left/right movement and hypergrowth activation (spacebar)
-window.addEventListener('keydown', function(event) {
-  if (!gameActive) return;
-  
-  // Get player positioning details for left/right movement
-  const playerRect = player.getBoundingClientRect();
-  const containerRect = gameContainer.getBoundingClientRect();
-  const playerWidth = player.offsetWidth;
-  const maxX = containerRect.width - playerWidth / 2;
-  const minX = playerWidth / 2;
-  let currentX = playerRect.left + playerWidth / 2 - containerRect.left;
-  
-  // Handle arrow keys for movement
-  if (event.key === 'ArrowLeft') {
-    currentX = Math.max(minX, currentX - 20);
-  } else if (event.key === 'ArrowRight') {
-    currentX = Math.min(maxX, currentX + 20);
-  } else if (event.key === ' ' || event.key === 'Spacebar') {
-    // Activate hypergrowth mode if not already active
-    if (!isSpeedBoost) {
-      isSpeedBoost = true;
-      console.log("Hypergrowth mode activated: spawning rockets");
-      spawnHyperParticles(20);
-    }
-  }
-  
-  // Update player's position based on movement
-  player.style.left = `${currentX}px`;
-});
-
-window.addEventListener('keyup', function(event) {
-  if (event.key === ' ' || event.key === 'Spacebar') {
-    // If hypergrowth was active, deactivate it and poof away the rocket particles
-    if (isSpeedBoost) {
-      isSpeedBoost = false;
-      console.log("Hypergrowth mode deactivated: poofing rockets");
-      document.querySelectorAll('.hyper-particle').forEach(particle => {
-        particle.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
-        particle.style.transform = 'scale(0)';
-        particle.style.opacity = '0';
-        setTimeout(() => particle.remove(), 400);
+        return response.json();
+      })
+      .then(data => {
+        console.log('Expense data loaded successfully:', data);
+        expenseData = data;
+      })
+      .catch(error => {
+        console.error('Error loading expense data:', error);
+        alert('Failed to load expense data. Please check data.json file and ensure it\'s in the same directory as index.html');
       });
+  }
+  fetchExpenseData();
+  
+  // Fallback expense data after 3 seconds
+  setTimeout(() => {
+    if (!expenseData) {
+      console.log('Using fallback expense data');
+      expenseData = {
+        "good": [
+          "Office Supplies",
+          "CRM Subscription", 
+          "Hotels for Conference",
+          "Business Lunch",
+          "Software License"
+        ],
+        "bad": [
+          { "label": "Strippers", "score": -100 },
+          { "label": "Netflix", "score": -25 },
+          { "label": "Happy hour no receipt", "score": -10 },
+          { "label": "Personal Amazon", "score": -20 },
+          { "label": "Casino Chips", "score": -50 }
+        ]
+      };
+    }
+  }, 3000);
+
+  // Start and restart button handlers
+  startButton.addEventListener('click', startGame);
+  restartButton.addEventListener('click', startGame);
+
+  // Screen shake effect
+  function shakeScreen() {
+    const originalPosition = gameContainer.style.position;
+    const originalTransform = gameContainer.style.transform;
+    gameContainer.style.position = 'relative';
+    setTimeout(() => { gameContainer.style.transform = 'translate(5px, 5px)'; }, 0);
+    setTimeout(() => { gameContainer.style.transform = 'translate(-5px, -5px)'; }, 50);
+    setTimeout(() => { gameContainer.style.transform = 'translate(5px, -5px)'; }, 100);
+    setTimeout(() => { gameContainer.style.transform = 'translate(-5px, 5px)'; }, 150);
+    setTimeout(() => { gameContainer.style.transform = 'translate(3px, 3px)'; }, 200);
+    setTimeout(() => { gameContainer.style.transform = 'translate(-3px, -3px)'; }, 250);
+    setTimeout(() => { gameContainer.style.transform = 'translate(0px, 0px)'; }, 300);
+    setTimeout(() => {
+      gameContainer.style.transform = originalTransform;
+      gameContainer.style.position = originalPosition;
+    }, 350);
+  }
+
+  // Update Level
+  function updateLevel() {
+    if (acceleratedLevelTime >= nextLevelTime && currentLevelIndex < levels.length - 1) {
+      currentLevelIndex++;
+      currentLevel = levels[currentLevelIndex];
+      nextLevelTime += levelDuration;
+
+      // Increase difficulty per level
+      currentFallSpeed *= 1.5;
+      spawnInterval /= 1.5;
+
+      console.log(`Advanced to level: ${currentLevel}`);
+    }
+    levelDisplay.textContent = currentLevel;
+  }
+
+  // Pixel poof effect for expenses
+  function createPoofEffect(x, y, color) {
+    const particleCount = 30;
+    const particleSize = 4;
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.classList.add('particle');
+      particle.style.left = `${x}px`;
+      particle.style.top = `${y}px`;
+      particle.style.backgroundColor = color;
+      const size = particleSize + Math.random() * 3;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      gameContainer.appendChild(particle);
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 30 + Math.random() * 60;
+      const endX = x + Math.cos(angle) * distance;
+      const endY = y + Math.sin(angle) * distance;
+      const duration = 300 + Math.random() * 500;
+      particle.style.transition = `all ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
+      setTimeout(() => {
+        particle.style.left = `${endX}px`;
+        particle.style.top = `${endY}px`;
+        particle.style.opacity = "0";
+        particle.style.transform = "scale(0.1)";
+      }, 15);
+      setTimeout(() => { particle.remove(); }, duration + 50);
     }
   }
-});
 
+  // Create a single rocket particle with shooting star effect
+  function createHyperParticle() {
+    const particle = document.createElement('div');
+    particle.classList.add('hyper-particle');
+    // Random starting position across the viewport
+    const startX = Math.random() * window.innerWidth;
+    const startY = Math.random() * window.innerHeight;
+    particle.style.position = "absolute";
+    particle.style.left = `${startX}px`;
+    particle.style.top = `${startY}px`;
+    // Set rocket emoji as content and randomize font size
+    particle.innerHTML = '🚀';
+    particle.style.fontSize = `${Math.random() * 15 + 20}px`; // between 20px and 35px
+    // Remove any background styling so only the emoji shows
+    particle.style.background = 'none';
+    // Set transition for a shooting star effect
+    particle.style.transition = 'transform 0.7s linear, opacity 0.7s linear';
+    hypergrowthParticles.appendChild(particle);
+    // After a brief delay, set a random translation and fade out
+    setTimeout(() => {
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = 100 + Math.random() * 200; // random distance between 100 and 300px
+      const translateX = Math.cos(angle) * distance;
+      const translateY = Math.sin(angle) * distance;
+      particle.style.transform = `translate(${translateX}px, ${translateY}px)`;
+      particle.style.opacity = '0';
+    }, 50);
+    // Remove the particle after animation completes
+    setTimeout(() => {
+      particle.remove();
+    }, 750);
+  }
 
+  // Spawn multiple rocket particles
+  function spawnHyperParticles(count) {
+    for (let i = 0; i < count; i++) {
+      createHyperParticle();
+    }
+  }
 
+  // Clear all hypergrowth particles immediately
+  function clearHyperParticles() {
+    hypergrowthParticles.innerHTML = '';
+  }
+
+  // Format time as MM:SS
+  function formatTime(timeInSeconds) {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
     
-
-    // Check collisions between player and expenses
-    function checkCollisions() {
-      const playerRect = player.getBoundingClientRect();
-      const containerRect = gameContainer.getBoundingClientRect();
-      for (let i = 0; i < expenses.length; i++) {
-        const expense = expenses[i];
-        if (!expense.element || expense.collided) continue;
-        const expenseRect = expense.element.getBoundingClientRect();
-        if (
-          expenseRect.left < playerRect.right &&
-          expenseRect.right > playerRect.left &&
-          expenseRect.bottom > playerRect.top &&
-          expenseRect.top < playerRect.bottom
-        ) {
-          expense.collided = true;
-          const expenseX = expenseRect.left + (expenseRect.width / 2) - containerRect.left;
-          const expenseY = expenseRect.top + (expenseRect.height / 2) - containerRect.top;
-          if (expense.type === 'bad') {
-            console.log("Blocked bad expense!");
-            createPoofEffect(expenseX, expenseY, '#FF0000');
-            expense.element.remove();
-            expense.toRemove = true;
-            score += Math.abs(expense.score);
-          } else {
-            console.log("Blocked good expense - penalty!");
-            score -= 10;
-            shakeScreen();
-            createPoofEffect(expenseX, expenseY, '#00FF00');
-            expense.element.remove();
-            expense.toRemove = true;
-            if (score < 0) endGame();
-          }
-          updateReputationMeter();
-        }
-      }
-      expenses = expenses.filter(expense => !expense.toRemove);
-    }
-
-    // Handle expense reaching bottom
-    function handleExpenseAtBottom(expense) {
-      if (!expense.element) return;
-      if (expense.type === 'good') {
-        score += expense.score;
-        console.log("Good expense scored!");
-      } else {
-        score += expense.score;
-        console.log("Bad expense penalty!");
-        shakeScreen();
-      }
-      updateReputationMeter();
-      if (score < 0) endGame();
-      expense.element.remove();
-      expense.toRemove = true;
-    }
-
-    // Main game loop
-    function gameLoop(timestamp) {
-  if (!gameActive) return;
-
-  const deltaTime = (timestamp - lastFrameTime) / 1000;
-  gameTime += deltaTime;
-
-  // Increment accelerated level timer (2x in hypergrowth mode)
-  if (isSpeedBoost) {
-    acceleratedLevelTime += deltaTime * 2;
-  } else {
-    acceleratedLevelTime += deltaTime;
+  // Update the Reputation Meter (half-circle gauge)
+  function updateReputationMeter() {
+    const meterFill = document.getElementById('reputation-meter-fill');
+    const maxScore = 100;
+    const clampedScore = Math.min(Math.max(score, 0), maxScore);
+    const rotation = (clampedScore / maxScore) * 180;
+    meterFill.style.transform = `rotate(${rotation}deg)`;
   }
 
-  // Update visual game timer (unchanged visually by hypergrowth)
-  timerDisplay.textContent = formatTime(gameTime);
-
-  // Update level logic
-  updateLevel();
-
-  // --- NEW Countdown logic added HERE ---
-  let timeRemainingToNextLevel = Math.max(0, nextLevelTime - acceleratedLevelTime);
-  nextLevelTimerDisplay.textContent = Math.ceil(timeRemainingToNextLevel) + ' sec';
-  // --------------------------------------
-
-  spawnTimer += (timestamp - lastFrameTime);
-  if (spawnTimer >= spawnInterval) {
-    if (expenseData) {
-      spawnExpense();
+  // Start/restart the game
+  function startGame() {
+    if (!expenseData) {
+      setTimeout(startGame, 1000);
+      return;
     }
+    score = 0;
+    gameTime = 0;
+    acceleratedLevelTime = 0;
+    currentLevelIndex = 0;
+    currentLevel = levels[currentLevelIndex];
+    nextLevelTime = levelDuration;
+    currentFallSpeed = initialFallSpeed;
+    spawnInterval = 750;
+    lastDifficultyIncrease = 0;
     spawnTimer = 0;
+    isSpeedBoost = false;
+    document.querySelectorAll('.expense').forEach(expense => expense.remove());
+    updateReputationMeter();
+    timerDisplay.textContent = formatTime(gameTime);
+    levelDisplay.textContent = currentLevel;
+    nextLevelTimerDisplay.textContent = `${levelDuration} Sec`;
+    startScreen.style.display = 'none';
+    gameOverScreen.style.display = 'none';
+    gameActive = true;
+    lastFrameTime = performance.now();
+    expenses = [];
+    requestAnimationFrame(gameLoop);
+    setTimeout(() => { if (gameActive) spawnExpense(); }, 500);
+  }
+      
+  // End game
+  function endGame() {
+    gameActive = false;
+    finalMessageDisplay.textContent = `You lasted ${formatTime(gameTime)} before fraud ruined your business`;
+    gameOverScreen.style.display = 'flex';
   }
 
-  if (timestamp - lastDifficultyIncrease > difficultyIncreaseInterval) {
-    currentFallSpeed = Math.min(maxFallSpeed, currentFallSpeed * fallSpeedIncreaseRate);
-    spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
-    lastDifficultyIncrease = timestamp;
-  }
-
-  for (let i = 0; i < expenses.length; i++) {
-    const expense = expenses[i];
-    if (!expense.element) continue;
-    const speedMultiplier = isSpeedBoost ? 2.0 : 1.0;
-    expense.y += currentFallSpeed * deltaTime * speedMultiplier;
-    expense.element.style.top = `${expense.y}px`;
-    if (expense.y > gameContainer.offsetHeight - 30) {
-      handleExpenseAtBottom(expense);
+  // Spawn a new expense
+  function spawnExpense() {
+    if (!expenseData) {
+      console.error("Cannot spawn expense: expense data not loaded");
+      return;
+    }
+    if (!gameActive) {
+      console.log("Game not active, not spawning expenses");
+      return;
+    }
+    // Increase bad expense frequency during hypergrowth
+    const badExpenseChance = isSpeedBoost ? 0.5 : 0.25;
+    const isGood = Math.random() >= badExpenseChance;
+    let expenseObj;
+    try {
+      if (isGood) {
+        const goodExpenses = expenseData.good;
+        if (!goodExpenses || !goodExpenses.length) {
+          console.error("No good expenses found in data");
+          return;
+        }
+        const randomIndex = Math.floor(Math.random() * goodExpenses.length);
+        expenseObj = { label: goodExpenses[randomIndex], score: 1, type: 'good' };
+      } else {
+        const badExpenses = expenseData.bad;
+        if (!badExpenses || !badExpenses.length) {
+          console.error("No bad expenses found in data");
+          return;
+        }
+        const randomIndex = Math.floor(Math.random() * badExpenses.length);
+        expenseObj = { label: badExpenses[randomIndex].label, score: badExpenses[randomIndex].score, type: 'bad' };
+      }
+      console.log(`Creating ${expenseObj.type} expense: ${expenseObj.label} (${expenseObj.score})`);
+      const expense = document.createElement('div');
+      expense.classList.add('expense');
+      expense.classList.add(isGood ? 'good-expense' : 'bad-expense');
+      expense.textContent = expenseObj.label;
+      const containerWidth = gameContainer.offsetWidth;
+      const expenseWidth = 100;
+      const maxX = containerWidth - expenseWidth;
+      const randomX = Math.floor(Math.random() * maxX);
+      expense.style.left = `${randomX}px`;
+      expense.style.top = '-30px';
+      gameContainer.appendChild(expense);
+      expenses.push({
+        element: expense,
+        x: randomX,
+        y: -30,
+        width: expenseWidth,
+        height: 30,
+        type: expenseObj.type,
+        score: expenseObj.score
+      });
+    } catch (error) {
+      console.error("Error spawning expense:", error);
     }
   }
 
-  if (isSpeedBoost) {
-    player.style.backgroundColor = '#FF9900';
-    player.style.boxShadow = '0 0 10px #FFCC00';
-  } else {
-    player.style.backgroundColor = '#FF4C4C';
-    player.style.boxShadow = 'none';
+  // Handle mouse movement
+  function handleMouseMove(event) {
+    if (!gameActive) return;
+    const containerRect = gameContainer.getBoundingClientRect();
+    const relativeX = event.clientX - containerRect.left;
+    const playerWidth = player.offsetWidth;
+    const maxX = containerRect.width - playerWidth / 2;
+    const minX = playerWidth / 2;
+    let playerX = Math.max(minX, Math.min(relativeX, maxX));
+    player.style.left = `${playerX}px`;
+  }
+  gameContainer.addEventListener('mousemove', handleMouseMove);
+
+  // Keyboard controls: unified for left/right movement and hypergrowth activation
+  window.addEventListener('keydown', function(event) {
+    if (!gameActive) return;
+    // Get player's current position info
+    const playerRect = player.getBoundingClientRect();
+    const containerRect = gameContainer.getBoundingClientRect();
+    const playerWidth = player.offsetWidth;
+    const maxX = containerRect.width - playerWidth / 2;
+    const minX = playerWidth / 2;
+    let currentX = playerRect.left + playerWidth / 2 - containerRect.left;
+    
+    if (event.key === 'ArrowLeft') {
+      currentX = Math.max(minX, currentX - 20);
+    } else if (event.key === 'ArrowRight') {
+      currentX = Math.min(maxX, currentX + 20);
+    } else if (event.key === ' ' || event.key === 'Spacebar') {
+      if (!isSpeedBoost) {
+        isSpeedBoost = true;
+        console.log("Hypergrowth mode activated: spawning rockets continuously");
+        // Start spawning rockets every 200 ms
+        hypergrowthInterval = setInterval(() => {
+          spawnHyperParticles(10);
+        }, 200);
+      }
+    }
+    player.style.left = `${currentX}px`;
+  });
+
+  window.addEventListener('keyup', function(event) {
+    if (event.key === ' ' || event.key === 'Spacebar') {
+      if (isSpeedBoost) {
+        isSpeedBoost = false;
+        console.log("Hypergrowth mode deactivated: poofing rockets");
+        if (hypergrowthInterval) {
+          clearInterval(hypergrowthInterval);
+          hypergrowthInterval = null;
+        }
+        document.querySelectorAll('.hyper-particle').forEach(particle => {
+          particle.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
+          particle.style.transform = 'scale(0)';
+          particle.style.opacity = '0';
+          setTimeout(() => particle.remove(), 400);
+        });
+      }
+    }
+  });
+
+  // Check collisions between player and expenses
+  function checkCollisions() {
+    const playerRect = player.getBoundingClientRect();
+    const containerRect = gameContainer.getBoundingClientRect();
+    for (let i = 0; i < expenses.length; i++) {
+      const expense = expenses[i];
+      if (!expense.element || expense.collided) continue;
+      const expenseRect = expense.element.getBoundingClientRect();
+      if (
+        expenseRect.left < playerRect.right &&
+        expenseRect.right > playerRect.left &&
+        expenseRect.bottom > playerRect.top &&
+        expenseRect.top < playerRect.bottom
+      ) {
+        expense.collided = true;
+        const expenseX = expenseRect.left + (expenseRect.width / 2) - containerRect.left;
+        const expenseY = expenseRect.top + (expenseRect.height / 2) - containerRect.top;
+        if (expense.type === 'bad') {
+          console.log("Blocked bad expense!");
+          createPoofEffect(expenseX, expenseY, '#FF0000');
+          expense.element.remove();
+          expense.toRemove = true;
+          score += Math.abs(expense.score);
+        } else {
+          console.log("Blocked good expense - penalty!");
+          score -= 10;
+          shakeScreen();
+          createPoofEffect(expenseX, expenseY, '#00FF00');
+          expense.element.remove();
+          expense.toRemove = true;
+          if (score < 0) endGame();
+        }
+        updateReputationMeter();
+      }
+    }
+    expenses = expenses.filter(expense => !expense.toRemove);
   }
 
-  expenses = expenses.filter(expense => !expense.toRemove);
-  checkCollisions();
+  // Handle expense reaching bottom
+  function handleExpenseAtBottom(expense) {
+    if (!expense.element) return;
+    if (expense.type === 'good') {
+      score += expense.score;
+      console.log("Good expense scored!");
+    } else {
+      score += expense.score;
+      console.log("Bad expense penalty!");
+      shakeScreen();
+    }
+    updateReputationMeter();
+    if (score < 0) endGame();
+    expense.element.remove();
+    expense.toRemove = true;
+  }
 
-  lastFrameTime = timestamp;
-  requestAnimationFrame(gameLoop);
-}
+  // Main game loop
+  function gameLoop(timestamp) {
+    if (!gameActive) return;
+    const deltaTime = (timestamp - lastFrameTime) / 1000;
+    gameTime += deltaTime;
+    // Increment accelerated level timer (2x in hypergrowth mode)
+    if (isSpeedBoost) {
+      acceleratedLevelTime += deltaTime * 2;
+    } else {
+      acceleratedLevelTime += deltaTime;
+    }
+    // Update visual game timer (remains unaffected by hypergrowth)
+    timerDisplay.textContent = formatTime(gameTime);
+    // Update level logic
+    updateLevel();
+    // Update countdown for next level
+    let timeRemainingToNextLevel = Math.max(0, nextLevelTime - acceleratedLevelTime);
+    nextLevelTimerDisplay.textContent = Math.ceil(timeRemainingToNextLevel) + ' sec';
+    spawnTimer += (timestamp - lastFrameTime);
+    if (spawnTimer >= spawnInterval) {
+      if (expenseData) {
+        spawnExpense();
+      }
+      spawnTimer = 0;
+    }
+    if (timestamp - lastDifficultyIncrease > difficultyIncreaseInterval) {
+      currentFallSpeed = Math.min(maxFallSpeed, currentFallSpeed * fallSpeedIncreaseRate);
+      spawnInterval = Math.max(minSpawnInterval, spawnInterval * difficultyIncreaseRate);
+      lastDifficultyIncrease = timestamp;
+    }
+    for (let i = 0; i < expenses.length; i++) {
+      const expense = expenses[i];
+      if (!expense.element) continue;
+      const speedMultiplier = isSpeedBoost ? 2.0 : 1.0;
+      expense.y += currentFallSpeed * deltaTime * speedMultiplier;
+      expense.element.style.top = `${expense.y}px`;
+      if (expense.y > gameContainer.offsetHeight - 30) {
+        handleExpenseAtBottom(expense);
+      }
+    }
+    if (isSpeedBoost) {
+      player.style.backgroundColor = '#FF9900';
+      player.style.boxShadow = '0 0 10px #FFCC00';
+    } else {
+      player.style.backgroundColor = '#FF4C4C';
+      player.style.boxShadow = 'none';
+    }
+    expenses = expenses.filter(expense => !expense.toRemove);
+    checkCollisions();
+    lastFrameTime = timestamp;
+    requestAnimationFrame(gameLoop);
+  }
 
-
-
-    window.addEventListener('resize', function() {
-      gameAreaWidth = gameContainer.offsetWidth;
-    });
+  window.addEventListener('resize', function() {
     gameAreaWidth = gameContainer.offsetWidth;
-    player.style.left = `${gameAreaWidth / 2}px`;
-  </script>
+  });
+  gameAreaWidth = gameContainer.offsetWidth;
+  player.style.left = `${gameAreaWidth / 2}px`;
+</script>
+
 </body>
 </html>
