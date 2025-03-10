@@ -677,16 +677,23 @@
       }
     }
 
-    function createHyperParticle() {
+   function createHyperParticle() {
   const particle = document.createElement('div');
   particle.classList.add('hyper-particle');
   
-  // Random positions across the screen
+  // Position randomly across the viewport
   particle.style.left = `${Math.random() * 100}vw`;
   particle.style.top = `${Math.random() * 100}vh`;
-  particle.style.width = particle.style.height = `${Math.random() * 15 + 10}px`;
-  particle.style.backgroundColor = '#FFDE00';
-  particle.style.borderRadius = '50%';
+  
+  // Set the content to a rocket emoji and define a random font size
+  particle.innerHTML = '🚀';
+  particle.style.fontSize = `${Math.random() * 15 + 20}px`; // between 20px and 35px
+  
+  // Remove background color and border radius so only the emoji shows
+  particle.style.background = 'none';
+  particle.style.borderRadius = '0';
+  
+  // Add animation (if desired, you can keep your existing animations)
   particle.style.animation = 'particleFloat 2s infinite ease-in-out, particleFade 2s infinite ease-in-out';
   
   hypergrowthParticles.appendChild(particle);
