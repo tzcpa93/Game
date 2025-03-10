@@ -201,7 +201,7 @@
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  z-index: 100; /* above everything */
+  z-index: 5; /* lower than UI elements */
   overflow: hidden;
 }
 
@@ -685,17 +685,18 @@
   particle.style.left = `${Math.random() * 100}vw`;
   particle.style.top = `${Math.random() * 100}vh`;
   
-  // Set the content to a rocket emoji and define a random font size
+  // Set the content to a rocket emoji and randomize the font size for variety
   particle.innerHTML = '🚀';
   particle.style.fontSize = `${Math.random() * 15 + 20}px`; // between 20px and 35px
   
-  // Remove background color and border radius so only the emoji shows
+  // Remove any default background styles so only the emoji shows
   particle.style.background = 'none';
   particle.style.borderRadius = '0';
   
-  // Add animation (if desired, you can keep your existing animations)
+  // Optionally, add your animations (if you already have keyframes defined)
   particle.style.animation = 'particleFloat 2s infinite ease-in-out, particleFade 2s infinite ease-in-out';
   
+  console.log("Spawning rocket particle");
   hypergrowthParticles.appendChild(particle);
 }
 
@@ -843,58 +844,52 @@ const isGood = Math.random() >= badExpenseChance;
     }
     gameContainer.addEventListener('mousemove', handleMouseMove);
 
-    // Keyboard controls (left/right arrows, spacebar for speed boost)
-    window.addEventListener('keydown', function(event) {
-      if (!gameActive) return;
-      const playerRect = player.getBoundingClientRect();
-      const containerRect = gameContainer.getBoundingClientRect();
-      const playerWidth = player.offsetWidth;
-      const maxX = containerRect.width - playerWidth / 2;
-      const minX = playerWidth / 2;
-      let currentX = playerRect.left + playerWidth / 2 - containerRect.left;
-      if (event.key === 'ArrowLeft') {
-        currentX = Math.max(minX, currentX - 20);
-      } else if (event.key === 'ArrowRight') {
-        currentX = Math.min(maxX, currentX + 20);
-      } else if (event.key === ' ' || event.key === 'Spacebar') {
-        isSpeedBoost = true;
-      }
-      player.style.left = `${currentX}px`;
-    });
-
-    window.addEventListener('keyup', function(event) {
-  if (!isSpeedBoost) return;
-  if (event.key === ' ' || event.key === 'Spacebar') {
-    isSpeedBoost = false;
-
-    // Poof away effect
-    document.querySelectorAll('.hyper-particle').forEach(particle => {
-      particle.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
-      particle.style.transform = 'scale(0)';
-      particle.style.opacity = '0';
-      setTimeout(() => particle.remove(), 400);
-    });
-  }
-});
-
-
+    // Keyboard controls: left/right movement and hypergrowth activation (spacebar)
 window.addEventListener('keydown', function(event) {
-  if (!gameActive || isSpeedBoost) return;
-  if (event.key === ' ' || event.key === 'Spacebar') {
-    isSpeedBoost = true;
-    // Create particles (20 particles)
-    spawnHyperParticles(20);
+  if (!gameActive) return;
+  
+  // Get player positioning details for left/right movement
+  const playerRect = player.getBoundingClientRect();
+  const containerRect = gameContainer.getBoundingClientRect();
+  const playerWidth = player.offsetWidth;
+  const maxX = containerRect.width - playerWidth / 2;
+  const minX = playerWidth / 2;
+  let currentX = playerRect.left + playerWidth / 2 - containerRect.left;
+  
+  // Handle arrow keys for movement
+  if (event.key === 'ArrowLeft') {
+    currentX = Math.max(minX, currentX - 20);
+  } else if (event.key === 'ArrowRight') {
+    currentX = Math.min(maxX, currentX + 20);
+  } else if (event.key === ' ' || event.key === 'Spacebar') {
+    // Activate hypergrowth mode if not already active
+    if (!isSpeedBoost) {
+      isSpeedBoost = true;
+      console.log("Hypergrowth mode activated: spawning rockets");
+      spawnHyperParticles(20);
+    }
   }
+  
+  // Update player's position based on movement
+  player.style.left = `${currentX}px`;
 });
 
 window.addEventListener('keyup', function(event) {
-  if (!isSpeedBoost) return;
   if (event.key === ' ' || event.key === 'Spacebar') {
-    isSpeedBoost = false;
-    // Clear particles with poof effect
-    hypergrowthParticles.innerHTML = '';
+    // If hypergrowth was active, deactivate it and poof away the rocket particles
+    if (isSpeedBoost) {
+      isSpeedBoost = false;
+      console.log("Hypergrowth mode deactivated: poofing rockets");
+      document.querySelectorAll('.hyper-particle').forEach(particle => {
+        particle.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
+        particle.style.transform = 'scale(0)';
+        particle.style.opacity = '0';
+        setTimeout(() => particle.remove(), 400);
+      });
+    }
   }
 });
+
 
 
     
