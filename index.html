@@ -84,8 +84,6 @@
   text-align: center;
 }
 
-
-
     /* Game area container */
     .game-area {
       display: flex;
@@ -196,6 +194,44 @@
       cursor: none;
     }
 
+    #hypergrowth-particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 100; /* above everything */
+  overflow: hidden;
+}
+
+.hyper-particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #FDD932; /* bright yellow */
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: floatParticle 3s infinite ease-in-out;
+}
+
+@keyframes particleFloat {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.2); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes particleFade {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+}
+   
+@keyframes particlePulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+
+    
     /* Instructions on the right side */
     #game-instructions {
       width: 200px;
@@ -483,6 +519,10 @@
 
     <div id="hypergrowth-message">Hold <span class="highlight">space</span> for <span class="highlight">hypergrowth</span> mode</div>
 
+    <div id="hypergrowth-container"></div>
+    <div id="hypergrowth-particles"></div>
+
+
   <script>
     // Game variables
     let gameActive = false;
@@ -519,6 +559,9 @@
     let levelDisplay = document.getElementById('level-display');
     let acceleratedLevelTime = 0;
     let nextLevelTimerDisplay = document.getElementById('next-level-timer');
+    let hypergrowthParticlesContainer = document.createElement('div');
+hypergrowthParticles.id = 'hypergrowth-particles';
+document.body.appendChild(hypergrowthParticles);
 
 
 
@@ -635,6 +678,32 @@
       }
     }
 
+    function createHyperParticle() {
+  const particle = document.createElement('div');
+  particle.classList.add('hyper-particle');
+  
+  // Random positions across the screen
+  particle.style.left = `${Math.random() * 100}vw`;
+  particle.style.top = `${Math.random() * 100}vh`;
+  particle.style.width = particle.style.height = `${Math.random() * 15 + 10}px`;
+  particle.style.backgroundColor = '#FFDE00';
+  particle.style.borderRadius = '50%';
+  particle.style.animation = 'particleFloat 2s infinite ease-in-out, particleFade 2s infinite ease-in-out';
+  
+  hypergrowthParticles.appendChild(particle);
+}
+
+function spawnHyperParticles(count) {
+  for (let i = 0; i < count; i++) {
+    createHyperParticle();
+  }
+}
+
+function clearHyperParticles() {
+  hypergrowthParticles.innerHTML = ''; // instantly removes all particles
+}
+
+    
     // Format time as MM:SS
     function formatTime(timeInSeconds) {
       const minutes = Math.floor(timeInSeconds / 60);
@@ -788,25 +857,41 @@ const isGood = Math.random() >= badExpenseChance;
     });
 
     window.addEventListener('keyup', function(event) {
-      if (event.key === ' ' || event.key === 'Spacebar') {
-        isSpeedBoost = false;
-      }
-    });
+  if (!isSpeedBoost) return;
+  if (event.key === ' ' || event.key === 'Spacebar') {
+    isSpeedBoost = false;
 
-    window.addEventListener('keydown', function(event) {
-  if (!gameActive) return;
-  
+    // Poof away effect
+    document.querySelectorAll('.hyper-particle').forEach(particle => {
+      particle.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
+      particle.style.transform = 'scale(0)';
+      particle.style.opacity = '0';
+      setTimeout(() => particle.remove(), 400);
+    });
+  });
+});
+
+
+window.addEventListener('keydown', function(event) {
+  if (!gameActive || isSpeedBoost) return;
   if (event.key === ' ' || event.key === 'Spacebar') {
     isSpeedBoost = true;
+    // Create particles (20 particles)
+    spawnHyperParticles(20);
   }
 });
 
 window.addEventListener('keyup', function(event) {
+  if (!isSpeedBoost) return;
   if (event.key === ' ' || event.key === 'Spacebar') {
     isSpeedBoost = false;
+    // Clear particles with poof effect
+    hypergrowthParticles.innerHTML = '';
   }
 });
 
+
+    
 
     // Check collisions between player and expenses
     function checkCollisions() {
