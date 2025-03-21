@@ -1,236 +1,154 @@
-/* Basic Reset & Font Setup */
-* {
+/* 
+  styles.css
+  Basic styling for the game container, player, falling items, 
+  and special effects like screen shake.
+*/
+
+/* 
+  Body: set background, remove default margins, 
+  and set up a retro-ish font and color scheme if desired.
+*/
+body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  background: #ffeecc; /* Light retro color */
+  overflow: hidden; /* Hide scrollbars if items go off-screen */
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #f8f9fc;
+/* Center the game container on desktop; fill screen on mobile */
+#game-container {
+  position: relative;
+  margin: 0 auto;
+  max-width: 600px; /* Constrain width on desktop */
+  height: 100vh;    /* Fill vertical space */
+  background: #fff8e1; /* Slightly different background for game area */
+  border: 2px solid #000;
+  overflow: hidden; /* Ensure falling items that go out of bounds are hidden */
+}
+
+/* Score Display (top-left or top-center) */
+#score-display {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 100;
   color: #333;
 }
 
-/* Header / Navbar */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e2e2e2;
-  padding: 0.75rem 1.5rem;
-}
-
-.header__left {
-  display: flex;
-  align-items: center;
-}
-
-.app-logo {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-right: 1.5rem;
-}
-
-.header__nav .nav-link {
-  margin-right: 1rem;
-  text-decoration: none;
-  color: #555;
-  font-weight: 500;
-}
-
-.header__nav .nav-link.active {
-  color: #2b7a78; /* A teal accent color */
-}
-
-.header__right {
-  display: flex;
-  align-items: center;
-}
-
-.user-points {
-  background-color: #2b7a78;
-  color: #fff;
-  padding: 0.3rem 0.75rem;
-  border-radius: 4px;
-  margin-right: 1rem;
-}
-
-.profile-link {
-  text-decoration: none;
-  color: #555;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.profile-link:hover {
-  color: #2b7a78;
-}
-
-/* Main Content */
-.main-content {
-  max-width: 900px;
-  margin: 1.5rem auto;
-  padding: 0 1.5rem;
-}
-
-/* Intro Section */
-.intro-section {
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.page-subtitle {
-  font-size: 1rem;
-  color: #666;
-}
-
-/* Question Card */
-.question-card {
-  background-color: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e2e2e2;
-  margin-bottom: 1.5rem;
-}
-
-.question-card__header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.difficulty-tag {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #ff9800;
-  background-color: #fff3e0;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  margin-right: 0.5rem;
-}
-
-.category-tag {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #555;
-  background-color: #eef1f5;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-}
-
-.question-card__title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.question-card__options {
-  margin-bottom: 1rem;
-}
-
-.option-item {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-}
-
-.btn-submit {
-  background-color: #2b7a78;
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border: none;
-  padding: 0.75rem 1.25rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-submit:hover {
-  background-color: #226561;
-}
-
-/* User Stats */
-.user-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.stat-block {
-  background-color: #fff;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  text-align: center;
-  padding: 1rem;
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  color: #777;
-  margin-bottom: 0.25rem;
-}
-
-.stat-value {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #333;
-}
-
-/* Leaderboard */
-.leaderboard-section {
-  background-color: #fff;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 1.5rem;
-}
-
-.leaderboard-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.leaderboard-table {
+/* Game Over Screen overlay */
+#game-over-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200; /* Above all game elements */
 }
 
-.leaderboard-table th,
-.leaderboard-table td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #e2e2e2;
+/* Hidden utility class */
+.hidden {
+  display: none !important;
 }
 
-.leaderboard-table th {
-  background-color: #f8f9fc;
-  font-weight: 600;
-  color: #555;
+/* Final Score in game over screen */
+#final-score {
+  margin: 20px 0;
+  font-size: 24px;
+  font-weight: bold;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+/* Restart button */
+#restart-button {
+  font-size: 18px;
+  padding: 10px 20px;
+  cursor: pointer;
+  background: #f90;
+  border: none;
+  border-radius: 4px;
+}
 
-  .header__left,
-  .header__right {
-    margin-bottom: 0.5rem;
-  }
+/* Player (the "blocker") */
+#player {
+  position: absolute;
+  bottom: 20px; 
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background-color: #f33; /* Distinct color for the player */
+  transform: translateX(-50%); /* Center based on 50% left */
+  border: 2px solid #000;
+}
 
-  .user-stats {
-    grid-template-columns: 1fr 1fr;
-  }
+/* 
+  Falling items will be dynamically generated with a .falling-item class.
+  We define a default style here. 
+*/
+.falling-item {
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 50px;
+  background-color: #39f; /* Distinct color for good items or override in JS */
+  border: 2px solid #000;
+  text-align: center;
+  line-height: 50px;
+  font-weight: bold;
+  color: #fff;
+  user-select: none;
+}
+
+/* 
+  We'll add a special "bad" style in JS 
+  or we can define it here if we want a red background. 
+*/
+.falling-item.bad {
+  background-color: #a00;
+}
+
+/* 
+  Shake animation for the entire game-container 
+  whenever a bad expense slips through.
+*/
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-5px, 0); }
+  40% { transform: translate(5px, 0); }
+  60% { transform: translate(-5px, 0); }
+  80% { transform: translate(5px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+.shake {
+  animation: shake 0.3s;
+}
+
+/* 
+  Mobile controls: 
+  We can always show them or toggle them with JS based on screen width.
+*/
+#mobile-controls {
+  position: absolute;
+  bottom: 80px;
+  width: 100%;
+  text-align: center;
+  z-index: 150;
+}
+
+#mobile-controls button {
+  font-size: 24px;
+  margin: 0 10px;
+  padding: 10px;
+  border: 2px solid #000;
+  background: #ff0;
+  cursor: pointer;
+  border-radius: 4px;
 }
